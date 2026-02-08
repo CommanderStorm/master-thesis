@@ -148,18 +148,15 @@
 
 #include "chapters/introduction.typ"
 
-//#include "Chapter_Background.typ"
+#include "chapters/02_theoretical_background.typ"
 
-//#include "Chapter_RelatedWork.typ"
+#include "chapters/03_methods.typ"
 
-//#include "Chapter_Methodology.typ"
+#include "chapters/04_experiments.typ"
 
-//#include "Chapter_Experiments.typ"
+#include "chapters/05_conclusion.typ"
 
-//#include "Chapter_Discussion.typ"
-
-//#include "Chapter_FutureResearch.typ"
-
+#include "chapters/06_outlook.typ"
 
 // --- Appendices ---
 
@@ -170,9 +167,7 @@
 
 #include("chapters/appendix.typ")
 
-// List of Acronyms.
-#heading(numbering: none)[Glossary]
-#print-glossary(glossary)
+#include "chapters/abbreviations.typ"
 
 // List of figures.
 #heading(numbering: none)[List of Figures]
