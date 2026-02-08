@@ -36,10 +36,19 @@
   examiner: "Prof. Dr. Albert Einstein",
   supervisors: ("Claude Elwood Shannon", "Kurt Gödel",),
   author: "Frank Elsinga",
-  title-en: "This is the Title of the Thesis",
+  title-en: "Master Thesis Exposé 'Automatic data/style-driven map optimisation for scalable geospatial visualization'",
+  //subtitle: "Improving efficiency of vector tile generation and rendering through spatial data management techniques",
   title-de: "Das ist der Titel der Arbeit",
   abstract-text: [
-    #lorem(60)
+    With the OSMFs rollout of minutely updating, global, free access to OSMs data the bar for deploying high fidelity client side rendered vector maps has never been lower.
+    A persistent problem of these maps is their performance.
+
+    One optimisation direction that existing systems have not covered is to co-optimise the visual style and the underlying data.
+    The resulting inefficiencies are unnecessary data transfer, increased load on servers and worse client performance.
+    
+    In this thesis, I propose to systematically study data/style-driven optimisations of client side rendered vector maps as a spatial query problem using database techniques.
+    The expected outcome is a reduction of size/complexity and increase of performance without impacting visual output.
+    I aim to measure the impact of such optimisations on network usage, rendering performance, and energy consumption using real-world map styles and data.
   ],
   acknowledgements: [
     These are the acknowledgements. Remove this argument if you don't need them.
@@ -146,7 +155,9 @@
 #set heading(numbering: "1.1")
 // --- Main Chapters ---
 
-#include "chapters/introduction.typ"
+#include "chapters/00_introduction.typ"
+
+#include "chapters/01_related_work.typ"
 
 #include "chapters/02_theoretical_background.typ"
 
@@ -158,6 +169,8 @@
 
 #include "chapters/06_outlook.typ"
 
+#include "chapters/07_future_research.typ"
+
 // --- Appendices ---
 
 // restart page numbering using roman numbers
@@ -165,9 +178,9 @@
 #counter(page).update(1)
 
 
-#include("chapters/appendix.typ")
+#include "chapters/YY_abbreviations.typ"
 
-#include "chapters/abbreviations.typ"
+#include "chapters/ZZ_appendix.typ"
 
 // List of figures.
 #heading(numbering: none)[List of Figures]
@@ -186,4 +199,4 @@
 // --- Bibliography ---
 
 #set par(leading: 0.7em, first-line-indent: 0em, justify: true)
-#bibliography("items.bib", style: "apa")
+#bibliography("references.bib", style: "apa")
