@@ -157,8 +157,6 @@
 
 #include "chapters/00_introduction.typ"
 
-#include "chapters/01_related_work.typ"
-
 #include "chapters/02_theoretical_background.typ"
 
 #include "chapters/03_methods.typ"
@@ -169,7 +167,7 @@
 
 #include "chapters/06_outlook.typ"
 
-#include "chapters/07_future_research.typ"
+
 
 // --- Appendices ---
 
@@ -178,9 +176,9 @@
 #counter(page).update(1)
 
 
-#include "chapters/YY_abbreviations.typ"
-
 #include "chapters/ZZ_appendix.typ"
+
+#print-glossary
 
 // List of figures.
 #heading(numbering: none)[List of Figures]

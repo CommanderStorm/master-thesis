@@ -1,68 +1,95 @@
-#heading(level: 1, "Background - Overview of Approaches to Map-Rendering")
+#heading(level: 1, "Introduction")
 
-As shown in @fig:basic-arch, there are four different aspects to how a map looks:
-- #text(weight: "bold")[styles] define how a map looks and where to find the other items
-- #text(weight: "bold")[tiles] deliver the geometry (points, lines, polygons) and associated data (for example building heights) that can be seen on maps
-- #text(weight: "bold")[sprites] are the icons that can be seen on maps
-- #text(weight: "bold")[fonts] are the text shown on the map
+#heading(level: 2, "Related Work")
+
+The research in this area has been fairly specific in the different subcategories, but has not been put together into a cohesive big picture framework.
+
+#heading(level: 2, "Data Level Optimisations")
+
+#heading(level: 2, "Style Level Optimisations")
+
+- #link("https://github.com/mapbox/vtshaver/")[Mapbox] built #raw("vtshaver") #footnote[#link("https://github.com/mapbox/vtshaver/")], a tool to shave tiles.
+  It looks at the style and performs optimisations to tile size and tile decoding speed.
+  It does not look at the data to optimize the style.
+- #link("https://github.com/ibesora/vt-optimizer")[Isaac Vilardaga] built #raw("vt-optimizer") #footnote[#link("https://github.com/ibesora/vt-optimizer")], a tool to optimise styles based on the data.
+  The optimisation implemented is dropping invisible/unused layers/fields both in the style and data.
+  It does not go as deep into this direction as #raw("vtshaver"), and does not use the data to optimize the style.
+- Tremmel et al. #footnote[Preprint at #link("https://www.arxiv.org/pdf/2508.10791")] reduces tile size by wire format innovation.
+  They discovered that there is 2-6x tile size reduction possible, mainly using more modern ideas (like row vs. column, server-side tessellation, ....).
+  They propose that on the fly reencoding might be possible.
+  Their work does not consider styles which leaves avenues for performance improvements.
+- #link("https://github.com/FabianRechsteiner/vector-tiles-benchmark")[Universität Salzburg] recently published a benchmark comparing different server implementations.
+  Since the systems considered offer different features, the evaluation partly compares incomparable aspects.
+  It does not go into the optimisation aspects.
+- #link("https://github.com/bdon/OSMExpress/")[OSMExpress] is fairly efficient queries of OSM data, including the application of minutely diffs.
+  Much of the existing optimisation work is motivated by the scale of OSM data, whose continuous growth and high update frequency place significant demands on analytical systems.
+  The underlying architecture being postgres based limits its applicability.
+  OSMExpress can also only answer raw spatial queries and does therefore not touch maps.
+
+As shown, existing tools optimise either data or style, but not both.
+Furthermore, the existing tools only apply a subset of optimisations or focus on compression rather than data/style-based filtering or style rewriting.
+They do not evaluate multi-objective tradeoffs suchs as latency vs. energy consumption.
+This thesis will fill this gap.
 
 #figure(
-  image("../figures/basic-architecture.png", width: 90%),
-  caption: "Basic building blocks of a map rendering stack. Data is taken from a data source, converted into a simplified format (for example a spatial index) and served to a client. How a client renders this data is defined by a style and supported by fonts and sprites for the text and icons on a map."
-) <fig:basic-arch>
+  table(
+    columns: (1fr, 1fr, 3fr), // Approximation for p{3cm}|p{2cm}|p{11cm} - will adjust if needed
+    align: (start, start, start),
+    [*optimisation*], [*data*], [*description [technique]*],
+    table.hline(),
+    [transparent reencoding], [-], [reencode tiles into a different tile specification on the fly [storage format]],
+    [compression optimisation], [-], [compress tiles more aggressively or with a different compression algorithm [no exact match]],
+    [data layout optimisation], [-], [for dynamic databases, reorganise tile data for access pattern [storage layout]],
+    [overlap reduction], [-], [for some layers like roads or pois at the higher zoom levels overlap is common. If one knows the style redundant data can be removed [storage layout]],
+    [static generation], [-], [(only some styles) extract semantics and generate a new, optimal #link("https://github.com/onthegomap/planetiler/tree/main/planetiler-custommap")[static instruction set for constructing the tile database]],
+    [tile shaving], [-], [only encodes the exact data that a style would actually look at [no exact match]],
+  ),
+  caption: "Overview of data-serving level optimisation techniques targeting improved tile storage, retrieval, and transmission efficiency."
+) <tab:optimisations-serving>
 
-There are several approaches to delivering clientside rendered vector maps.
-For styles/sprites/fonts this is usually a file-server with little processing involved.
+#figure(
+  table(
+    columns: (1fr, 1fr, 3fr), // Approximation for p{3cm}|p{2cm}|p{11cm}
+    align: (start, start, start),
+    [*optimisation*], [*data*], [*description [technique]*],
+    table.hline(),
+    [prewarming caches], [-], [make sure that sprites and fonts are in an in-memory cache [prefetching]],
+    [minimum sprite-set mining], "- / full scan", [some styles may permit to statically know which sprites will be used. For others, one might need to do a full table scan to gather this statistic. [no exact match]],
+    [server side layouting], "- / full scan", [Layouting of labels and sprites is a performance intensive task for clients. Pulling this work to the server side might have advantages [no exact match]],
+  ),
+  caption: "Overview of optimisation strategies for supporting resources such as sprites and fonts, focusing on reducing client-side load and improving rendering responsiveness."
+) <tab:optimisations-resources>
 
-For tiles there are three different major approaches to storing/ accessing them:
+#figure(
+  table(
+    columns: (1fr, 1fr, 3fr), // Approximation for p{3cm}|p{2cm}|p{11em}
+    align: (start, start, start),
+    [*optimisation*], [*data*], [*description [technique]*],
+    table.hline(),
+    [filter reordering], [sampling], [optimize style filter order (like #raw("any"), #raw("all"), #raw("match"), #raw("case")) [selectivity analysis]],
+    [expression order optimisation], [sampling], [optimise the order of reorderable-expressions (like #raw("match")) [selectivity analysis]],
+    [expression kind optimisation], [-], [rewrite expensive operators with more performant forms [operator selection]],
+    [constant folding], [full scan], [replace constant style expressions or predicates with literal values [constant folding]],
+  ),
+  caption: "Overview of style-level optimisation techniques designed to reduce rendering complexity through expression rewriting, filter reordering, and related strategies."
+) <tab:optimisations-styles>
 
-- #text(weight: "bold")[Dynamic]: Store data in a database (for example #link("https://postgis.net/")[PostGIS]). Use a tile server to convert between stored/served data <access:dynamic>
-- #text(weight: "bold")[Client-driven]: Store encoded tiles as one file in a blob store in a format that includes a header where a tile is (#link("https://protomaps.com/")[PMTiles], #link("https://versatiles.org/")[VersaTiles]). Requires multiple requests with appropriate #link("https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Range")[`Range`]s to know exact tile-location.
-- #text(weight: "bold")[Semi-static]: Store encoded tiles on disk in a database (for example SQLite). Use a tile server to reach into the database and serve it to a client.
+#figure(
+  table(
+    columns: (1fr, 1fr, 3fr), // Approximation for p{3cm}|p{2cm}|p{11em}
+    align: (start, start, start),
+    [*optimisation*], [*data*], [*description [technique]*],
+    table.hline(),
+    [dead source elimination], [-], [remove impossible or hidden data-sources or style-layers [dead code elimination]],
+    [metadata refinement], [full scan], [more accurate #raw("{min,max}_zoom") metadata based on the data, filters, and impossible styling conditions (think: #raw("opacity=0") after zooming out) [no exact match]],
+  ),
+  caption: "Overview of metadata-level optimisation techniques aimed at improving client-side rendering performance through more accurate and efficient metadata representation"
+) <tab:optimisations-metadata>
 
-Dynamic can be synced minutely by applying diffs, while the other approaches need full rebuilding.
-At larger scales, caching tiles in-memory via regional, CDN-type infrastructures and falling back to static data is important.
-
-The data, sprites and fonts are then taken by a rendering engine, transformed into a GPU-capable representation and uploaded to the WebGL / WebGPU / Vulkan / ... buffer for rendering according to the style.
-
-While all of these resources can be optimised, due to the continuous streaming nature and (usually) highest data load tiles are the most interesting.
-Real world observations support this with the map performance Microsoft Bing Maps being siginficantly different from less optimised maps like #link("https://basemap.de/")[basemap.de/].
-
-#heading(level: 1, "Proposed Work")
-
-In this thesis, I propose to design and implement a #text(weight: "bold")[framework] and underlying benchmarks for #text(weight: "bold")[automatic data/style-driven optimisation of map rendering pipelines].
-Currently, such optimisations are largely manual, ad hoc, and often style-specific — leaving significant performance potential untapped.
-I hypothesize that a structured, automated approach can achieve nearly the same speed up one can achieve by manual optimisations.
-
-#heading(level: 2, "Key Results / Research Questions")
-
+#heading(level: 2, "Research Goal")
 - #text(weight: "bold")[R1]: This research investigates to what extent automatic data and style co-optimisation is able to reduce map tile size and improve rendering performance.
 - #text(weight: "bold")[R2]: It further examines which techniques — such as simplification, query optimisation, query processing, and data management — are most relevant for achieving these improvements.
 - #text(weight: "bold")[R3]: Finally, it evaluates how expensive such optimisations are in terms of latency, server- and client-side CPU, memory, and energy consumption.
 
-#heading(level: 2, "Preliminary Structure")
-
-1. Introduction
-    1. Related work
-    2. Research Goal
-    3. Outline
-2. Theoretical background
-    1. Map rendering approaches
-    2. Multi-objective optimisation
-3. Methods
-    1. System overview
-    2. Gathering a representative sample
-    3. Building optimisations
-    4. Gathered metrics
-4. Experiments
-    1. Experiment one: Short description
-        1. Evaluation details
-        2. Results
-        3. Discussion
-5. Conclusion
-6. Outlook
-7. Appendix
-8. Abbreviations
-9. List of figures
-10. List of tables
-11. Biblography
+#heading(level: 2, "Outline")
+// Briefly describe the structure of the thesis here.

@@ -1,5 +1,9 @@
 #heading(level: 1, "Methods")
 
+In this thesis, I propose to design and implement a #text(weight: "bold")[framework] and underlying benchmarks for #text(weight: "bold")[automatic data/style-driven optimisation of map rendering pipelines].
+Currently, such optimisations are largely manual, ad hoc, and often style-specific — leaving significant performance potential untapped.
+I hypothesize that a structured, automated approach can achieve nearly the same speed up one can achieve by manual optimisations.
+
 #heading(level: 2, "Approach")
 
 For building on a performance relevant topic, gathering a solid baseline and benchmarking against it is the planned approach.
@@ -21,7 +25,7 @@ For some of the optimisations - such as the proposed operator rewriting - buildi
 
 #heading(level: 3, "Building Optimisations")
 
-A few of the optimisations that I envision can be applied to all, others only to some data sources mentioned in @access:dynamic.
+A few of the optimisations that I envision can be applied to all, others only to some data sources mentioned in #ref(<access:dynamic>).
 When optimising performance, a holistic approach is assumed to be nessesary.
 Thus, we will look into the different componets that make up a map: data, resources, styles and metadata-glue.
 Specifically, during this research, we will be looking into
@@ -36,7 +40,7 @@ During evaluation / implementation this list will change as new opportunities be
 These optimisations can be split by topic, but also by data requirement:
 - #text(style: "italic")[full scan] means that this optimisation would require executing one operation over the whole table at minimum.
 - #text(style: "italic")[sampling] means that this data can be gathered by sampling approaches, but evaluating if a full scan could add context will have to be looked at.
-  For sampling based approaches, the resampling frequency for the dynamic sources noted in @access:dynamic needs to be determined via statistical approaches.
+  For sampling based approaches, the resampling frequency for the dynamic sources noted in #ref(<access:dynamic>) needs to be determined via statistical approaches.
 - #text(style: "italic")[-] is the case where no scan is necessary.
   This does not mean that it might not still be beneficial, for example for parameter tuning.
 
