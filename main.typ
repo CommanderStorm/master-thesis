@@ -4,27 +4,6 @@
 #import "glossary.typ": glossary
 #import "@preview/glossarium:0.5.9": make-glossary, register-glossary, print-glossary, gls, glspl
 
-
-/** Introduction
-
-  The philosophy of this template is that the template file itself only contains the template of the first pages of the thesis, that are the same for all thesis.
-
-  The formatting for the main part of the thesis is done here in the main.typ file. This looks less clean in the first place but has the advantage that you can easily change the formatting of the thesis, without the need to change the unreachable template file.
-
-**/
-
-/** Drafting
-
-  Set inwriting and draft inside utils.typ.
-  
-  The "draft" variable is used to show DRAFT in the header and the title. This should be true until the final version is handed-in.
-  
-  The "inwriting" is used to change the appearance of the document for easier writing. Set to true for yourself but false for handing in a draft or so.
-
-**/
-
-
-// Global Settings //
 #set text(lang: "en", size: 12pt)
 #set text(ligatures: false)
 #set text(font: "Helvetica")
