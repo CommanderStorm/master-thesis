@@ -31,7 +31,7 @@ Writing $\equiv$ for pixel-identity on $\mathcal{I}$,
     \forall v \in \mathcal{V}:\; R(S, T, v) \neq \bot \;\Rightarrow\; R(S', T', v) \equiv R(S, T, v).
 \end{equation}
 The constraint is asymmetric in $\bot$.
-An optimisation pass may suppress a runtime evaluation error that the original style would have raised, but it must never introduce one that the original would not have raised.
+An optimization pass may suppress a runtime evaluation error that the original style would have raised, but it must never introduce one that the original would not have raised.
 In practice we sample $v$ on a discrete grid of zooms and viewports, and check $\equiv$ by direct image comparison rather than by formal proof.
 \Cref{eq:visual_equivalence} doubles as the \emph{soundness criterion} for every pass in this chapter.
 Any rewrite whose correctness depends on a MapLibre runtime invariant must either preserve the invariant or reject the rewrite when the invariant cannot be established.
@@ -642,7 +642,7 @@ Negation pushdown and operator normalization.}
 
 	\caption{
 Examples of expression-level transformations applied to representative style inputs.
-Each panel shows a before/after \ac{JSON} example pair demonstrating how these optimisations interact.}
+Each panel shows a before/after \ac{JSON} example pair demonstrating how these optimizations interact.}
 	\label{fig:expr_before_after}
 \end{figure}
 
@@ -949,6 +949,30 @@ The cascade mirrors the materialized-view maintenance problem, with the renderin
     For example, if no style layer allows for a line with a \texttt{class=ferry} property, the pass can remove features with that value.
     \item[\textbf{Feature ID requirement}] whether any style layer uses \texttt{[\mlop{"id"}]} or \texttt{[\mlop{"feature-state"},~\ldots]}.
     When IDs are unused, the pass strips the entire ID column.
+\end{description}
+
+noindent The advisory captures five categories of information for each source-layer:
+
+\begin{description}
+	\item[\textbf{Property usage.}] Properties referenced through
+	\texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]},
+	together with the zoom ranges over which they are referenced.
+	
+	\item[\textbf{Geometry usage.}] Geometry types (Point, LineString, and
+	Polygon) required at each zoom level, inferred from the live style layers
+	targeting the source-layer.
+	
+	\item[\textbf{Zoom-level coverage.}] Zoom levels for which at least one live
+	style layer references the source-layer.
+	
+	\item[\textbf{Categorical-value usage.}] Property values referenced by
+	equality filters and match expressions, together with their applicable zoom
+	ranges.
+	
+	\item[\textbf{Feature-ID usage.}] Whether any live style layer references
+	\texttt{[\mlop{"id"}]} or
+	\texttt{[\mlop{"feature-state"},~\ldots]}.
+	
 \end{description}
 
 \noindent The pipeline applies the pruning advisory to each \ac{MVT} tile before encoding (\cref{fig:tile_shaving_pipeline}).
