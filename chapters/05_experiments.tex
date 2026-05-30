@@ -175,7 +175,7 @@ Filter count is reduced primarily by metadata refinement (consuming zoom predica
 	\centering
 	\includegraphics[width=\linewidth]{figures/style_size_ablation.pdf}
 	\caption{
-Style size across ablation steps, with raw bytes on the left axis and gzip and Brotli bytes on the right axis.
+Style size in three encodings (raw, gzip, Brotli) across ablation steps.
 The effect on this metric is incremental rather than transformative.}
 	\label{fig:style_size_ablation}
 \end{figure}
@@ -323,7 +323,7 @@ Bootstrap \qty{95}{\percent} confidence intervals confirm that the full-pipeline
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/rendering_metrics_mlt.pdf}
+    \includegraphics[width=\linewidth]{figures/rendering_metrics_mlt.pdf}
     \caption{
 Rendering metrics (load time, \ac{FPS}) across configurations~1-5, enabling direct comparison with Experiments~1-2 in the combined analysis.
 The figure shows the significant drop in both load time and increase in \ac{FPS} for tile shaving, as well as the fact that style-only optimization is ineffective.
@@ -343,7 +343,7 @@ Both formats benefit from shaving across all compression schemes, confirming tha
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/shaving_effectiveness_per_zoom}
+    \includegraphics[width=\linewidth]{figures/shaving_effectiveness_per_zoom}
     \caption{
 Total tile size per zoom level for unshaved and shaved variants of
       both \ac{MVT} and our \ac{MLT} encoder, using the Liberty advisory.  The gap
@@ -390,7 +390,7 @@ Total tileset size for the three encoders under four wire compressions.
           The \ac{MLT} (this work) column reports the encoder developed in this thesis}
         \label{tab:mvt_mlt_comparison}
     \end{subfigure}
-\caption[Encoder comparison: per-zoom breakdown and total tileset size]{Encoder comparison for the Germany OpenMapTiles tileset (zoom~0-14, \qty{256588}{\kilo tiles}).
+\caption{Encoder comparison for the Germany OpenMapTiles tileset (zoom~0-14, \qty{256588}{\kilo tiles}).
 Our \ac{MLT} encoder achieves \qty{28.3}{\percent} smaller total size than the reference baseline under no wire compression.
 The reference encoder drifts above \ac{MVT} size at several zoom levels under Brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
 \label{fig:encoder_comparison}
@@ -484,7 +484,7 @@ The optimal encoding depends on the rendering style, which is a design choice.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.8\linewidth]{figures/tile_shave_per_style}
+    \includegraphics[width=\linewidth]{figures/tile_shave_per_style}
     \caption{
 On-Wire data reduction from style-driven \ac{MVT} shaving across 11 \ac{OMT}-compatible styles, applied to the same \qty{3.07}{\giga\byte} Germany tileset.  Styles that reference fewer source-layers and properties achieve larger reductions}
     \label{fig:tile_shave_per_style}
