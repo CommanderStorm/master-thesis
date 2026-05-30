@@ -36,7 +36,7 @@ This thesis makes four main contributions, mirroring the structure of \cref{sec:
 Two findings from the evaluation went against our prior expectations.
 We expected the three pass families to compound on tile size, since style-level dead elimination narrows the pruning advisory that the data-level passes consume.
 The aggregate data shows the combined style+shaving reduction is approximately the sum of the individual reductions (\cref{sub:mlt_discussion}).
-The three families are independently useful rather than co-equal partners in a synergistic pipeline.
+The three families are independently useful and can be deployed selectively rather than requiring joint adoption.
 Practically this means a deployment can apply, or skip, any one of them without losing the benefit of the others.
 A mobile deployment on a constrained network should prioritize tile shaving and re-encoding.
 A desktop deployment bottlenecked by draw calls benefits most from the structural passes alone.
@@ -45,13 +45,11 @@ We also observed that the frame-time consistency metric worsens as the pipeline 
 Sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers that on real consumer hardware capped well below that rate would not cross the jank threshold.
 The metric is doing what it should but reading a regime the renderer was never expected to enter.
 
-Beyond these surprises, the compiler-optimization framing of \cref{ch:theoretical_background} transfers cleanly to the map-style domain.
+Beyond these surprises, the compiler-optimization framing of \cref{ch:theoretical_background} applies directly to the map-style domain through its rewrite-rule algebra.
 Our rewrite rules (\cref{tab:all_rewrite_rules}) are individually simple, yet their composition through fixpoint iteration achieves globally significant simplification across styles of widely varying complexity (raw reductions of \qtyrange{3}{68}{\percent} across the Maputnik generalization corpus).
 Expressions are compositional and the rules are individually semantics-preserving, so iterating until no rule fires is sound for any order, even though the system is not confluent and different orders may reach different but visually equivalent normal forms (\cref{sub:fixpoint}).
 
 \section{Research Questions Revisited}\label{sec:rq_revisited}
-
-We can now answer the three research questions posed in \cref{sec:research_goals} directly from the experiments in \cref{ch:experiments}.
 
 \paragraph{R1: Size and Rendering Impact of Co-Optimizations}
 Yes, meaningfully.
@@ -95,7 +93,7 @@ The pruning advisory could plausibly run as a lightweight serving-time filter bu
 Encoding strategy competition is the inherently batch part because it has to profile whole columns, but its decisions could be cached per schema, and on-the-fly \ac{MVT}-to-\ac{MLT} re-encoding at the tile server or \ac{CDN} edge would expose the encoding gains without a full tile rebuild.
 The AnyBlox framework~\cite{gienieczkoAnyBloxFrameworkSelfDecoding2025}, which bundles lightweight WebAssembly decoders with the datasets they read, suggests a third path.
 Shipping the \ac{MLT} decoder as a \ac{WASM} module along the tiles would decouple format evolution from client updates entirely.
-The end-point of this trajectory is direct integration of the optimized \ac{MLT} decoder into MapLibre GL~JS, which is the next concrete piece of work we plan to take on.
+The end-point of this trajectory is direct integration of the optimized \ac{MLT} decoder into MapLibre GL~JS, which would deliver the decode-throughput gains to existing deployments without requiring a separate client.
 
 \paragraph{Selective Column Decoding}
 A complement on the decode side is selective column decoding.

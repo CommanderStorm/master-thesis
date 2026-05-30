@@ -1,7 +1,7 @@
 We investigate automatic, joint style and data optimization for MapLibre-based map rendering pipelines, asking whether composing style-level and data-level transformations yields additive or synergistic gains.
-Interactive web maps built on vector tiles face a complex performance landscape.
+Interactive web maps built on vector tiles face complex performance constraints.
 Every frame requires fetching tiles over the network, decoding them, evaluating style expressions for each feature, and submitting draw calls to the graphics \ac{API}.
-Despite this, style authoring and tile data preparation have traditionally been treated as independent concerns, leaving the interaction between the two unexploited.
+Despite this, style authoring and tile data preparation have traditionally been treated as independent concerns, leaving their interaction unexamined.
 
 We design and implement a standalone optimizer that operates at three levels.
 Expression rewrites come first.
@@ -10,7 +10,7 @@ On top of that, structural passes work on a typed representation of the full sty
 The third level leaves the style behind and reaches into the tile data.
 A pruning advisory derived from the optimized style removes unused properties, geometry types, and feature values, and the surviving content is re-encoded into the columnar MapLibre Tiles format with automatic encoding strategy selection.
 
-We evaluated across 15~styles, 18~scenarios, and 19~cumulative ablation steps plus one plain-tile-shaving comparison.
+We evaluated across 15~styles and 18~scenarios, running 19~cumulative ablation steps and one plain-tile-shaving comparison.
 Tile shaving dominates load-time improvements, achieving load-time reductions of \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and \ac{FPS} gains of \qtyrange{100}{200}{\percent} (median \qty{152}{\percent}) across the ten deep-corpus styles we benchmarked end-to-end.
 For the 11 \ac{OMT}-compatible styles where we measured tile shaving without browser rendering, shaving effectiveness varied \qtyrange{19.8}{46.3}{\percent}.
 Our new \ac{MLT} encoder reduces total tile volume by \qty{28}{\percent} over the reference encoder and \qty{12}{\percent} over gzip-compressed \ac{MVT} on the Germany OpenMapTiles tileset.

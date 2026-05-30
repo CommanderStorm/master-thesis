@@ -101,13 +101,13 @@ We use the rest of this section to explain why one outlier pass dominates the pe
 \paragraph{Dominance of Unary Simplification}
 Some styles are implemented in a not optimal way and thus allow a very high unary simplification gain.
 The gain of this simplification is non-representative and biases the results to look better than they are overall.
-Only two of the style familys gain significant speedups, both of the times through what we think are typos in how the style is written.
+Only two of the style families gain significant speedups, in both cases due to typos in the style file.
 
 We expect this.
 Reducing an expression tree to a literal eliminates all per-feature evaluation cost for that expression, whereas algebraic simplifications merely shorten the evaluation path.
-For some styles this does not hold and unary simplification is more effective due to expensive string index handling being collapsed into senatically identical, but faster variants.
+For some styles this does not hold and unary simplification is more effective due to expensive string index handling being collapsed into semantically identical, but faster variants.
 Fixpoint iteration amplifies the effect.
-A single successful simplfication can cascade through nested expressions, collapsing entire subtrees in subsequent iterations.
+A single successful simplification can cascade through nested expressions, collapsing entire subtrees in subsequent iterations.
 
 \paragraph{Size Reduction vs.\ Rendering Improvement}
 Passes that primarily reduce serialized style size (default stripping, color minification) show smaller rendering improvements but contribute meaningfully to transfer size under compression.
@@ -197,7 +197,7 @@ The interaction between the two is synergistic: styles with many narrowly-filter
 Layer merging does not always reduce the raw serialized byte count.
 A merged layer replaces $k$ small filter expressions with a single \mlop{\texttt{match}}-keyed filter and $k$-armed \mlop{\texttt{match}} expressions for every differing paint property, which for small $k$ can produce a slightly larger textual representation than the sum of the originals.
 The per-style ablation tables in \cref{sec:app_per_style} show one such case (Bright: \num{44.4}$\to$\qty{44.6}{\kilo\byte} after layer merging), where the raw count creeps up while the layer count drops by one (119$\to$118).
-This was uncomfortable when we first saw it in the runs, since the intuition is that merging should shrink the style, but raw byte count turns out to be a proxy for parse time and transfer cost rather than for rendering cost, which is driven by layer count and per-frame draw calls.
+Counterintuitively, merging can grow raw style size because merged layers use longer filter expressions, but raw byte count turns out to be a proxy for parse time and transfer cost rather than for rendering cost, which is driven by layer count and per-frame draw calls.
 The merged layer is still cheaper to render even when its serialized form is bigger, and the gzip and Brotli columns of the same table show the compressed size essentially unchanged, so the raw increase disappears under realistic wire compression anyway.
 
 \paragraph{Indirect Effects of Metadata Refinement}
@@ -291,7 +291,8 @@ In this section we quantify the interaction between style-level and data-level o
 Comparing gzip-size reductions for style-only, shaving-only, and the combination: Fiord's combined reduction (\qty{14.7}{\percent}) sits \qty{0.2}{\percent} above its style-only figure (\qty{14.5}{\percent}), and Liberty's combined (\qty{4.8}{\percent}) matches its style-only (\qty{4.8}{\percent}).
 Both styles compose additively.
 Shaving alone is negligible for these two because Liberty references most tile properties and Fiord's gains already come from layer-level cleanup.
-This was the central empirical question of the thesis and the one we expected to answer in the affirmative going in. The data did not bear that expectation out.
+This was the central empirical question of the thesis.
+The data shows that style and data optimizations compose additively rather than synergistically.
 Per-scenario load-time synergy (combined exceeding the sum) appears in 17 of 36 style-scenario pairs but is too sparse to lift the aggregate.
 
 \paragraph{Rendering Metrics across Configurations}
@@ -312,7 +313,7 @@ Jangda et~al.~\cite{jangdaNotFastAnalyzing2019} measured a 45-55\% slowdown for 
 Although the computational gap has narrowed since 2019, the data-transfer boundary cost remains largely unchanged because the \ac{WASM}-JS interface still lacks zero-copy sharing of structured columnar buffers.
 As a result, the columnar decoder's advantage materialises primarily on larger, feature-dense tiles where the per-column setup and transfer cost is amortised.
 On smaller tiles the per-column dispatch overhead narrows the gap to approximate parity with \ac{MVT}'s single-path protobuf parser.
-We are currently working to shift more decoding and data consumption into \ac{WASM} to reduce boundary-crossing overhead.
+Shifting more decoding and data consumption into \ac{WASM} to reduce boundary-crossing overhead is left for future work.
 Bootstrap \qty{95}{\percent} confidence intervals confirm that the full-pipeline load-time improvements are tight: Fiord's final load time is \qty{120.5}{\milli\second} (CI: [\num{119.3}, \num{121.5}]), Liberty's is \qty{133.7}{\milli\second} (CI: [\num{132.9}, \num{134.2}]), both with $p < 10^{-45}$ (Wilcoxon, $n = 270$ for Fiord across 18 scenarios and $n = 254$ for Liberty across 17 scenarios at the full-pipeline pool) against their respective baselines.
 
 \begin{figure}[H]
@@ -425,7 +426,7 @@ To separate the contribution of the multi-strategy competition (this work) from 
 The headline is the \qty{28.3}{\percent} reduction our encoder achieves over the reference baseline under no wire compression.
 The reference baseline already incorporates encoding fixes backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds), so the \qty{28}{\percent} isolates the contribution of automatic strategy selection over a correctly-implemented fixed-plan encoder rather than conflating bug fixes with the innovation we want to attribute to.
 
-The finding in the table that is easiest to overlook, and the one we found most uncomfortable when we first plotted it, is that the reference baseline is \emph{worse} than gzip-compressed \ac{MVT} (\qty{3.54}{\giga\byte} vs.\ \qty{3.08}{\giga\byte}).
+The finding in the table that is easiest to overlook is that the reference baseline is \emph{worse} than gzip-compressed \ac{MVT} (\qty{3.54}{\giga\byte} vs.\ \qty{3.08}{\giga\byte}).
 General-purpose LZ77-family compressors already exploit most of the row-level redundancy in the protobuf wire format, and a columnar encoder that uses fixed per-column schemes cannot keep up.
 The data-driven strategy selection in our encoder reclaims this gap and goes past it: our encoder under gzip is \qty{12.3}{\percent} smaller than \ac{MVT} under gzip, and the advantage holds (\qty{12.9}{\percent}) even against zstd-22, the strongest general-purpose compressor in the comparison.
 
@@ -435,13 +436,12 @@ The cleaner evidence for the profiler's value is the absolute comparison: our en
 This directly answers the question we posed at the start of \cref{sec:exp_mlt}: our encoder's contribution lives in the joint strategy-selection layer that sits on top of the columnar format, not in the format alone.
 
 \paragraph{zstd-on-\acs{MVT} Comparison}
-A natural objection is that general-purpose compressors such as zstd-22 or Brotli-11 should be sufficient: if compression is the goal, simply applying the strongest available compressor to the existing \ac{MVT} wire format would avoid the complexity of a columnar encoder entirely.
-\Cref{tab:mvt_mlt_comparison} answers this directly.
-\ac{MVT} under zstd-22 yields \qty{3.16}{\giga\byte} for the Germany tileset, whereas our encoder under the same compressor yields \qty{2.75}{\giga\byte}, a \qty{12.9}{\percent} reduction.
+A natural objection is that general-purpose compressors such as zstd-22 or Brotli-11 should be sufficient. If compression is the goal, simply applying the strongest available compressor to the existing \ac{MVT} wire format would avoid the complexity of a columnar encoder entirely.
+\ac{MVT} under zstd-22 yields \qty{3.16}{\giga\byte} for the Germany tileset, whereas our encoder under the same compressor yields \qty{2.75}{\giga\byte}, a \qty{12.9}{\percent} reduction (\cref{tab:mvt_mlt_comparison}).
 We attribute this to a structural difference: a general-purpose compressor sees the interleaved, heterogeneous protobuf byte stream and must discover redundancy across mixed data types.
 A columnar encoder, by contrast, groups homogeneous values (all road classes in one stream, all vertex deltas in another) and each stream compresses more effectively under lightweight per-type codecs (delta-\acs{RLE} for monotonic integers, dictionary encoding for low-cardinality strings, \ac{FSST} for high-cardinality strings) than a monolithic LZ77-family compressor can achieve on the interleaved byte stream.
 The columnar advantage is preserved \emph{after} applying the same general-purpose compressor on top: the per-column codecs have already removed most of the type-specific redundancy, so the post-hoc compressor has less work to do but starts from a lower baseline.
-This finding is consistent with the columnar-database literature, where per-column lightweight encoding consistently outperforms row-level block compression even when the block compressor is state-of-the-art~\cite{kuschewskiBtrBlocksEfficientColumnar2023}.
+This finding is consistent with the columnar-database literature, where per-column lightweight encoding consistently outperforms row-level block compression even when using zstd-22 or Brotli-11~\cite{kuschewskiBtrBlocksEfficientColumnar2023}.
 
 \paragraph{Decoder Cost}
 A legitimate concern for any multi-encoding scheme is that the client must pay the decoder cost, which can erode the transfer savings on mobile or battery-constrained targets.
@@ -515,7 +515,6 @@ Two styles that served identical tiles under \ac{MVT} now fetch distinct shaved 
 For deployments where a single style dominates traffic, style-driven shaving is strictly beneficial.
 For multi-tenant tile servers hosting dozens of styles, operators should apply shaving per style and cache the resulting tile variants independently (the approach of Mapbox's closed-source \enquote{style-optimized vector tiles} service~\cite{StyleoptimizedVectorTiles}).
 
-We frame the decision with a per-style break-even model.
 A vector-tile source's \texttt{encoding} field selects \ac{MVT} or \ac{MLT}, so the two formats cannot mix within one source.
 Unshaved \ac{MLT} is possible in principle but not emitted by our tool, so each style is served either as shaved \ac{MLT} (with its own \emph{(tile, style)} cache-key namespace) or as raw \ac{MVT} (sharing cache slots with all other \ac{MVT}-served styles).
 The choice is usually binary per style (given most styles only have one vector tile source), and the operational question is which styles belong in which group.
@@ -546,7 +545,7 @@ Our model omits spatial locality and the second-order effect that peeling the do
 \paragraph{Geometry Simplification as out of scope}
 A complementary direction we do not explore in this thesis is geometry-level pruning, which covers coordinate precision reduction, Visvalingam~\cite{visvalingamLineGeneralisationRepeated1993} or Douglas-Peucker~\cite{douglasALGORITHMSREDUCTIONNUMBER1973} simplification, and polygon topology coalescing, and is the principal lever used by upstream generators such as Tippecanoe\footnote{\url{https://github.com/felt/tippecanoe}, last accessed 2026-04-21} and Planetiler\footnote{\url{https://github.com/onthegomap/planetiler}, last accessed 2026-04-21}.
 These techniques typically deliver larger absolute savings than attribute-column pruning, but they interact non-trivially with style-defined visual thresholds (line width, dash pattern length, label anchor placement) and would violate the pixel-identity soundness criterion established in \cref{sec:problem_statement}.
-Style-driven geometry simplification, choosing a simplification tolerance that is demonstrably below the smallest visible feature at each zoom level, is an interesting direction for future work but we do not pursue it here.
+Style-driven geometry simplification, choosing a simplification tolerance that is demonstrably below the smallest visible feature at each zoom level, is left for future work.
 We therefore quantify the size reductions achievable \emph{without} touching geometry at all, which understates the total optimizations headroom a production pipeline could reach by composing this work with an upstream simplifier.
 
 \section{Cross-Style Generalisation}\label{sec:exp_cross_style}
@@ -571,7 +570,7 @@ We execute no rendering benchmarks, as the diverse styles reference incompatible
 \subsection{Results}\label{sub:cross_results}
 
 \cref{fig:cross_style_reduction} shows per-style percentage reductions (raw, gzip, Brotli) across the 13 Maputnik styles, sorted by raw reduction.
-The key question here is whether the distribution clusters tightly around the deep corpus median or fans out with substantial per-style variance.
+The distribution either clusters tightly around the deep corpus median or fans out with substantial per-style variance.
 \cref{fig:cross_style_complexity_scatter} then plots each style's initial complexity against its achievable reduction, testing the hypothesis that verbose institutional styles (the right-hand side of the scatter) have disproportionately more optimizations headroom than already-compact minimal basemaps on the left.
 
 The distribution fans out considerably.
@@ -640,7 +639,8 @@ Expression-level passes (constant folding, boolean simplification, default strip
 We expect this: any style written by a human or generated by an editor is likely to contain at least some redundant expressions, default-valued properties, or suboptimal color encodings.
 
 \paragraph{Complexity and Reduction}
-While verbose institutional styles with several hundred layers and deeply nested expressions tend to offer more room for improvement than simple styles with fewer than 50 layers, we find that the correlation between initial style complexity and achievable reduction is not statistically significant at this sample size ($r = 0.35$, $n = 13$, $p = 0.24$), and is dominated by a single high-leverage point.
+We find no statistically significant correlation between initial style complexity and achievable reduction at this sample size ($r = 0.35$, $n = 13$, $p = 0.24$), and the relationship is dominated by a single high-leverage point.
+The intuition that verbose institutional styles with several hundred layers and deeply nested expressions offer more room for improvement than simple styles with fewer than 50 layers is not borne out at this sample size.
 The scatter plot (\cref{fig:cross_style_complexity_scatter}) visualizes the per-style relationship.
 
 \paragraph{Unevaluated Stats-Dependent Passes}
@@ -667,7 +667,7 @@ The multi-pass design is what generalizes.
 \end{keytakeaways}
 
 \noindent This section presents the full pipeline ablation across all 19 cumulative steps (\cref{sub:ablation}) and analyses interactions between expression, structural, and data passes.
-The combined view matters because the three categories \emph{can} interact in principle.
+The combined view isolates interactions between the three optimization levels.
 Style-level dead elimination narrows tile pruning advisories, and metadata refinement enables more aggressive zoom-stop pruning downstream.
 
 \subsection{Full Pipeline Ablation}\label{sub:combined_ablation}
@@ -982,10 +982,10 @@ The tile statistics (\cref{sub:tile_statistics}) count feature \emph{occurrences
 This inflates total feature counts and distorts absolute selectivity estimates, though relative selectivity ordering (which is all the reordering heuristic of \cref{sec:selectivity_reordering} consumes) is less affected.
 We made this choice deliberatiley because the underlying features are not a concearn for the renderer on most layers (exception being symbol placement which is map-global instead of tile-local).
 
-The selectivity estimation model assumes independence between filter predicates (\cref{eq:selectivity_compound}), which may not hold for correlated properties.
+The selectivity estimation model assumes independence between filter predicates (\cref{eq:selectivity_theory}), which may not hold for correlated properties.
 Map-style filters in practice do exhibit correlations (e.g.\ \mlval{\texttt{class}} and \mlval{\texttt{subclass}} in OpenMapTiles), so we treat the estimator as a first-order approximation rather than a calibrated model, and we understand selectivity-based reordering as a heuristic that produces a locally-good ordering rather than a provably-optimal one.
 
-The 15-run median provides robustness against outliers but does not quantify sampling uncertainty on its own.
+The 15-run median reduces measurement noise from per-run outliers but does not quantify sampling uncertainty on its own.
 We computed bootstrap \qty{95}{\percent} confidence intervals~\cite{efronIntroductionBootstrap1998} (10\,000 resamples, percentile method) over the per-(style, variant) measurement pools for \texttt{loadMs} and \texttt{fps}.
 Error bars in the waterfall (\cref{fig:waterfall_loadMs}), and rendering-metrics (\cref{fig:rendering_metrics_mlt}) figures represent these bootstrap \qty{95}{\percent} CIs.
 Wilcoxon signed-rank tests (or Mann-Whitney~U where sample sizes differ) confirm that the full-pipeline load-time reductions are highly significant for both end-to-end styles (Fiord: \qty{370.9}{\milli\second}$\to$\qty{120.5}{\milli\second}, $p < 10^{-45}$, $n = 270$, and Liberty: \qty{466.5}{\milli\second}$\to$\qty{133.7}{\milli\second}, $p < 10^{-74}$, $n = 254$).
@@ -999,7 +999,7 @@ Style-only effects on load time are smaller and, for individual styles, not cons
 The cumulative ablation design (\cref{sub:ablation}) means that the reported marginal contribution of each pass depends on the ordering of preceding passes.
 A leave-one-out or fractional-factorial design would isolate each pass's standalone contribution more cleanly but we did not run it for cost reasons.
 
-Tail metrics (p99 frame time, jank count) are noisier than central-tendency metrics: each per-run p99 is estimated from the tail of one animation's frame-delta distribution (hundreds of frames), which is intrinsically higher-variance than the mean, and the across-run median then aggregates 15 such per-run tail estimates rather than smoothing a larger pool. The reported numbers should accordingly be read as directional rather than conclusive.
+Tail metrics (p99 frame time, jank count) are noisier than central-tendency metrics: each per-run p99 is estimated from the tail of one animation's frame-delta distribution (hundreds of frames), which is intrinsically higher-variance than the mean, and the across-run median then aggregates 15 such per-run tail estimates rather than smoothing a larger pool. The reported numbers should accordingly be read as estimates of effect direction and rough magnitude, not as precise tail quantiles.
 The full-pipeline ablation performs thousands of pairwise comparisons across metrics, styles, scenarios, and ablation steps.
 We apply no multiple-comparisons correction (Bonferroni, Benjamini-Hochberg), so individual per-cell \enquote{significant} differences should not be read as hypothesis tests, only as descriptive summaries.
 

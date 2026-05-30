@@ -71,7 +71,7 @@ The encoding strategy is chosen without knowledge which properties the renderer 
 Removing properties and features changes column cardinalities and value distributions.
 For instance, pruning rare road classes can convert a high-cardinality string column into one amenable to dictionary or run-length encoding, so the optimal encoding strategy for the shaved tile differs from the original.
 
-The encoding techniques used in \ac{MLT} draw on a rich literature in columnar database compression.
+The encoding techniques used in \ac{MLT} draw on the columnar database compression literature.
 Lemire and Boytsov~\cite{lemireDecodingBillionsIntegers2015} introduced \ac{SIMD}-vectorised integer compression \ac{FastPFOR} achieving billions of integers per second in decompression throughput.
 Boncz et al.~\cite{bonczFSSTFastRandom2020} developed \ac{FSST}, a lightweight string compression scheme using a static symbol table that supports random access without decompressing surrounding data.
 Kuschewski et al.~\cite{kuschewskiBtrBlocksEfficientColumnar2023} demonstrated with BtrBlocks that cascading multiple encoding schemes (including \ac{FSST}, bit-packing, \ac{RLE}, and dictionary encoding) with automatic per-block strategy selection achieves 2.2$\times$ faster scans than Parquet.
@@ -103,7 +103,7 @@ Our encoding level optimizations are explained in \cref{sub:encoding_strategies}
 
 \section{Style Optimization}\label{sec:rw_style_optimizations}
 
-In contrast to data-level optimizations, style-level optimization techniques have attracted comparatively little research attention.
+In contrast to data-level optimizations, few prior works address style-level optimization.
 
 \begin{sloppypar}
 The MapLibre style specification includes the utilities \texttt{gl\allowbreak-style\allowbreak-validate} and \texttt{gl\allowbreak-style\allowbreak-migrate}\footnote{\url{https://www.maplibre.org/maplibre-style-spec/}, last accessed 2025-10-24}, which validate style documents against the specification and mechanically migrate legacy function syntax to the expression language.
@@ -113,7 +113,7 @@ A simplification pass is therefore a natural complement to migration, not a repl
 \end{sloppypar}
 
 More broadly, style documents in practice accumulate redundancy through several channels: iterative authoring that leaves superseded properties in place, copy-paste development across layers, automated migration that introduces mechanically correct but verbose expression forms, and multi-author editing where conventions drift over successive contributions.
-The result is that production styles routinely contain default-valued properties, unreachable filter branches, and duplicated paint blocks, creating a practical demand for automatic simplification that no existing tool meets.
+The result is that production styles routinely contain default-valued properties, unreachable filter branches, and duplicated paint blocks.
 
 Stamen Design published \texttt{mapbox-gl-style-remove-defaults}\footnote{\url{https://github.com/stamen/mapbox-gl-style-remove-defaults}, last accessed 2026-5-27}, a tool that removes properties set to their specification default values from Mapbox GL style \ac{JSON}.
 This corresponds to the default stripping pass we describe in \cref{ch:methods}, implemented as a standalone tool.
@@ -155,8 +155,8 @@ We complement them by introducing a cumulative ablation methodology that isolate
 Each strand of this literature solves part of the problem in isolation.
 The data-side tools (\texttt{vtshaver}, \texttt{vt-optimizer}, Tippecanoe) prune tile content but never read or rewrite the style document that drives the renderer.
 Mapbox's closed-source \enquote{style-optimized tiles} service is the only precedent that genuinely couples style and data, and its terms of service explicitly preclude the independent evaluation needed to confirm what it actually does.
-The style-side work is sparser still.
-Stamen's default-stripping utility and a handful of validators cover individual optimizations, but no published tool composes multiple passes, and the closest academic analogue (\ac{CSS} minification) lives in a different domain altogether.
+Style-side work is scarce.
+Stamen's default-stripping utility and a few validators cover individual optimizations, but no published tool composes multiple passes, and the closest academic analogue (\ac{CSS} minification) lives in a different domain altogether.
 Tremmel and Zink's \ac{MLT} format advances the encoding layer but picks strategies without consulting the style.
 The benchmarking literature is in better shape, and we adopt its statistical methodology rather than extending it.
 

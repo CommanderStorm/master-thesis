@@ -25,7 +25,7 @@ Due to having better hardware access, these \acp{API} can render more complex sc
 \end{description}
 
 Due to the more advanced features and mostly better performance, we focus exclusively on renderers based on open-source 3D graphics \acp{API}.
-While these renderers are powerful, they require data to be preprocessed and optimized specifically for rendering.
+These renderers require data to be preprocessed and optimized specifically for rendering.
 As a result, they cannot directly render high-level primitives such as shapes (polygons, lines, points), text, or images.
 Instead, they operate on lower-level graphics primitives such as textures, triangles, and quads.
 
@@ -78,11 +78,11 @@ The visual appearance is defined by a style and supported by fonts and sprites f
 	\label{fig:basic-arch}
 \end{figure}
 
-As a lower-level representation layer for displaying map content, the following components are required, as shown in \cref{fig:basic-arch}.
-\emph{Styles} define the visual appearance of the map and reference the other required resources.
-\emph{Tiles} provide the geometry (points, lines, polygons) and associated attributes (for example, building heights) displayed on the map.
-\emph{Sprites} supply the icons.
-\emph{Fonts} provide the glyphs used to render text labels.
+As shown in \cref{fig:basic-arch}, displaying map content at this lower level requires
+    \emph{styles} that define the visual appearance and reference the other resources,
+    \emph{tiles} that provide the geometry (points, lines, polygons) and associated attributes (for example, building heights),
+    \emph{sprites} that supply the icons, and
+    \emph{fonts} that provide the glyphs used to render text labels.
 Occasionally, additional assets such as 3D geometry models or terrain are used as well.
 
 There are several approaches to deliver client-side rendered vector maps.
@@ -106,8 +106,8 @@ Tiles, by contrast, can be stored and accessed using three major approaches:
 Dynamic data sources can be updated frequently by applying incremental diffs, whereas the other approaches typically require a full rebuild when the underlying data changes.
 At larger scales, in-memory caching of tiles via regional or \ac{CDN}-style infrastructure, combined with fallback to runtime-dynamic data, is essential for performance and cost.
 
-Although all of these resources can be optimized, tiles are usualy the most critical due to their continuously streaming nature as a user moves the map.
-They usualy have a cumulatively higher data volume due to this, even though their individual tiles may be much smaller.
+All of these resources can be optimized, but tiles are usually the most critical because they stream continuously as a user moves the map.
+This typically gives them a cumulatively higher data volume, even though their individual tiles may be much smaller.
 All other resources may depend on locale slightly (for example loading different Unicode ranges or fonts), but are only handled one time.
 
 Real-world observations support this.
@@ -158,37 +158,6 @@ We turn this into the asymmetric \mlprop{minzoom}/ \mlprop{maxzoom} tightening r
 \Cref{lst:overzoom} shows the two operations the slicer performs to synthezise a target tile from the source's \mlprop{maxzoom} tile.
 \stepcirc{1}~Rescale each coordinate by $2^{\Delta z}$ relative to the target-tile offset ($offsetX \notin \{null,0\} \lor offsetY \notin \{null,0\} \Rightarrow x = x * scale - offsetX$). \stepcirc{2}~Clip to the target extent with a 128-unit overdraw buffer for continuous edge geometry.
 Both operations consume the source's \mlprop{maxzoom} tile as input, which is what makes \mlprop{maxzoom} tightening risky in a way that \mlprop{minzoom} tightening is not.
-
-\clearpage
-\begin{lstlisting}[
-  language=TypeScript,
-  caption={Condensed MapLibre GL-JS overzoom implementation (\texttt{src/source/vector\_tile\_overzoomed.ts})},
-  label=lst:overzoom,
-  escapeinside={(*@}{@*)},
-]
-function sliceVectorTileLayer(sourceLayer, maxZoomTileID, targetTileID) {
-    const {extent} = sourceLayer;
-    const dz = targetTileID.z - maxZoomTileID.z;
-    const scale = Math.pow(2, dz);
-
-    // Target tile's offset within the source tile, in target coords
-    const offsetX = (targetTileID.x - maxZoomTileID.x * scale) * extent;
-    const offsetY = (targetTileID.y - maxZoomTileID.y * scale) * extent;
-
-    for (const feature of sourceLayer) {
-        let geometry = feature.loadGeometry();
-        // (*@\stepcirc{1}@*) Rescale each coordinate into the target tile's space
-        for (const ring of geometry) for (const p of ring) {
-            p.x = p.x * scale - offsetX;
-            p.y = p.y * scale - offsetY;
-        }
-        // (*@\stepcirc{2}@*) Clip to the target extent with a 128-unit overdraw buffer
-        geometry = clipGeometry(geometry, feature.type,
-                                -128, -128, extent + 128, extent + 128);
-        // ...emit feature with rescaled+clipped geometry
-    }
-}
-\end{lstlisting}
 
 No symmetric \enquote{underzoom} behavior exists.
 If a source has no tile at a zoom lower than \mlprop{minzoom}, the layer is not rendered there.
@@ -250,7 +219,7 @@ Three architectural approaches to map styling have been established:
 \end{description}
 
 We focus on client-side declarative styles, specifically the MapLibre style specification.
-It is the most widely adopted approach in open-source map rendering, and its declarative nature makes it amenable to static analysis and automatic optimizations.
+It is widely adopted in the open-source map rendering ecosystem, and its declarative nature makes it amenable to static analysis and automatic optimizations.
 
 The MapLibre style specification\footnote{\url{https://www.maplibre.org/maplibre-style-spec/}, last accessed 2025-10-24} defines a map's appearance as a \ac{JSON} document with the following key components:
 
@@ -301,49 +270,6 @@ Tightening \mlprop{minzoom}/ \mlprop{maxzoom} makes the \stepcirc{3} guard true 
 Pre-folding zoom-dependent constants reduces the work in \stepcirc{4}.
 Filter-to-property propagation simplifies the per-feature work inside \stepcirc{5}.
 
-\begin{lstlisting}[
-    language=TypeScript,
-    escapeinside={(*@}{@*)},
-    caption={MapLibre GL-JS WorkerTile.parse processing pipeline (\texttt{src/source/worker\_tile.ts})},
-    label=lst:worker_pipeline
-]
-// (*@\stepcirc{1}@*) Iterate source layers
-const layerFamilies = layerIndex.familiesBySource[this.source];
-for (const sourceLayerId in layerFamilies) {
-    const sourceLayer = data.layers[sourceLayerId];
-	if (!sourceLayer) continue;
-
-    ...
-
-    const sourceLayerIndex = sourceLayerCoder.encode(sourceLayerId);
-
-    // (*@\stepcirc{2}@*) Collect raw features
-    const features = [];
-    for (let index = 0; index < sourceLayer.length; index++) {
-        const feature = sourceLayer.feature(index);
-        const id = featureIndex.getId(feature, sourceLayerId);
-        features.push({feature, id, index, sourceLayerIndex});
-    }
-
-    for (const family of layerFamilies[sourceLayerId]) {
-        const layer = family[0];
-
-        ...
-        // (*@\stepcirc{3}@*) Skip hidden layers
-        if (layer.isHidden(this.zoom, true)) continue;
-
-        // (*@\stepcirc{4}@*) Recalculate zoom-dependent expressions
-        recalculateLayers(family, this.zoom, availableImages);
-
-        const bucket = buckets[layer.id] = layer.createBucket({...});
-
-        // (*@\stepcirc{5}@*) Filter features and build vertex data
-        bucket.populate(features, options, this.tileID.canonical);
-        featureIndex.bucketLayerIDs.push(family.map((l) => l.id));
-    }
-}
-\end{lstlisting}
-
 \subsection{Feature and Global State}\label{sub:feature_state}
 
 A MapLibre map carries two runtime key-value stores that sit alongside the JSON style document and the encoded tile data, even though they live in neither.
@@ -370,7 +296,7 @@ In this section we introduce the foundational concepts we apply in \cref{ch:meth
 \begin{sloppypar}
 A \emph{peephole optimizer} examines a small, fixed-size window of code (the \enquote{peephole}) and applies local pattern-matching rewrites that replace instruction sequences with shorter or faster equivalents~\cite{davidsonCodeSelectionObject1984}.
 Each rewrite rule is independent, matching a local pattern and emitting a replacement without requiring knowledge of the surrounding program.
-Many small, local improvements compose into significant global optimizations under repeated application.
+Many small, local improvements accumulate into substantial global gains under repeated application.
 \end{sloppypar}
 
 Peephole optimizers are classified by the level at which they operate.
@@ -576,7 +502,8 @@ Our encoder uses two:
 
 Choosing the physical technique for a given logical chain has been studied systematically.
 Abadi et~al.~\cite{abadiIntegratingCompressionExecution2006} proposed property-based selection rules, and Damme et~al.~\cite{dammeComprehensiveExperimentalSurvey2019} developed a cost-model-driven strategy that picks the lowest expected cost for a given data distribution.
-A third school sidesteps both rule and model and decides empirically: BtrBlocks~\cite{kuschewskiBtrBlocksEfficientColumnar2023} trial-encodes candidate schemes on a sample of each column block and keeps the smallest result, arguing that lightweight on-sample trials are both more accurate than a cost model and cheap enough to run at encode time.
+A third school sidesteps both rule and model and decides empirically.
+BtrBlocks~\cite{kuschewskiBtrBlocksEfficientColumnar2023} trial-encodes candidate schemes on a sample of each column block and keeps the smallest result, arguing that lightweight on-sample trials are both more accurate than a cost model and cheap enough to run at encode time.
 Our encoding competition in \cref{sub:encoding_strategies} sits in the same trial-based family.
 It trials a pruned set of (logical chain, physical technique) pairs and retains the smallest output, but operates on each whole tile rather than on a sample, since per-tile data volumes are modest.
 
@@ -601,9 +528,7 @@ Applying \ac{FSST} to the deduplicated dictionary strings compresses both the un
 
 \emph{Space-filling curves} map multi-dimensional points to a one-dimensional ordering while preserving spatial locality.
 Points that are close in two-dimensional space tend to receive nearby positions on the curve~\cite{moonAnalysisClusteringProperties2001}.
-Such curves play two roles in tile encoding.
-As a logical encoding they map a 2D coordinate to a single integer column (\cref{sub:logical_integer_encodings}).
-As a \emph{feature ordering} they sort features before per-column encoding so that spatially adjacent features end up contiguous, improving the effectiveness of delta and \ac{RLE} on geometry and property columns.
+In tile encoding, such curves serve as a logical encoding that maps a 2D coordinate to a single integer column (\cref{sub:logical_integer_encodings}), and as a \emph{feature ordering} that sorts features before per-column encoding so that spatially adjacent features end up contiguous, improving the effectiveness of delta and \ac{RLE} on geometry and property columns.
 This subsection treats the feature-ordering use.
 
 Two space-filling curves are commonly used.
@@ -634,9 +559,8 @@ Identifying which columns share sufficient overlap is a set similarity problem.
 \begin{equation}\label{eq:jaccard}
     J(A, B) = \frac{|A \cap B|}{|A \cup B|}
 \end{equation}
-MinHash yields no asymptotic improvement over the exact computation.
-Constructing a signature requires examining every element of $A$ and $B$, so the time complexity remains $\mathcal{O}(|A|+|B|)$, and the input sets must be retained throughout construction.
-The reduction is a constant factor and applies to the persistent representation.
+Constructing a MinHash signature requires examining every element of $A$ and $B$, so the construction time remains $\mathcal{O}(|A|+|B|)$ and the input sets must be retained throughout construction.
+MinHash instead yields a constant-factor reduction in the persistent representation.
 Whereas the exact computation stores all $\mathcal{O}(|A|+|B|)$ elements, MinHash stores only $k$ hash values per set.
 For fixed $k$, the saving in persistent storage grows without bound as $|A|$ and $|B|$ increase.
 For each of $k$ independent hash functions $h_1, \ldots, h_k$, the minimum hash value over all elements is recorded: $\mathit{sig}_i(A) = \min_{a \in A} h_i(a)$.
@@ -650,8 +574,7 @@ The estimate is unbiased with variance $\mathcal{O}(1/k)$~\cite{broderResemblanc
 
 \section{Benchmarking}\label{sec:benchmarking}
 
-Benchmarking refers to the systematic measurement of system performance using controlled workloads and standardized metrics.
-The purpose of benchmarking is to evaluate system behavior, compare alternative implementations, and quantify the effects of optimizations.
+Benchmarking is the systematic measurement of system performance under controlled workloads and standardized metrics, used to evaluate system behavior, compare alternative implementations, and quantify the effects of optimizations.
 
 According to Jain~\cite{jainArtComputerSystems1991}, a good evaluation must start with selecting relevant metrics.
 Georges et~al.~\cite{georgesStatisticallyRigorousJava2007} later demonstrated that naive averaging of execution times on managed runtimes (such as JavaScript engines) leads to unreliable conclusions, advocating instead for confidence intervals computed over multiple independent \ac{JVM}/engine invocations.
@@ -667,9 +590,9 @@ In the context of web maps, the candidate metrics span a range from deployment-c
     \item[\textbf{Throughput,}] typically measured in \acp{FPS} or frame time, describing how many frames can be rendered per second.
     \item[\textbf{Frame stability,}] which captures variations in frame time and identifies dropped frames or rendering stutters.
     \item[\textbf{Network utilisation,}] including transferred bytes, tile request rates, and bandwidth consumption.
-    \item[\textbf{Power consumption}] in Watts, which is relevant for mobile devices and battery-powered systems.  We do not measure power consumption.
-We use no \ac{RAPL} counters, battery deltas, or external power meters, as our benchmark host is a desktop workstation rather than a battery-constrained mobile device.  We list power here as a candidate metric because transfer-size reductions and reduced draw-call counts are established proxies for energy savings on mobile targets.
-Cellular radio energy is proportional to data volume, and \ac{GPU} active time scales with draw-call count.
+    \item[\textbf{Power consumption}] in Watts, which is relevant for mobile devices and battery-powered systems.
+We do not measure power consumption directly, since our benchmark host is a desktop workstation rather than a battery-constrained mobile device.
+We instead rely on transfer-size reductions and reduced draw-call counts as established proxies for energy savings on mobile targets, given that cellular radio energy is proportional to data volume and \ac{GPU} active time scales with draw-call count.
 \end{description}
 
 These can be benchmarked at different workload levels~\cite{jainArtComputerSystems1991}:
@@ -685,7 +608,7 @@ They are the most representative but also the noisiest due to network variabilit
 
 \noindent We primarily use macro-benchmarks.
 We load a full style, fetch and decode tiles, and exercise the renderer with a scripted camera animation.
-Our benchmark harness controls for network variability (via a caching proxy) and \ac{GPU} variability (via hardware-accelerated rendering with ANGLE/Vulkan) to achieve reproducible results at the macro level.
+Our benchmark harness controls for network variability (via a caching proxy) and \ac{GPU} variability (via hardware-accelerated rendering with ANGLE/Vulkan) to achieve reproducible results across runs.
 
 \begin{chaptersummary}
 Three theoretical traditions map onto the three levels of the pipeline.

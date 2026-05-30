@@ -82,7 +82,84 @@ We characterize each rule by its pass assignment, scope (filter-only or both fil
 
 \section{MapLibre GL-JS Reference Excerpts}
 
-The two render-pass loops the painter runs over \texttt{layerIds} (the opaque pass top-to-bottom and the translucent pass bottom-to-top) are the basis for the layer-merging savings discussed in \cref{sub:structural_optimizations}.
+\Cref{lst:overzoom} shows the two operations MapLibre performs when synthesizing a tile at a zoom level beyond the source's \mlprop{maxzoom}, as referenced in \cref{sec:tiles}.
+
+\begin{lstlisting}[
+  language=TypeScript,
+  caption={Condensed MapLibre GL-JS overzoom implementation (\texttt{src/source/vector\_tile\_overzoomed.ts})},
+  label=lst:overzoom,
+  escapeinside={(*@}{@*)},
+]
+function sliceVectorTileLayer(sourceLayer, maxZoomTileID, targetTileID) {
+    const {extent} = sourceLayer;
+    const dz = targetTileID.z - maxZoomTileID.z;
+    const scale = Math.pow(2, dz);
+
+    // Target tile's offset within the source tile, in target coords
+    const offsetX = (targetTileID.x - maxZoomTileID.x * scale) * extent;
+    const offsetY = (targetTileID.y - maxZoomTileID.y * scale) * extent;
+
+    for (const feature of sourceLayer) {
+        let geometry = feature.loadGeometry();
+        // (*@\stepcirc{1}@*) Rescale each coordinate into the target tile's space
+        for (const ring of geometry) for (const p of ring) {
+            p.x = p.x * scale - offsetX;
+            p.y = p.y * scale - offsetY;
+        }
+        // (*@\stepcirc{2}@*) Clip to the target extent with a 128-unit overdraw buffer
+        geometry = clipGeometry(geometry, feature.type,
+                                -128, -128, extent + 128, extent + 128);
+        // ...emit feature with rescaled+clipped geometry
+    }
+}
+\end{lstlisting}
+
+\Cref{lst:worker_pipeline} shows the steps MapLibre GL-JS's \texttt{WorkerTile.parse} method goes through to process a tile's data to produce the vertex buffers for the painter.
+
+\begin{lstlisting}[
+    language=TypeScript,
+    escapeinside={(*@}{@*)},
+    caption={MapLibre GL-JS WorkerTile.parse processing pipeline (\texttt{src/source/worker\_tile.ts})},
+    label=lst:worker_pipeline
+]
+// (*@\stepcirc{1}@*) Iterate source layers
+const layerFamilies = layerIndex.familiesBySource[this.source];
+for (const sourceLayerId in layerFamilies) {
+    const sourceLayer = data.layers[sourceLayerId];
+	if (!sourceLayer) continue;
+
+    ...
+
+    const sourceLayerIndex = sourceLayerCoder.encode(sourceLayerId);
+
+    // (*@\stepcirc{2}@*) Collect raw features
+    const features = [];
+    for (let index = 0; index < sourceLayer.length; index++) {
+        const feature = sourceLayer.feature(index);
+        const id = featureIndex.getId(feature, sourceLayerId);
+        features.push({feature, id, index, sourceLayerIndex});
+    }
+
+    for (const family of layerFamilies[sourceLayerId]) {
+        const layer = family[0];
+
+        ...
+        // (*@\stepcirc{3}@*) Skip hidden layers
+        if (layer.isHidden(this.zoom, true)) continue;
+
+        // (*@\stepcirc{4}@*) Recalculate zoom-dependent expressions
+        recalculateLayers(family, this.zoom, availableImages);
+
+        const bucket = buckets[layer.id] = layer.createBucket({...});
+
+        // (*@\stepcirc{5}@*) Filter features and build vertex data
+        bucket.populate(features, options, this.tileID.canonical);
+        featureIndex.bucketLayerIDs.push(family.map((l) => l.id));
+    }
+}
+\end{lstlisting}
+
+The layer-merging savings in \cref{sub:structural_optimizations} depend on the two render-pass loops the painter runs over \texttt{layerIds} (opaque top-to-bottom, translucent bottom-to-top).
 Every layer eliminated by a merge shortens \texttt{layerIds} and removes one texttt{renderLayer} dispatch from each pass.
 
 \begin{lstlisting}[language=TypeScript,caption={MapLibre GL-JS painter render loop (\texttt{src/render/painter.ts})},label=lst:painter_loop]
@@ -166,7 +243,6 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 \clearpage
 
 \section{Camera Animation Patterns}\label{app:animation_patterns}
-\Cref{fig:app_animation_patterns} visualizes the five animation patterns.
 
 \begin{figure}[htbp]
 	\centering
@@ -502,8 +578,7 @@ Panel~\subref{fig:app_anim_dofs} tabulates the exercised \acp{DOF}.
 
 \section{Per-Style Ablation Results}\label{sec:app_per_style}
 
-In this section, we provide the full per-style, per-ablation-step results for each of the benchmark styles.
-For each style, the table reports style size (raw bytes, gzip at level~9, Brotli at maximum quality), median load time across scenarios, median \ac{FPS}, and layer count at each cumulative ablation step.
+Tables below list per-style, per-ablation-step results: size (raw bytes, gzip level~9, Brotli max), median load time, median \ac{FPS}, and layer count.
 Performance metrics are medians across all combinations of scenarios and animations.
 Steps 16--19 (selectivity reorder, tile shaving, tile rewrite) require tile statistics and are only available for fiord and liberty, which we benchmarked with an \texttt{.mbtiles} source.
 We exclude Americana from the per-style tables due to incomplete benchmark data (only 3 of 20 ablation steps completed).
@@ -598,7 +673,7 @@ All remaining styles were optimized with static passes only (no tile statistics)
 
 All measurements in \cref{ch:experiments} were collected on a single workstation.
 Preprocessing (\ac{MVT} pruning, \ac{MLT} encoding) and browser-based rendering used the same host.
-The tables below document the hardware, operating system, language toolchains, key library versions, and the headless browser harness used for the rendering scenarios.
+Tables list hardware, operating system, toolchains, libraries, and the browser harness.
 
 \subsection{Hardware}\label{app:bench_hw}
 
@@ -711,7 +786,7 @@ The separate visual-check harness is used offline for \texttt{pixelmatch}-based 
 
 \subsection{Key Library Versions}\label{app:bench_libs}
 
-\Cref{tab:bench_libs} lists the most load-bearing dependencies of each codebase exercised in the experiments.
+\Cref{tab:bench_libs} lists the key dependencies of each codebase exercised in the experiments.
 
 \begin{table}[htbp]
 \centering \small

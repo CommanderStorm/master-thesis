@@ -66,7 +66,7 @@ The following concerns are deliberately out of scope:
 We report no \ac{RAPL} or battery deltas because the benchmark host is a desktop workstation rather than a mobile device (\cref{sub:metrics}).
     \item[\emph{Lossy geometry transformations}] Coordinate-precision reduction, Visvalingam-Whyatt, Douglas-Peucker, and polygon coalescing would violate the pixel-identity contract of \cref{eq:visual_equivalence}.
     Writing a visually non-lossy gepgraphic simplification is deferred to future work.
-    We therefore quantify the size reductions achievable \emph{without} touching geometry, understating that there is headroom that composition with an geographic simplifier could reach at the cost of changing the style output.
+    We therefore quantify the size reductions achievable \emph{without} touching geometry, noting that there is headroom that composition with an geographic simplifier could reach at the cost of changing the style output.
     \item[\emph{Symbol-layer merging}] MapLibre evaluates symbol placement per layer through a tile-wide\newline
     \noindent\texttt{CollisionIndex}, so merging symbol layers would alter label suppression order.
 The detailed argument is given along the structural passes (\cref{sub:structural_optimizations}).
@@ -372,13 +372,7 @@ Let $N$ denote the total number of features in the source layer, and $\mathrm{fr
         \mathrm{sel}(p \neq v) &= 1 - \mathrm{sel}(p = v) \\[4pt]
     \end{aligned}
 \end{equation}
-We estimate compound predicates under the standard independence assumption:
-\begin{equation}\label{eq:selectivity_compound}
-    \begin{aligned}
-        \mathrm{sel}(\mlop{all} \quad p_0 \ldots p_i) &= \prod_i \mathrm{sel}(p_i) \\[4pt]
-        \mathrm{sel}(\mlop{any} \quad p_0 \ldots p_i) &= 1 - \prod_i \bigl(1 - \mathrm{sel}(p_i)\bigr) \\[4pt]
-    \end{aligned}
-\end{equation}
+We estimate compound predicates under the standard independence assumption from \cref{eq:selectivity_theory}.
 
 \noindent The independence assumption is known to be imprecise for correlated predicates~\cite{selingerAccessPathSelection1979}, but as discussed in \cref{sec:query_optimizations} only a reordering heuristic consumes the selectivity signal here, not a cost-based plan chooser.
 What matters is the \emph{ordering} of predicates by selectivity, not their absolute values.
@@ -386,11 +380,8 @@ Correlation between map-style predicates (e.g.\ \mlval{class} and \mlval{subclas
 Because the rendering benefit of predicate reordering depends on the proportion of evaluation cost attributable to predicate ordering (expected to be small for styles with short filters) we include this pass as an exploratory extension and do not separately benchmark its isolated impact.
 
 \paragraph{Termination and Confluence of the Fixpoint}
-The expression-level phase applies the entire rewrite rule set until the style \ac{JSON} stops changing.
-In the \ac{TRS} framing of \cref{sub:fixpoint}, this is the standard normal-form criterion.
-We impose a hard cap of \texttt{8} iterations.
-This is the \emph{formal} termination guarantee.
-The fixpoint loop executes at most 8 passes regardless of rule behavior.
+Per the \ac{TRS} framing of \cref{sub:fixpoint}, the expression-level phase applies the entire rewrite rule set until the style \ac{JSON} stops changing, the standard normal-form criterion.
+We impose a hard cap of \texttt{8} iterations as a safety bound.
 
 The majority of the rules described above strictly decrease a lexicographic measure
 \begin{equation}\label{eq:termination_measure}
@@ -719,11 +710,7 @@ If a source layer's first tile appears at zoom~4, the pass raises the layer's \m
 This refinement only tightens bounds.
 It never loosens them due to \cref{eq:visual_equivalence}.
 
-A subtle but load-bearing correctness concern is MapLibre's \emph{overzoom} behavior.
-When a client requests a tile at a zoom level beyond a source's \mlprop{maxzoom}, the renderer reuses the nearest available tile from a lower zoom and upscales it.
-A naive stats-driven tightening (\enquote{the last tile containing polygons appears at zoom~12, therefore set \mlprop{maxzoom}=\mlval{12}}) would change the rendered output if the layer is visible at zoom~13 or~14 via overzoom from zoom~12.
-
-Because our work requires  \cref{eq:visual_equivalence}, the metadata refinement pass enforces two asymmetric rules:
+Per the overzoom analysis of \cref{sec:tiles}, the refinement pass enforces two asymmetric rules to satisfy \cref{eq:visual_equivalence}:
 \begin{enumerate}
     \item \textbf{\mlprop{minzoom} is symmetric.}
     Vector tiles are not \emph{underzoomed} (the renderer will not synthezise a coarser tile from a finer one) so raising \mlprop{minzoom} to the first data-carrying zoom never removes a rendered pixel.
@@ -934,7 +921,6 @@ The bridge between style-level and data-level optimizations is the \emph{tile pr
 We compute the advisory from the \emph{optimized} style (after all expression and structural passes) together with tile statistics.
 The ordering matters because dead layer elimination, metadata refinement, and layer merging shrink the live-layer set, which in turn reduces the referenced properties and geometry types the advisory carries into the data level.
 The empirical character of this style-to-data cascade is taken up in \cref{sub:mlt_results}.
-The cascade mirrors the materialized-view maintenance problem, with the rendering style as the view definition, the tile set as the base relation, and the shaved tile as the materialized view.
 
 \noindent The advisory captures five categories of information for each source-layer:
 
@@ -1045,8 +1031,9 @@ Second, it optionally reorders the columnar data according to the sort strategy 
 Third, it independently encodes each column using the per-stream encoding competition.
 The final wire format consists of three concatenated sections per layer, namely a header (layer name, tile extent, column count), a metadata section (column types, encoding descriptors), and a data section (the encoded streams).
 
-We reformulate the encoding problem in our encoder as a \emph{multi-strategy competition} inspired by \ac{PGO} in compilers~\cite{changUsingProfileInformation1991} and the instance-optimized systems vision of SageDB~\cite{dingSageDBInstanceOptimizedData2022}.
-Rather than committing to a single encoding plan, the encoder uses the data distribution of each tile to try multiple strategies, measures the output size of each, and selects the smallest result.
+The encoder runs a \emph{multi-strategy competition} over per-stream encodings.
+Rather than committing to a single encoding plan, it uses the data distribution of each tile to try multiple strategies, measures the output size of each, and selects the smallest result.
+The broader lineage of this trial-based approach is discussed in \cref{sec:data_encoding}.
 
 This competition operates at two nested levels.
 An \emph{outer loop} that tries multiple feature sort orderings, and an \emph{inner loop} that selects the best integer encoding for each individual data stream.
@@ -1286,7 +1273,7 @@ The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlva
     Our encoder replaces prefix matching with MinHash-based similarity clustering (\cref{sub:lsh})~\cite{broderResemblanceContainmentDocuments1998}.
     \Cref{fig:minhash_clustering} walks through the four-step pipeline from per-column vocabularies through MinHash signatures and pairwise Jaccard estimation to the final Union-Find clustering.
     For each string column, the encoder computes two MinHash sketches of $128$ permutations, one over exact string values and one over byte trigrams (3-byte sliding windows).
-    The choice of 128 permutations corresponds to an expected standard error of approximately $1/\sqrt{128} \approx 8.8\%$ on the Jaccard estimate, which is adequate for the binary accept/reject decision of the clustering step.
+    The variance bound from \cref{sub:lsh} ($\mathcal{O}(1/k)$) gives a standard error of $\approx 8.8\%$ at $k = 128$, adequate for the binary accept/reject decision of the clustering step.
     The trigram sketch captures partial overlap between columns whose values are substrings or morphological variants of each other.
     The encoder estimates pairwise Jaccard similarity as $\hat{J} = |\{i : h_i^{(a)} = h_i^{(b)}\}| / 128$ for each sketch type and takes the maximum of two estimates.
     The encoder unifies columns whose similarity exceeds \texttt{7.5\%} via a Union-Find structure (union by size).
@@ -1420,7 +1407,7 @@ The optimizer accepts either an MBTiles database, in which case the scan runs on
 For each source layer, the phase collects the following statistics:
 
 \begin{description}
-    \item[\textbf{Feature count}] total number of features across all tiles\footnote{Contrairy to na"ive reasoning, eatures appearing in multiple tiles at different zoom levels are counted multipe times, as the optimizer reasons per-tile, not per-geographic-entity.
+    \item[\textbf{Feature count}] total number of features across all tiles\footnote{Contrary to naive reasoning, features appearing in multiple tiles at different zoom levels are counted multiple times, as the optimizer reasons per-tile, not per-geographic-entity.
 This creates bias, but bias that is representative to the usecase of rendering maps, where tiled features are used instead of geographic features.}.
     \item[\textbf{Features by zoom}] a per-zoom-level feature count, used by metadata refinement to determine the first and last zoom level at which data exists.
     \item[\textbf{Geometry types}] counts of Point, LineString, and Polygon features, used by dead elimination to detect geometry-type mismatches.
