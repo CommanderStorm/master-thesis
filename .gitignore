@@ -13,5 +13,6 @@ scripts/__pycache__
 *.blg
 *.lot
 *.lof
+*.log
 main.pdf
 *.run.xml
