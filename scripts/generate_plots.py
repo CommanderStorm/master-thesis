@@ -28,16 +28,14 @@ FIG_WIDTH = 700
 FIG_HEIGHT = 450
 
 # Okabe-Ito CVD-safe palette (https://jfly.uni-koeln.de/color/).
-# Ordered to maximise pairwise contrast for the most common sources.
 SOURCE_COLORS = {
-    "MVT": "#0072B2",              # blue
-    "MVT-shaved": "#56B4E9",       # sky blue
-    "MLT-Java": "#E69F00",          # orange
-    "MLT-Rust": "#009E73",          # bluish green
-    "MLT-Rust-shaved": "#CC79A7",  # reddish purple
+    "MVT": "#0072B2",
+    "MVT-shaved": "#56B4E9",
+    "MLT-Java": "#E69F00",
+    "MLT-Rust": "#009E73",
+    "MLT-Rust-shaved": "#CC79A7",
 }
 
-# Redundant non-colour channel for bar/box plots (Plotly pattern shapes).
 SOURCE_PATTERNS = {
     "MVT": "",
     "MVT-shaved": "/",
@@ -46,7 +44,6 @@ SOURCE_PATTERNS = {
     "MLT-Rust-shaved": ".",
 }
 
-# Redundant marker symbols for scatter/box overlays.
 SOURCE_MARKERS = {
     "MVT": "circle",
     "MVT-shaved": "square",
@@ -55,9 +52,7 @@ SOURCE_MARKERS = {
     "MLT-Rust-shaved": "cross",
 }
 
-# Display labels for legends/captions. Internal IDs stay language-tagged
-# (they key into CSV columns and other scripts); the rendered output uses
-# the thesis framing of "reference" vs "this work".
+# Internal IDs key into CSV columns; display labels are used for output.
 SOURCE_DISPLAY = {
     "MVT": "MVT",
     "MVT-shaved": "MVT (shaved)",
@@ -103,7 +98,7 @@ STEP_LABELS: dict[int, str] = {
     19: "MLT rewrite",
 }
 
-# Full-pipeline steps (only available for fiord/liberty)
+# Only fiord/liberty have measurements for these steps.
 FULL_PIPELINE_STEPS = {16, 17, 18, 19}
 
 
@@ -176,7 +171,6 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
 
     for comp in compressions:
         sub = df[df["compression"] == comp]
-        # Absolute bytes panel (top)
         row, col = abs_positions[comp]
         for source in ["MVT", "MLT-Java", "MLT-Rust"]:
             s = sub[sub["source"] == source].sort_values("zoom")
@@ -194,7 +188,6 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
                 legendgroup=source,
             ), row=row, col=col)
 
-        # % of MVT panel (bottom); MVT itself is the 100 % baseline reference line
         mvt = sub[sub["source"] == "MVT"].set_index("zoom")["total_bytes"]
         row, col = rel_positions[comp]
         for source in ["MLT-Java", "MLT-Rust"]:
@@ -348,9 +341,9 @@ def plot_compression_ratio_per_zoom(df: pd.DataFrame) -> None:
 
 
 MODE_COLORS = {
-    "hybrid": "#009E73",       # bluish green
-    "only-trigram": "#E69F00",  # orange
-    "only-plain": "#0072B2",   # blue
+    "hybrid": "#009E73",
+    "only-trigram": "#E69F00",
+    "only-plain": "#0072B2",
 }
 
 MODE_PATTERNS = {
@@ -443,38 +436,31 @@ def plot_waterfall_loadMs() -> None:
         return
 
     baseline = pivot.loc[0]
-    # Percentage change from baseline per style
     pct = (pivot.subtract(baseline)) / baseline * 100
 
     steps = sorted(pct.index)
     labels = [STEP_LABELS.get(int(s), f"Step {s}") for s in steps]
 
-    # Per-step cross-style bootstrap CI of cumulative percentage change
     cum_med = []
     for s in steps:
         vals = pct.loc[s].dropna().values
         m, _, _ = _bootstrap_ci(vals)
         cum_med.append(m)
 
-    # Compute per-step deltas and their CIs
     deltas, delta_err_lo, delta_err_hi = [], [], []
     for i, s in enumerate(steps):
         if i == 0:
-            # Step 0 is baseline → 0% change
             deltas.append(0.0)
             delta_err_lo.append(0.0)
             delta_err_hi.append(0.0)
             continue
         prev = steps[i - 1]
-        # Per-style delta between consecutive steps
         per_style_delta = (pct.loc[s] - pct.loc[prev]).dropna().values
         m, lo, hi = _bootstrap_ci(per_style_delta)
         deltas.append(m)
         delta_err_lo.append(m - lo)
         delta_err_hi.append(hi - m)
 
-    # Build waterfall using stacked bars (base + delta)
-    # Compute running total for bar bases
     running = 0.0
     bases, heights = [], []
     colors = []
@@ -482,25 +468,25 @@ def plot_waterfall_loadMs() -> None:
         if i == 0:
             bases.append(0.0)
             heights.append(0.0)
-            colors.append("#BBBBBB")  # neutral baseline (Okabe-Ito grey)
+            colors.append("#BBBBBB")
         elif d <= 0:
+            # Improvement bar drawn from (running + d) upward by |d|.
             bases.append(running + d)
             heights.append(abs(d))
-            colors.append("#009E73")  # bluish green = improvement
+            colors.append("#009E73")
         else:
             bases.append(running)
             heights.append(d)
-            colors.append("#D55E00")  # vermillion = regression
+            colors.append("#D55E00")
         running += d
 
     fig = go.Figure()
-    # Invisible base bars
+    # Transparent base bars stack the visible delta bars to the running total.
     fig.add_trace(go.Bar(
         x=labels, y=bases,
         marker_color="rgba(0,0,0,0)", showlegend=False,
         hoverinfo="skip",
     ))
-    # Visible delta bars
     fig.add_trace(go.Bar(
         x=labels, y=heights,
         marker_color=colors, showlegend=False,
@@ -534,7 +520,6 @@ def plot_marginal_loadMs() -> None:
 
     steps = sorted(pct.index)
 
-    # Compute per-step deltas (skip baseline)
     plot_steps, plot_labels = [], []
     deltas, err_lo, err_hi = [], [], []
     colors = []
@@ -546,7 +531,7 @@ def plot_marginal_loadMs() -> None:
         per_style_delta = (pct.loc[s] - pct.loc[prev]).dropna().values
         m, lo, hi = _bootstrap_ci(per_style_delta)
 
-        # Skip near-zero deltas (deduped steps)
+        # Deduped steps register as near-zero deltas; omit them.
         if abs(m) < 0.05 and abs(lo) < 0.1 and abs(hi) < 0.1:
             continue
 
@@ -588,7 +573,6 @@ def main() -> None:
     plot_shaving_effectiveness_per_zoom(df)
     plot_compression_ratio_per_zoom(df)
 
-    # MinHash sweep plot (optional - generated by generate_minhash_sweep.py)
     sweep_csv = DATA_DIR / "minhash_sweep.csv"
     if sweep_csv.exists():
         sweep_df = pd.read_csv(sweep_csv)
@@ -596,7 +580,6 @@ def main() -> None:
     else:
         print("\nSkipped: minhash_sweep (run generate_minhash_sweep.py first)")
 
-    # Benchmark-derived plots (interaction and rendering metrics across configs 1-5)
     parser = argparse.ArgumentParser(description="Generate thesis figures.")
     parser.add_argument("--bench", type=Path, nargs="*", help="Benchmark JSONL file(s) with tile_shave variants")
     args, _ = parser.parse_known_args()
@@ -608,7 +591,6 @@ def main() -> None:
     else:
         print("\nSkipped: interaction_plot (pass --bench <jsonl> with tile_shave data)")
 
-    # CI-derived plots - use precomputed confidence_intervals.csv
     plot_rendering_metrics_mlt()
     plot_waterfall_loadMs()
     plot_marginal_loadMs()
@@ -616,11 +598,8 @@ def main() -> None:
     print(f"\nAll figures written to {OUTPUT_DIR}")
 
 
-# ── Benchmark JSONL helpers ──────────────────────────────────────────────────
-
-# Map benchmark variant names to thesis configuration labels.
 # The "style-only" config is the last cumulative style pass before tile steps;
-# we match both step-15 (without selectivity) and step-16 (with selectivity).
+# both step-15 (no selectivity) and step-16 (with selectivity) collapse to it.
 CONFIG_MAP = {
     "step-00-baseline": "1: MVT baseline",
     "step-15-layer_merge": "2: Style-only",
@@ -631,11 +610,11 @@ CONFIG_MAP = {
 }
 
 CONFIG_COLORS = {
-    "1: MVT baseline":      "#0072B2",  # blue
-    "2: Style-only":        "#E69F00",  # orange
-    "3: Shaving-only":      "#56B4E9",  # sky blue
-    "4: Style+shaving":     "#009E73",  # bluish green
-    "5: Style+shaving+MLT": "#CC79A7",  # reddish purple
+    "1: MVT baseline":      "#0072B2",
+    "2: Style-only":        "#E69F00",
+    "3: Shaving-only":      "#56B4E9",
+    "4: Style+shaving":     "#009E73",
+    "5: Style+shaving+MLT": "#CC79A7",
 }
 
 CONFIG_PATTERNS = {
@@ -660,7 +639,6 @@ def load_bench_jsonl(paths: list[Path]) -> pd.DataFrame | None:
         print("No benchmark data found.", file=sys.stderr)
         return None
     df = pd.DataFrame(rows)
-    # Keep only the 5 thesis configurations
     df = df[df["variant"].isin(CONFIG_MAP)]
     if df.empty:
         print("Benchmark JSONL has no tile_shave variants - skipping interaction/rendering plots.")
@@ -678,10 +656,8 @@ def plot_interaction(df: pd.DataFrame) -> None:
     narrows the advisory and produces a measurable cascade effect."""
     print("Generating interaction_plot…")
 
-    # Compute median tile_bytes per config across all (style, scenario) pairs
     medians = df.groupby(["config", "style", "scenario"])["tile_bytes"].median().reset_index()
 
-    # Pivot to get one column per config
     baseline = medians[medians.config == "1: MVT baseline"].groupby("style")["tile_bytes"].median()
     shave_only = medians[medians.config == "3: Shaving-only"].groupby("style")["tile_bytes"].median()
     combined = medians[medians.config == "4: Style+shaving"].groupby("style")["tile_bytes"].median()

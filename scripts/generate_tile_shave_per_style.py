@@ -22,9 +22,8 @@ FORMATS = ["png", "pdf"]
 FIG_WIDTH = 700
 FIG_HEIGHT = 400
 
-# Okabe-Ito palette (matches generate_plots.py SOURCE_COLORS)
-BAR_COLOR = "#0072B2"       # blue
-BAR_COLOR_ALT = "#56B4E9"   # sky blue
+BAR_COLOR = "#0072B2"
+BAR_COLOR_ALT = "#56B4E9"
 
 LAYOUT_DEFAULTS = dict(
     template="plotly_white",
@@ -81,8 +80,6 @@ def main() -> None:
     print(f"  Median reduction: {df['reduction_pct'].median():.1f}%")
     print()
 
-    # ── horizontal bar chart: % tile data reduction per style ────────────────
-
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
@@ -106,8 +103,6 @@ def main() -> None:
     print("Generating tile_shave_per_style figure:")
     export_figure(fig, "tile_shave_per_style")
     print()
-
-    # ── summary stats for thesis text ────────────────────────────────────────
 
     print("LaTeX-ready stats:")
     print(f"  Min reduction:  {df['reduction_pct'].min():.1f}%  ({df.iloc[0]['style_id']})")

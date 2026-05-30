@@ -72,7 +72,6 @@ def main() -> None:
         pd.Series(df["optimized_ast_nodes"]),
     )
 
-    # ── per-style CSV ───────────────────────────────────────────────────────
     per_style_cols = [
         "style_id", "style_title",
         "original_bytes", "optimized_bytes", "reduction_pct",
@@ -89,7 +88,6 @@ def main() -> None:
     args.per_style_out.parent.mkdir(parents=True, exist_ok=True)
     per_style.to_csv(args.per_style_out, index=False, float_format="%.4f")
 
-    # ── summary CSV ─────────────────────────────────────────────────────────
     summary_rows: list[dict[str, Any]] = []
     for key, label, col in SUMMARY_METRICS:
         s = df[col].astype(float)
@@ -117,7 +115,6 @@ def main() -> None:
     print(f"Wrote {args.summary_out}")
     print()
 
-    # ── LaTeX-ready stats ───────────────────────────────────────────────────
     print(f"n = {len(df)} styles")
     print()
     print("Summary (min / P25 / median / P75 / max):")
@@ -138,14 +135,12 @@ def main() -> None:
               f"(AST nodes: {int(row['original_ast_nodes'])})")
     print()
 
-    # Pearson correlation: AST nodes vs raw reduction
     r_ast, p_ast = stats.pearsonr(df["original_ast_nodes"], df["reduction_pct"])
     r_layers, p_layers = stats.pearsonr(df["original_layer_count"], df["reduction_pct"])
     print(f"Pearson r (AST nodes vs raw reduction):   r = {r_ast:+.3f}, p = {p_ast:.3f}")
     print(f"Pearson r (layer count vs raw reduction): r = {r_layers:+.3f}, p = {p_layers:.3f}")
     print()
 
-    # Spot-check values cited in chapter prose
     am = df[df["style_id"] == "americana"].iloc[0]
     print(f"Americana original AST nodes: {int(am['original_ast_nodes'])}")
     print(f"Americana raw reduction:      {am['reduction_pct']:.1f}%")

@@ -19,15 +19,11 @@ from statistics import median
 import numpy as np
 from scipy import stats
 
-# Paths
-
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
 ROOT = THESIS_DIR.parent
 INPUT_DIR = ROOT.parent / "maplibre-optimizer" / "tests" / "bench" / "results"
 OUTPUT_DIR = SCRIPT_DIR / "data"
-
-# Constants
 
 EXCLUDED_STYLES = {"americana"}
 
@@ -58,7 +54,6 @@ PASS_LABELS: dict[str, str] = {
 
 FULL_PIPELINE_STYLES = {"fiord", "liberty"}
 
-# Variants used for the §5.3.3 per-scenario style/shaving synergy decomposition.
 SYNERGY_VARIANTS = {
     "baseline": "step-00-baseline",
     "style_only": "step-16-selectivity_reorder",
@@ -66,7 +61,6 @@ SYNERGY_VARIANTS = {
     "combined": "step-18-tile_shave",
 }
 
-# Key claims to check for statistical significance in diagnostics.
 KEY_CLAIMS = [
     {
         "label": "Expression passes reduce load time (liberty, steps 1-5 vs baseline)",
@@ -120,9 +114,6 @@ KEY_CLAIMS = [
 ]
 
 
-# Data loading (same logic as generate_tables.py)
-
-
 def load_jsonl(input_dir: Path) -> list[dict]:
     """Load all ``*.jsonl`` files under *input_dir*."""
     rows: list[dict] = []
@@ -171,9 +162,6 @@ def parse_variant(variant: str) -> tuple[int, str]:
     return 0, "baseline"
 
 
-# Bootstrap CI computation
-
-
 def bootstrap_ci(
     data: np.ndarray,
     n_resamples: int = 10_000,
@@ -208,8 +196,7 @@ def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
     Returns p-value or None if test cannot be performed.
     """
     if len(baseline) != len(treatment):
-        # If lengths differ we cannot do a paired test.
-        # Fall back to Mann-Whitney U (unpaired).
+        # Fall back to Mann-Whitney U when arrays are unpaired.
         if len(baseline) < 2 or len(treatment) < 2:
             return None
         try:
@@ -219,7 +206,7 @@ def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
             return None
 
     diff = treatment - baseline
-    # Remove zero differences (Wilcoxon cannot handle them).
+    # Wilcoxon cannot handle zero differences; drop them.
     nonzero = diff[diff != 0]
     if len(nonzero) < 10:
         return None
@@ -229,9 +216,6 @@ def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
         return float(result.pvalue)
     except ValueError:
         return None
-
-
-# Main analysis
 
 
 def collect_values(
@@ -251,7 +235,7 @@ def collect_values(
         and r.get(metric) is not None
         and not r.get("deduped", False)
     ]
-    # Sort by (scenario, run) so paired tests line up.
+    # Order by (scenario, run) so paired Wilcoxon tests line up.
     recs.sort(key=lambda r: (r.get("scenario", ""), r.get("run", 0)))
     return np.array([r[metric] for r in recs], dtype=np.float64)
 
@@ -326,7 +310,6 @@ def main() -> int:
     filtered = filter_latest_session(records)
     print(f"  {len(filtered)} records after filtering")
 
-    # Discover styles and variants.
     styles = sorted({r["style"] for r in filtered if r.get("style") and r["style"] not in EXCLUDED_STYLES})
     variants_by_style: dict[str, list[str]] = {}
     for style in styles:
@@ -340,7 +323,6 @@ def main() -> int:
     for s in styles:
         print(f"  {s}: {len(variants_by_style[s])} variants")
 
-    # Compute CIs for each (style, variant, metric).
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = OUTPUT_DIR / "confidence_intervals.csv"
     header = [
@@ -351,7 +333,6 @@ def main() -> int:
     ]
 
     rows: list[list] = []
-    # Also collect data for key claim diagnostics.
     claim_data: dict[tuple[str, str, str], dict] = {}
 
     print("\nComputing bootstrap CIs (10,000 resamples each)...")
@@ -368,7 +349,7 @@ def main() -> int:
                 vals = collect_values(filtered, style, variant, metric)
 
                 if len(vals) == 0:
-                    # Deduped step -- skip, no independent measurements.
+                    # Deduped step has no independent measurements.
                     done += 1
                     continue
 
@@ -376,7 +357,6 @@ def main() -> int:
                 q1 = float(np.percentile(vals, 25))
                 q3 = float(np.percentile(vals, 75))
 
-                # Wilcoxon test vs baseline.
                 wilcoxon_p = None
                 if variant != baseline_variant:
                     baseline_vals = collect_values(filtered, style, baseline_variant, metric)
@@ -394,7 +374,6 @@ def main() -> int:
                     f"{wilcoxon_p:.6g}" if wilcoxon_p is not None else "",
                 ])
 
-                # Store for claim diagnostics.
                 claim_data[(style, variant, metric)] = {
                     "median": med,
                     "ci_lo": ci_lo,
@@ -405,20 +384,16 @@ def main() -> int:
 
                 done += 1
 
-            # Progress.
             if done % 20 == 0 or done == total_combos:
                 print(f"  {done}/{total_combos} computed...", end="\r")
 
     print(f"\n  Done: {len(rows)} rows computed.")
 
-    # Write CSV.
     with csv_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(header)
         w.writerows(rows)
     print(f"\nCSV written to {csv_path}")
-
-    # Summary diagnostics: statistical significance of key claims
 
     print("\n" + "=" * 72)
     print("STATISTICAL SIGNIFICANCE DIAGNOSTICS")
@@ -470,7 +445,6 @@ def main() -> int:
         else:
             print(f"    Wilcoxon p-value: N/A (insufficient non-zero differences)")
 
-    # Summary of CIs for full-pipeline styles.
     print("\n" + "-" * 72)
     print("FULL-PIPELINE LOAD TIME SUMMARY")
     print("-" * 72)
@@ -489,7 +463,7 @@ def main() -> int:
         v = claim_data[final_key]
 
         reduction_pct = (b["median"] - v["median"]) / b["median"] * 100
-        # CI on reduction: worst case is baseline_ci_lo vs variant_ci_hi.
+        # Worst-case bounds: pair baseline median against variant's CI extremes.
         red_lo = (b["median"] - v["ci_hi"]) / b["median"] * 100
         red_hi = (b["median"] - v["ci_lo"]) / b["median"] * 100
 
@@ -497,8 +471,6 @@ def main() -> int:
         print(f"    Baseline: {b['median']:.1f} ms (95% CI: [{b['ci_lo']:.1f}, {b['ci_hi']:.1f}])")
         print(f"    Final:    {v['median']:.1f} ms (95% CI: [{v['ci_lo']:.1f}, {v['ci_hi']:.1f}])")
         print(f"    Reduction: {reduction_pct:.1f}% (approx CI: [{red_lo:.1f}%, {red_hi:.1f}%])")
-
-    # §5.3.3 per-scenario style/shaving synergy decomposition (loadMs).
 
     print("\n" + "=" * 72)
     print("PER-SCENARIO STYLE/SHAVING SYNERGY (loadMs)")

@@ -10,22 +10,17 @@ from collections import defaultdict
 from pathlib import Path
 from statistics import median
 
-# Paths
-
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
 ROOT = THESIS_DIR.parent
 INPUT_DIR = ROOT.parent / "maplibre-optimizer" / "tests" / "bench" / "results"
 OUTPUT_DIR = SCRIPT_DIR / "data"
 
-# Constants
-
 EXCLUDED_STYLES = {"americana"}
 FULL_PIPELINE_STYLES = {"fiord", "liberty"}
 
 _STEP_RE = re.compile(r"^step-(\d+)-(.+)$")
 
-# Short pass labels for per-style ablation tables.
 PASS_LABELS: dict[str, str] = {
     "baseline": "Baseline",
     "simplify_unary": "Unary simpl.",
@@ -49,7 +44,6 @@ PASS_LABELS: dict[str, str] = {
     "tile_rewrite": "Tile rewrite",
 }
 
-# Longer names for the marginal-contribution table.
 MARGINAL_LABELS: dict[int, str] = {
     1: "Unary simplification",
     2: "Kind normalisation",
@@ -72,7 +66,6 @@ MARGINAL_LABELS: dict[int, str] = {
     19: "Tile rewriting",
 }
 
-# Style ID → display name (for table captions).
 STYLE_NAMES: dict[str, str] = {
     "liberty": "Liberty",
     "bright": "Bright",
@@ -90,7 +83,6 @@ STYLE_NAMES: dict[str, str] = {
     "stadia-outdoors": "Stadia Outdoors",
 }
 
-# Style ID → label in the summary table (matching existing text).
 SUMMARY_LABELS: dict[str, str] = {
     "liberty": "liberty",
     "bright": "bright",
@@ -108,7 +100,6 @@ SUMMARY_LABELS: dict[str, str] = {
     "basemap-col": "BasemapDE colour",
 }
 
-# Appendix order: existing 9 tables first, then 5 new styles.
 APPENDIX_ORDER: list[str] = [
     "liberty", "bright", "positron", "fiord", "dark-matter",
     "osm-bright", "klokan-basic", "toner", "osm-liberty",
@@ -116,16 +107,12 @@ APPENDIX_ORDER: list[str] = [
     "stadia-outdoors",
 ]
 
-# Summary table order: style-only first, then full-pipeline (fiord, liberty).
 SUMMARY_ORDER: list[str] = [
     "bright", "positron", "dark-matter", "osm-bright",
     "klokan-basic", "toner", "osm-liberty", "stadia-outdoors",
     "icgc-fosc", "icgc-gris", "basemap-top", "basemap-col",
     "fiord", "liberty",
 ]
-
-
-# Data loading
 
 
 def load_jsonl(input_dir: Path) -> list[dict]:
@@ -169,9 +156,6 @@ def filter_latest_session(records: list[dict]) -> list[dict]:
     return filtered
 
 
-# Aggregation
-
-
 def parse_variant(variant: str) -> tuple[int, str]:
     m = _STEP_RE.match(variant)
     if m:
@@ -192,13 +176,11 @@ def aggregate_steps(records: list[dict], style: str) -> list[dict]:
         group = by_step[step_num]
         _, pass_name = parse_variant(group[0]["variant"])
 
-        # Deterministic values (identical across runs/scenarios).
         style_bytes = int(group[0].get("style_bytes", 0))
         gzip_bytes = int(group[0].get("gzip_bytes", 0))
         brotli_bytes = int(group[0].get("brotli_bytes", 0))
         layer_count = int(group[0].get("layer_count", 0))
 
-        # Runtime values: median across all runs × scenarios.
         loads = [r["loadMs"] for r in group if r.get("loadMs") is not None]
         fpss = [r["fps"] for r in group if r.get("fps") is not None]
 
@@ -215,8 +197,6 @@ def aggregate_steps(records: list[dict], style: str) -> list[dict]:
 
     return steps
 
-
-# CSV writers
 
 PER_STYLE_HEADER = ["step", "pass", "rawB", "gzipB", "brotliB", "loadMs", "fps", "layers"]
 SUMMARY_HEADER = ["style", "grp", "baseGzip", "optGzip", "reduction", "deltaLoad", "deltaFps", "isBold", "midruleBefore"]
@@ -282,23 +262,21 @@ def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
             f"{reduction:.1f}",
             f"{d_load:.1f}" if d_load is not None else "",
             f"{d_fps:.1f}" if d_fps is not None else "",
-            0, 0,  # isBold, midruleBefore - set below
+            0, 0,
         ])
 
     for s in style_only:
         if s in all_steps:
             _add_row(s, "style_only")
 
-    # Mark midrule before first full_pipeline row
     first_fp = True
     for s in full_pipe:
         if s in all_steps:
             _add_row(s, "full_pipeline")
             if first_fp:
-                rows[-1][-1] = 1  # midruleBefore
+                rows[-1][-1] = 1
                 first_fp = False
 
-    # Mean row
     if all_base:
         mean_base = int(sum(all_base) / len(all_base))
         mean_opt = int(sum(all_opt) / len(all_opt))
@@ -311,7 +289,7 @@ def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
             f"{mean_red:.1f}",
             f"{mean_dload:.1f}" if mean_dload is not None else "",
             f"{mean_dfps:.1f}" if mean_dfps is not None else "",
-            1, 1,  # isBold=1, midruleBefore=1
+            1, 1,
         ])
 
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -392,9 +370,6 @@ def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
         w.writerows(rows)
 
 
-# Main
-
-
 def main() -> int:
     print("Loading JSONL data...")
     records = load_jsonl(INPUT_DIR)
@@ -404,7 +379,6 @@ def main() -> int:
     filtered = filter_latest_session(records)
     print(f"  {len(filtered)} records after filtering")
 
-    # Build per-style step data.
     styles = sorted({r["style"] for r in filtered if r.get("style")})
     all_steps: dict[str, list[dict]] = {}
     for style_id in styles:
@@ -415,7 +389,6 @@ def main() -> int:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 1a. Per-style ablation CSVs
     print("\nPer-style ablation CSVs:")
     for style_id in APPENDIX_ORDER:
         if style_id not in all_steps:
@@ -430,11 +403,9 @@ def main() -> int:
             f"final gzip={steps[-1]['gzip_bytes']}"
         )
 
-    # 1b. Summary CSV
     print("\nSummary CSV:")
     write_summary_csv(OUTPUT_DIR / "per_style_summary.csv", all_steps)
 
-    # Print gzip-reduction diagnostics.
     reductions: dict[str, float] = {}
     for sid, steps in all_steps.items():
         base = steps[0]["gzip_bytes"]
@@ -445,7 +416,6 @@ def main() -> int:
     print(f"  Gzip reduction range: {min(reds):.1f}%--{max(reds):.1f}%")
     print(f"  Gzip reduction median: {median(reds):.1f}%")
 
-    # Print load-time diagnostics for full-pipeline styles.
     for sid in sorted(FULL_PIPELINE_STYLES):
         if sid in all_steps:
             steps = all_steps[sid]
@@ -455,7 +425,6 @@ def main() -> int:
                 pct = (base_load - final_load) / base_load * 100
                 print(f"  {sid} load reduction: {pct:.1f}% ({base_load:.0f} → {final_load:.0f} ms)")
 
-    # 1c. Marginal contribution CSV
     print("\nMarginal contribution CSV:")
     write_marginal_csv(OUTPUT_DIR / "marginal_contribution.csv", all_steps)
 

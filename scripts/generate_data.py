@@ -88,7 +88,6 @@ def extract_compressed_stats(mbtiles_path: Path, source_label: str) -> list[dict
     print(f"  Processing {source_label} ({mbtiles_path.name})…", flush=True)
     con = sqlite3.connect(f"file:{mbtiles_path}?mode=ro", uri=True)
 
-    # zoom -> compressor -> list of sizes
     accum: dict[int, dict[str, list[int]]] = defaultdict(lambda: defaultdict(list))
 
     count = 0
@@ -136,14 +135,12 @@ def main() -> None:
     if not mvt_path.exists():
         sys.exit(f"MVT source not found: {mvt_path}")
 
-    # Build and convert if needed
     mlt_bin = build_mlt(ROOT)
     if not mlt_rust_path.exists():
         convert_mvt_to_mlt(mlt_bin, mvt_path, mlt_rust_path)
     else:
         print(f"Skipping conversion - {mlt_rust_path.name} already exists.")
 
-    # Extract stats for each source
     all_rows: list[dict] = []
     for label, path in SOURCES.items():
         if not path.exists():

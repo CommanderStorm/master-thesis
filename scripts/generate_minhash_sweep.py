@@ -34,7 +34,6 @@ TMP_OUTPUT = Path("/tmp/minhash_sweep_output.mbtiles")
 
 THRESHOLDS = [0.025, 0.050, 0.075, 0.100, 0.125]
 
-# The similarity comparison line in cluster_by_similarity()
 COMPARISON_PATTERNS = {
     "hybrid": "if f64::max(exact, tri) > MINHASH_SIMILARITY_THRESHOLD {",
     "only-trigram": "if tri > MINHASH_SIMILARITY_THRESHOLD {",
@@ -56,10 +55,8 @@ def patch_source(original: str, mode: str, threshold: float) -> str:
     """Patch the comparison line and threshold constant."""
     text = original
 
-    # Patch the threshold constant
     text = THRESHOLD_RE.sub(rf"\g<1>{threshold};", text)
 
-    # Patch the comparison line - replace any of the three known patterns
     for pattern in COMPARISON_PATTERNS.values():
         if pattern in text:
             text = text.replace(pattern, COMPARISON_PATTERNS[mode])
@@ -121,7 +118,6 @@ def main() -> None:
                     "total_bytes": size,
                 })
     finally:
-        # Always restore original source
         SHARED_DICT_RS.write_text(original_source)
         print("\nRestored original source.")
 

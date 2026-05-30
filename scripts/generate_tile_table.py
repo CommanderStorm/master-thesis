@@ -14,7 +14,6 @@ SOURCES = ["MVT", "MVT-shaved", "MLT-Java", "MLT-Rust", "MLT-Rust-shaved"]
 def main() -> None:
     rows = list(csv.DictReader(CSV_PATH.open()))
 
-    # Index: (source, zoom) → gzip total_bytes
     data: dict[tuple[str, int], int] = {}
     tile_counts: dict[int, int] = {}
     for r in rows:
