@@ -244,21 +244,13 @@ We implemented the encoder and its strategy-selection routine ourselves.
 Rivian contributed the runtime performance engineering, which brings transcoding of the Germany OpenMapTiles tileset down from roughly five hours under the prior Tremmel \& Zink reference encoder to about one minute.
 We credit that speedup to Rivian rather than ourselves, and therefore do not analyse encoder performance further in this chapter.}
 
-\subsection{Problem Statement}\label{sub:mlt_problem}
+\subsection{Motivation}\label{sub:mlt_problem}
 
-Beyond the thesis-wide formal optimization problem of \cref{sec:problem_statement}, two open problems specific to the data-level pipeline frame this experiment:
-
-\begin{description}
-    \item \textbf{Tiles carry data the style never uses, and how much depends on the style.}
-    A general-purpose tile schema (e.g., OpenMapTiles) exposes hundreds of properties and multiple geometry types.
-Any specific style references only a fraction.
-    The unused remainder is style-dependent, so the savings achievable by tile shaving (\cref{sub:tile_shaving}) co-vary with the upstream style optimizations.
-    More dead layers and simpler filters expose more removable columns and feature values.
-
-    \item \textbf{Encoders ignore the data characteristics that shaving produces.}
-    Existing \ac{MLT} encoders commit to a fixed encoding plan per column.
-    After shaving, the surviving data has fewer distinct values, longer runs, and smaller string vocabularies, which a data-adaptive encoder (\cref{sub:encoding_strategies}) can exploit but a fixed-plan encoder cannot.
-\end{description}
+The expression and structural passes of \cref{sec:exp_expressions,sec:exp_structural} cut what the renderer has to do on a given style, but two opportunities on the data side remain untouched.
+First, every tile still carries data the style never uses, and how much depends on the style.
+A general-purpose schema such as OpenMapTiles exposes hundreds of properties and multiple geometry types, of which any specific style references only a fraction, so the savings achievable by tile shaving (\cref{sub:tile_shaving}) co-vary with the upstream style optimizations.
+Second, existing \ac{MLT} encoders commit to a fixed encoding plan per column and ignore the data characteristics that shaving produces.
+After shaving, the surviving data has fewer distinct values, longer runs, and smaller string vocabularies, which a data-adaptive encoder (\cref{sub:encoding_strategies}) can exploit but a fixed-plan encoder cannot.
 
 \subsection{Evaluation Design}\label{sub:mlt_evaluation}
 
@@ -855,11 +847,7 @@ Under the \qty{1.5}{\Mbps} throttle, style-fetch latency becomes significant for
 
 \subsection{Preprocessing Cost}\label{sub:preprocessing_cost}
 
-Research Goal~R3 asks how expensive the optimizations are in terms of preprocessing time.
-The optimizations pipeline is an \emph{offline} stage: we optimize a style once and serve it many times, and re-encode tiles once per tileset build.
-Preprocessing cost is therefore amortised over all subsequent tile deliveries and is not on the user's critical path, but it still matters for operational feasibility on large tilesets.
-
-In this section we measure each of the four additive cost terms $C_\text{style}$, $C_\text{stats}$, $C_\text{adv}$, and $C_\text{enc}$ from the preprocessing cost model (\cref{eq:cost_model}, \cref{sub:preprocessing_cost_model}) on a real tileset, and confirm that the cost-control mechanisms formalised there keep the multi-strategy overhead well below the naive worst case.
+We measure each of the four additive cost terms $C_\text{style}$, $C_\text{stats}$, $C_\text{adv}$, and $C_\text{enc}$ from the preprocessing cost model (\cref{eq:cost_model}, \cref{sub:preprocessing_cost_model}) on a real tileset, and confirm that the cost-control mechanisms formalised there keep the multi-strategy overhead well below the naive worst case.
 
 \paragraph{Measured Stage Costs}
 \Cref{tab:preprocessing_cost} reports wall-clock time for each stage of the preprocessing pipeline on the Germany OpenMapTiles tileset..
@@ -944,8 +932,8 @@ We partly self-inflict this, because using real \ac{GPU} hardware (ANGLE/Vulkan)
 
 \section{Visual Correctness Validation}\label{sec:visual_correctness}
 
-We verified visual losslessness (\cref{eq:visual_equivalence}, with the per-pass soundness arguments collected in \cref{sec:building_optimizations}) with pixelmatch\footnote{\url{https://github.com/mapbox/pixelmatch}, last accessed 2026-05-23} across all 15 benchmark styles at zoom levels~0-14, across all 18 scenarios from \cref{sub:scenarios}, in both axis-aligned and pitched views, at \texttt{pixelRatio}~1 and using MapLibre GL~JS's Node-side software rasteriser.
-Across every comparison, the fraction of differing pixels stayed below pixelmatch's per-test tolerance (default \texttt{allowed}~$=0.00025$ at the YIQ-perceptual \texttt{threshold}~$=0.1285$), confirming that every optimizations pass preserves visual identity on the software rasteriser within the perceptual-difference budget used by the upstream MapLibre render harness.
+We ran the visual-equivalence check defined alongside \cref{eq:visual_equivalence} (with the per-pass soundness arguments collected in \cref{sec:building_optimizations}) across all 15 benchmark styles, all 18 scenarios from \cref{sub:scenarios}, and zoom levels~0-14 in both axis-aligned and pitched views.
+Across every comparison, the fraction of differing pixels stayed below the configured per-test tolerance, confirming that every optimizations pass preserves visual identity on the software rasteriser within the perceptual-difference budget used by the upstream MapLibre render harness.
 
 \section{Threats to Validity}\label{sec:threats}
 

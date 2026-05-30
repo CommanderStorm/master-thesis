@@ -92,7 +92,7 @@ At the centre sits the \emph{optimiser}, a pipeline of passes at three levels of
 Around the optimiser are three supporting components, each detailed in its own section.
 A code-generation front end (\cref{sub:codegen}) produces Rust types from the upstream MapLibre style specification.
 A tile-statistics scanner (\cref{sub:tile_statistics}) profiles \ac{MVT} tiles for the stats-driven and data-level passes.
-A validation harness (pixel-exact render tests plus a curated style corpus) exercises both pipelines against the visual-equivalence guarantee of \cref{eq:visual_equivalence}.
+A validation harness exercises both pipelines against the visual-equivalence guarantee of \cref{eq:visual_equivalence} by comparing optimized and unoptimized renderings of a curated style corpus pixel-for-pixel with pixelmatch\footnote{\url{https://github.com/mapbox/pixelmatch}, last accessed 2026-05-23} against MapLibre GL~JS's Node-side software rasteriser at \texttt{pixelRatio}~1, using the upstream render-harness defaults of \texttt{allowed}~$=0.00025$ and YIQ-perceptual \texttt{threshold}~$=0.1285$.
 The three pass levels at the centre are:
 
 \begin{enumerate}
