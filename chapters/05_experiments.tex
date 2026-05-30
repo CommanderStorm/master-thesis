@@ -156,45 +156,27 @@ We report the effects on performance generalized in \cref{sub:cross_results} (ov
 
 \subsection{Results}\label{sub:structural_results}
 
-\cref{fig:complexity_layer_count} tracks layer count across the structural ablation steps, showing which passes concretely remove layers rather than merely rewriting them.
-\cref{fig:complexity_total_expression_nodes,fig:complexity_filter_count} extend the complexity view to the two remaining metrics introduced in \cref{sub:structural_evaluation}: total expression-tree node count and filter count.
+\cref{fig:complexity_metrics} tracks the three structural complexity metrics introduced in \cref{sub:structural_evaluation} -- layer count, filter count, and total expression-tree node count -- across the cumulative ablation steps on the Fiord and Liberty styles.
+Values are normalised to each style's baseline so the three metrics share a single axis despite their differing absolute scales (layer counts in the tens, filter counts in the hundreds, expression-tree node counts in the thousands).
 \cref{fig:style_size_ablation} complements these with the raw, gzip, and Brotli style sizes, confirming that the structural reductions also translate into smaller transfer size rather than just reshuffling the serialized form.
 
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\linewidth]{figures/complexity_layer_count.pdf}
-	\caption{
-Layer Count across Cumulative Ablation Steps on the Liberty Style: only layer merging reduces the layer count.
-Dead elimination rarely removes whole layers, because styles are designed to expose parts of the map rather than leave entire layers unreferenced.}
-	\label{fig:complexity_layer_count}
-\end{figure}
-
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=\linewidth]{figures/complexity_total_expression_nodes.pdf}
-	\caption{
-Total expression-tree node count across cumulative ablation steps.
-Expression passes (steps~1-7) produce the largest reductions, with Fiord dropping by \qty{36.8}{\percent} (\num{1610}$\to$\num{1018}) and Liberty by \qty{10.5}{\percent} (\num{3537}$\to$\num{3167}).
-Structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.}
-	\label{fig:complexity_total_expression_nodes}
-\end{figure}
-
-\begin{figure}[htbp]
-	\centering
-	\includegraphics[width=\linewidth]{figures/complexity_filter_count.pdf}
-	\caption{
-Filter count across cumulative ablation steps.
-Metadata refinement (consuming zoom predicates) and dead elimination drive most of the filter-count reduction.
-Cleanup removes the residual \mlval{\texttt{true}} filters that refinement leaves behind.}
-	\label{fig:complexity_filter_count}
+	\includegraphics[width=\linewidth]{figures/complexity_metrics.pdf}
+	\caption{Structural complexity metrics across cumulative ablation steps on the Fiord and Liberty styles, normalised to each style's baseline.
+Layer count drops only when layer merging fires; dead elimination rarely removes whole layers because styles are designed to expose parts of the map rather than leave layers unreferenced.
+Total expression-tree node count is driven mostly by the expression passes (steps~1--7) -- Fiord falls by \qty{36.8}{\percent} (\num{1610}$\to$\num{1018}) and Liberty by \qty{10.5}{\percent} (\num{3537}$\to$\num{3167}); structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.
+Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{\texttt{true}} filters that refinement leaves behind.}
+	\label{fig:complexity_metrics}
 \end{figure}
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\linewidth]{figures/style_size_ablation.pdf}
 	\caption{
-Style size (raw, gzip, Brotli) across ablation steps: the effect on this metric is incremental rather than transformative.}
+Style size across ablation steps, with raw bytes on the left axis and gzip and Brotli bytes on the right axis.
+The effect on this metric is incremental rather than transformative.}
 	\label{fig:style_size_ablation}
 \end{figure}
 
@@ -946,7 +928,7 @@ Style-only effects on load time are smaller and, for individual styles, not cons
 The cumulative ablation design (\cref{sub:ablation}) means that the reported marginal contribution of each pass depends on the ordering of preceding passes.
 A leave-one-out or fractional-factorial design would isolate each pass's standalone contribution more cleanly but we did not run it for cost reasons.
 
-Tail metrics (p99 frame time, jank count) are particularly sensitive to sample size: with $n=15$ runs, the tail carries only a handful of informative samples per cell, and the reported numbers should be read as directional rather than conclusive.
+Tail metrics (p99 frame time, jank count) are noisier than central-tendency metrics: each per-run p99 is estimated from the tail of one animation's frame-delta distribution (hundreds of frames), which is intrinsically higher-variance than the mean, and the across-run median then aggregates 15 such per-run tail estimates rather than smoothing a larger pool. The reported numbers should accordingly be read as directional rather than conclusive.
 The full-pipeline ablation performs thousands of pairwise comparisons across metrics, styles, scenarios, and ablation steps.
 We apply no multiple-comparisons correction (Bonferroni, Benjamini-Hochberg), so individual per-cell \enquote{significant} differences should not be read as hypothesis tests, only as descriptive summaries.
 
