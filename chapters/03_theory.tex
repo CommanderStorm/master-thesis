@@ -534,12 +534,12 @@ The foundational system in this space is by Dremel~\cite{melnikDremelInteractive
 This layout offers three advantages for read-heavy workloads. \emph{Reduced I/O} follows from reading or transferring only the referenced columns. \emph{Better compression} follows from the higher local homogeneity of values of the same type and semantic domain compared to interleaved multi-type records. \emph{Vectorised processing} follows from the layout's natural fit for \ac{SIMD}-style batch operations over arrays of the same type.
 
 In the context of vector tiles, the row-oriented \ac{MVT} format stores all properties of a feature together, whereas the columnar \ac{MLT} format stores each property as an independent column.
-The columnar layout allows per-column encoding strategies:
-a column of \texttt{road} classes can use dictionary encoding, while a column of building heights can use a DeltaRLE logical chain handed to a physical technique such as FastPFOR, each chosen independently.
+The columnar layout allows per-column encoding strategies.
+A column of \texttt{road} classes can use dictionary encoding, while a column of building heights can use a DeltaRLE logical chain handed to a physical technique such as FastPFOR, each chosen independently.
 
 \subsection{Logical Integer Encodings}\label{sub:logical_integer_encodings}
 
-Integer columns appear throughout tile data: geometry coordinates, feature IDs, property values, and dictionary indices.
+Integer columns appear throughout tile data as geometry coordinates, feature IDs, property values, and dictionary indices.
 Logical-level techniques rewrite the value sequence so that a downstream physical technique (\cref{sub:physical_integer_compressions}) sees a distribution that packs to fewer bytes.
 Several such techniques exploit structural properties of integer sequences:
 
@@ -547,7 +547,8 @@ Several such techniques exploit structural properties of integer sequences:
     \item[\textbf{Zigzag encoding}] maps signed integers to unsigned ones ($n \mapsto 2n$ for $n \geq 0$, $n \mapsto -2n-1$ for $n < 0$) so that small-magnitude negative values also produce small unsigned codes.
     The byte count is unchanged on its own and the saving comes from the downstream physical technique.
 
-    \item[\textbf{Delta encoding}] replaces each value with the difference from its predecessor: given a sequence $v_0, v_1, \ldots, v_n$, the encoded sequence is $v_0,\, v_1 - v_0,\, v_2 - v_1,\, \ldots,\, v_n - v_{n-1}$.
+    \item[\textbf{Delta encoding}] replaces each value with the difference from its predecessor.
+    Given a sequence $v_0, v_1, \ldots, v_n$, the encoded sequence is $v_0,\, v_1 - v_0,\, v_2 - v_1,\, \ldots,\, v_n - v_{n-1}$.
     Like zigzag, delta does not shrink the column by itself.
     It produces the same number of values at (often) smaller magnitude, which then pack well under VarInt or FastPFOR.
 
@@ -616,7 +617,8 @@ where $x_i$ and $y_i$ are the $i$-th bits of $x$ and $y$, respectively.
 Morton codes are fast to compute via bit-interleaving instructions, but the Z-order curve exhibits \enquote{jumps} between quadrants that break spatial continuity.
 
 The \textbf{Hilbert curve} traces a continuous path through the grid without the inter-quadrant jumps of the Z-order curve, achieving better locality preservation at the cost of a more complex index computation~\cite{moonAnalysisClusteringProperties2001}.
-The Hilbert curve has also been used as the basis for spatial index structures: the Hilbert R-tree~\cite{kamelHilbertRtreeImproved1994} orders rectangles along the Hilbert curve to achieve tighter node packing than conventional R-trees, and FlatGeobuf\footnote{\url{http://flatgeobuf.org/}, last accessed 2026-05-11} uses a packed Hilbert R-tree for spatial indexing of its features.
+The Hilbert curve has also been used as the basis for spatial index structures.
+The Hilbert R-tree~\cite{kamelHilbertRtreeImproved1994} orders rectangles along the Hilbert curve to achieve tighter node packing than conventional R-trees, and FlatGeobuf\footnote{\url{http://flatgeobuf.org/}, last accessed 2026-05-11} uses a packed Hilbert R-tree for spatial indexing of its features.
 The Hilbert index is computed recursively.
 The unit square is divided into four quadrants, each mapped to a sub-range of the curve.
 The quadrant containing the point determines the high-order bits of the index, and the process recurses on the sub-quadrant.
@@ -681,7 +683,8 @@ They capture interactions between components but require careful setup to ensure
 They are the most representative but also the noisiest due to network variability, browser behavior, and hardware differences.
 \end{description}
 
-\noindent We primarily use macro-benchmarks: we load a full style, fetch and decode tiles, and exercise the renderer with a scripted camera animation.
+\noindent We primarily use macro-benchmarks.
+We load a full style, fetch and decode tiles, and exercise the renderer with a scripted camera animation.
 Our benchmark harness controls for network variability (via a caching proxy) and \ac{GPU} variability (via hardware-accelerated rendering with ANGLE/Vulkan) to achieve reproducible results at the macro level.
 
 \begin{chaptersummary}

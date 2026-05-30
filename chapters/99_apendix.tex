@@ -526,7 +526,7 @@ We exclude Americana from the per-style tables due to incomplete benchmark data 
 
 \section{Per-Zoom Tile Size Breakdown}\label{app_tile_sizes}
 
-In \cref{tab:tile_sizes_per_zoom}, we report the per-zoom-level tile size (gzip) for the Germany OpenMapTiles tileset across four encoding configurations: the \ac{MVT} baseline, the reference \ac{MLT} encoder of Tremmel \& Zink, our \ac{MLT} encoder (without shaving), and the full pipeline (style optimizations + tile shaving + our encoder).
+In \cref{tab:tile_sizes_per_zoom}, we report the per-zoom-level tile size (gzip) for the Germany OpenMapTiles tileset across four encoding configurations, namely the \ac{MVT} baseline, the reference \ac{MLT} encoder of Tremmel \& Zink, our \ac{MLT} encoder (without shaving), and the full pipeline (style optimizations + tile shaving + our encoder).
 For the shaved configuration, we use the advisory generated from the fiord style.
 Other styles would produce slightly different shaving results depending on their property and layer references.
 
@@ -758,7 +758,8 @@ The chosen threshold of 0.075 captures the majority of the achievable size reduc
     \caption{
 Total encoded mbtiles size of the Germany OpenMapTiles tileset under different MinHash similarity modes and Jaccard thresholds.  Lower is better.  The hybrid mode (teal) produces the smallest output at every threshold.
 All modes increase monotonically with threshold as fewer column pairs qualify for shared-dictionary grouping.
-The y-axis is zoomed to the data range to make the differences visible: the full range spans approximately \qty{6}{\mega\byte} out of \qty{3.14}{\giga\byte} total}
+The y-axis is zoomed to the data range to make the differences visible.
+The full range spans approximately \qty{6}{\mega\byte} out of \qty{3.14}{\giga\byte} total}
     \label{fig:minhash_sweep}
 \end{figure}
 

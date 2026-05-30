@@ -93,14 +93,16 @@ The current pipeline assumes a one-shot tile rebuild, which is acceptable for st
 The style optimizer already depends only on the style and can run at deployment time.
 The pruning advisory could plausibly run as a lightweight serving-time filter built on column selection and predicate evaluation, in the spirit of adaptive query processing~\cite{deshpandeAdaptiveQueryProcessing2006}.
 Encoding strategy competition is the inherently batch part because it has to profile whole columns, but its decisions could be cached per schema, and on-the-fly \ac{MVT}-to-\ac{MLT} re-encoding at the tile server or \ac{CDN} edge would expose the encoding gains without a full tile rebuild.
-The AnyBlox framework~\cite{gienieczkoAnyBloxFrameworkSelfDecoding2025}, which bundles lightweight WebAssembly decoders with the datasets they read, suggests a third path: shipping the \ac{MLT} decoder as a \ac{WASM} module along the tiles would decouple format evolution from client updates entirely.
+The AnyBlox framework~\cite{gienieczkoAnyBloxFrameworkSelfDecoding2025}, which bundles lightweight WebAssembly decoders with the datasets they read, suggests a third path.
+Shipping the \ac{MLT} decoder as a \ac{WASM} module along the tiles would decouple format evolution from client updates entirely.
 The end-point of this trajectory is direct integration of the optimized \ac{MLT} decoder into MapLibre GL~JS, which is the next concrete piece of work we plan to take on.
 
 \paragraph{Selective Column Decoding}
 A complement on the decode side is selective column decoding.
 The \ac{MLT} columnar layout permits skipping unreferenced columns entirely, a form of \emph{late materialisation}~\cite{abadiMaterializationStrategiesColumnOriented2007} applied at the tile level rather than at the analytical-query level.
 Augmenting the decoder with a column projection derived from the style's property references would make decode cost scale with the number of columns actually used rather than with the total schema width.
-This composes with tile shaving rather than competing with it: shaving removes columns at encoding time (early materialisation), selective decoding skips them at decode time (late materialisation), and the two are most valuable when they run together.
+This composes with tile shaving rather than competing with it.
+Shaving removes columns at encoding time (early materialisation), selective decoding skips them at decode time (late materialisation), and the two are most valuable when they run together.
 
 \paragraph{Rewrite Engine and Encoder Improvements}
 On the rewrite engine itself, two improvements are worth flagging.
@@ -108,7 +110,8 @@ The engine currently applies rules in a fixed priority order and is not confluen
 Swapping it for an equality saturation engine~\cite{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} would explore equivalent forms simultaneously and pick the globally optimal one, removing the ordering dependence at the cost of substantially more implementation work.
 Nandi et~al.~\cite{nandiRewriteRuleInference2021} also showed that equality saturation can be used to \emph{infer} rewrite rules from input/output examples, which could complement or replace the manually-authored set we present here.
 We would only reach for this if the rule set grew large enough that ordering sensitivity became a measured rather than a hypothetical problem.
-A simpler engine-side improvement would be to replace the encoder's exhaustive sort-strategy competition (\cref{sub:data_optimizations}) with a learned predictor in the manner of Kraska et~al.'s~\cite{kraskaCaseLearnedIndex2018} learned indexes: a model trained on layer-level statistics (cardinality, spatial spread, value distribution) could pick a sort order without running every trial, trading a little compression for a substantial cut in preprocessing cost.
+A simpler engine-side improvement would be to replace the encoder's exhaustive sort-strategy competition (\cref{sub:data_optimizations}) with a learned predictor in the manner of Kraska et~al.'s~\cite{kraskaCaseLearnedIndex2018} learned indexes.
+A model trained on layer-level statistics (cardinality, spatial spread, value distribution) could pick a sort order without running every trial, trading a little compression for a substantial cut in preprocessing cost.
 
 \paragraph{Coverage Gaps}
 Finally, the coverage gaps we would have closed, given more time.
