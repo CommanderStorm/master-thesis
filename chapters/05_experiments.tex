@@ -366,22 +366,24 @@ The gap between the shaved \ac{MVT} and the shaved output of our encoder quantif
 Both formats benefit from shaving across all compression schemes, confirming that the advisory operates on the data itself rather than relying on format-specific redundancy.
 \cref{fig:encoder_comparison} reframes the same evidence as a ratio against the \ac{MVT} baseline, adding the reference \ac{MLT} encoder of Tremmel \& Zink~\cite{tremmelMapLibreTileNext2025b} for comparison: our encoder's curves remain at roughly $0.6$-$0.8\times$ \ac{MVT} throughout the zoom range, whereas the reference-encoder curves drift above $1.0\times$ at several zoom levels under brotli/zstd, underscoring that the gains attributed to the \ac{MLT} format in this thesis come almost entirely from the encoder-side strategy competition and not from the columnar format alone.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\linewidth]{figures/shaving_effectiveness_per_zoom}
-    \caption{
-Total tile size per zoom level for unshaved and shaved variants of
-      both \ac{MVT} and our \ac{MLT} encoder, using the Liberty advisory.  The gap
-      between each format and its shaved counterpart quantifies the data removed
-      by the pruning advisory.
-The gap between the shaved \ac{MVT} and the
-      shaved output of our encoder quantifies the additional contribution of
-      columnar encoding}
-    \label{fig:shaving_effectiveness_per_zoom}
-\end{figure}
+
 
 \paragraph{Isolating the Contribution of Our Encoder's Strategy Selection}
 To separate the contribution of the multi-strategy competition (this work) from that of the \ac{MLT} format as proposed by Tremmel and Zink~\cite{tremmelMapLibreTileNext2025b}, we report in \cref{fig:encoder_comparison} both a per-zoom breakdown and the total encoded size of the Germany OpenMapTiles tileset (zoom~0-14, \num{256588} tiles) under three encoders (\ac{MVT} as the row-oriented protobuf baseline, the reference \ac{MLT} encoder of Tremmel and Zink as the columnar baseline, and our \ac{MLT} encoder with sort-strategy competition, per-stream profiling, and shared-dictionary clustering) and across four wire compressions (none, gzip-9, Brotli-11, zstd-22).
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=\linewidth]{figures/shaving_effectiveness_per_zoom}
+	\caption{
+		Total tile size per zoom level for unshaved and shaved variants of
+		both \ac{MVT} and our \ac{MLT} encoder, using the Liberty advisory.  The gap
+		between each format and its shaved counterpart quantifies the data removed
+		by the pruning advisory.
+		The gap between the shaved \ac{MVT} and the
+		shaved output of our encoder quantifies the additional contribution of
+		columnar encoding}
+	\label{fig:shaving_effectiveness_per_zoom}
+\end{figure}
 
 \begin{figure}[htbp]
 \centering
@@ -710,6 +712,34 @@ Real consumer hardware caps well below this rate, so the same pauses would not c
 	\label{fig:heatmapjankcount}
 \end{figure}
 
+\cref{fig:box_load_fps} preserves the per-run distribution that the heatmaps collapse to a median.
+The load-time interquartile range tightens incrementally across the style-only passes and contracts sharply at \texttt{tile\_shave}, where the multi-second outliers visible across the style-only stack effectively disappear.
+The \ac{FPS} view mirrors this from the other direction: median \ac{FPS} roughly doubles at \texttt{tile\_shave\_only} and approximately triples by \texttt{tile\_rewrite}, with the spread widening as some styles realise more headroom than others.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/box_loadMs.pdf}
+        \caption{Load time per ablation step.}
+        \label{fig:box_loadMs}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/box_fps.pdf}
+        \caption{Frames-per-second per ablation step.}
+        \label{fig:box_fps}
+    \end{subfigure}
+    \caption{
+Per-run distribution of load time and \ac{FPS} across all scenarios and styles, by ablation step.
+Each box aggregates the same measurement pool as the corresponding heatmap row, exposing the spread that the heatmap median hides.
+Load-time variance compresses sharply at \texttt{tile\_shave}; the \ac{FPS} spread instead widens past the same step, exposing per-style headroom.}
+    \label{fig:box_load_fps}
+\end{figure}
+
 \cref{fig:time_breakdown} decomposes load time across ablation steps.
 The style-parse component shrinks monotonically with each expression pass, while first-tile and remaining-load are unchanged by style-only steps and drop only once tile shaving fires at steps~17-19.
 
@@ -735,6 +765,20 @@ Heap memory usage (mean heap used in MB across all scenarios and benchmark style
 Style-level passes (steps 1-15) reduce the heap by \qty{3.1}{\mega\byte} (\qty{-3.6}{\percent}).
 The bulk of the heap savings comes from data-level passes (steps 17-19) where the in-memory tile payload itself shrinks, yielding a cumulative reduction of \qty{-35.7}{\percent} from baseline to step~19.}
     \label{fig:memory_ablation}
+\end{figure}
+
+\cref{fig:waterfall_gzip_bytes} traces mean style gzip bytes across the same 19 cumulative steps, complementing the load-time waterfall of \cref{fig:waterfall_loadMs} on the wire-size axis.
+Almost all of the style-size win lands by \texttt{strip\_metadata} (step~8), and the structural and refinement passes leave the curve flat because their gains are concentrated in layer count rather than serialized bytes.
+The brief uptick at \texttt{tile\_shave\_only} corresponds to Configuration~3 of \cref{sub:mlt_evaluation} (shaving applied to the unoptimized style); the subsequent \texttt{tile\_shave} and \texttt{tile\_rewrite} steps restore the optimized style and push the curve to the pipeline's overall minimum.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/waterfall_gzip_bytes.pdf}
+    \caption{
+Cumulative ablation of mean style gzip bytes across all 19 steps.
+The orange line is the mean across scenarios; thin gray lines bound the per-scenario distribution.
+Most of the wire-size win lands by \texttt{strip\_metadata}; the \texttt{tile\_shave\_only} spike is the unoptimized-style baseline of Configuration~3, which \texttt{tile\_shave} and \texttt{tile\_rewrite} recover and surpass.}
+    \label{fig:waterfall_gzip_bytes}
 \end{figure}
 
 \begin{table}[htbp]
