@@ -1,8 +1,7 @@
 \chapter{Methods}\label{ch:methods}
 
-The preceding chapters established that no existing tool jointly optimizes map styles and tile data, and introduced the compiler, database, and encoding techniques whose analogues make such joint optimization possible.
-This chapter applies those foundations in a concrete Rust optimizer that consumes a MapLibre style~\ac{JSON} document with optional tile statistics and emits a visually equivalent style with optimized tile data.
-We formalise the problem and its visual-equivalence constraint (\cref{sec:problem_statement}), scope the work to MapLibre GL~JS (\cref{sec:scope}), and then walk level by level through the three-level pipeline (\cref{sec:approach}) and the passes that implement it.
+The preceding chapters established that no existing tool jointly optimizes map styles and tile data.
+This chapter applies the compiler, database, and encoding analogues of \cref{ch:theoretical_background} in a concrete Rust optimizer that consumes a MapLibre style~\ac{JSON} document with optional tile statistics and emits a visually equivalent style with optimized tile data.
 
 \section{Formalised Problem Statement}\label{sec:problem_statement}
 
@@ -200,23 +199,14 @@ This is the boundary shape a columnar encoder requires: each tile is handed over
 
 \section{Building Optimizations}\label{sec:building_optimizations}
 
-The implemented passes target three areas of the rendering pipeline: style expressions, structural properties, and tile data.
-We classify each pass by \emph{where} it operates and its \emph{data requirements} (none, sampling, or full scan).
-Many are analogues of well-known compiler and query-processing techniques.
-
-Each level discharges the visual-equivalence contract of \cref{sec:scope} in a different way.
-For expression-level passes, the termination measure $\mu(S)$ (\cref{eq:termination_measure}) witnesses this.
-Each rewrite strictly reduces $\mu$ while preserving expression semantics.
-For structural passes, we argue soundness per-pass in the paragraphs below.
-Dead elimination preserves equivalence because it only removes layers that produce no visible output.
-Metadata refinement preserves equivalence because it only tightens bounds that the renderer would enforce anyway (with the overzoom asymmetry detailed below).
-Layer merging preserves equivalence via the three invariants of \cref{sub:structural_optimizations}.
-For data-level passes, the pruning advisory removes only data that no live style layer references, so the rendering function $R$ receives the same effective input.
+The three pass families introduced in \cref{sub:pipeline} are detailed in turn below.
+Each pass carries its own soundness argument that discharges the visual-equivalence constraint of \cref{eq:visual_equivalence}; we state these alongside the passes rather than recapping them centrally.
+The classification by data dependency (none, sampling, or full scan) is given in the table that opens each subsection.
 
 \subsection{Expression-Level Optimizations}\label{sub:expression_optimizations}
 
-Expression passes operate directly on the \ac{JSON} representation, applying rewrites that reduce expression complexity and eliminate redundant computation.
-\cref{tab:expression_passes} summarizes the implemented passes.
+Expression passes act on the raw \ac{JSON} representation introduced in \cref{sub:pipeline}.
+\Cref{tab:expression_passes} lists them.
 
 \begin{table}[htbp]
 \centering
@@ -244,11 +234,7 @@ Sampling passes additionally fold expressions using observed value distributions
 \label{tab:expression_passes}
 \end{table}
 
-Among these passes, we expect constant folding to dominate because reducing an expression to a literal eliminates all per-feature evaluation cost.
-The other passes primarily shorten the evaluation path rather than eliminating it.
-
 We organize the expression pass engine as a table of rewrite rules (\cref{tab:all_rewrite_rules}), each gated by a \emph{pass flag} (which pass must be enabled) and scoped to a \emph{rule scope} (whether the rule applies to filters only, to paint/layout properties, or to both).
-Selectivity reordering runs as a separate pass after the rewrite table has stabilised.
 We further classify rules by their \emph{type}:
 	\emph{pure} rules operate on the expression array alone,
 	\emph{MIR-aware} rules additionally consult the specification's type metadata (e.g.\ to determine whether an operator is pure or to look up default values), and
@@ -364,6 +350,7 @@ The pass strips only plain scalar values.
 It never removes expression-valued properties, even if they would evaluate to the default at all zoom levels, to avoid the risk of changing renderer behavior when the expression's mere presence affects layout (e.g.\ \mlprop{text-radial-offset} suppresses \mlprop{text-offset} regardless of its value).
 
 \paragraph{Selectivity Reordering}\label{sec:selectivity_reordering}
+Selectivity reordering runs as a separate pass after the peephole rewrite table has stabilised.
 For variadic boolean expressions (\mlop{all}, \mlop{any}), the pass reorders predicates by estimated selectivity to exploit short-circuit evaluation, applying the selectivity-estimation framework of \cref{sec:query_optimizations}.
 For \mlop{all} (conjunction), it sorts predicates by ascending selectivity (the predicate most likely to be false is evaluated first).
 For \mlop{any} (disjunction), it sorts predicates by descending selectivity (the predicate most likely to be true is evaluated first).
@@ -649,8 +636,8 @@ Each panel shows a before/after \ac{JSON} example pair demonstrating how these o
 \clearpage
 \subsection{Structural Optimizations}\label{sub:structural_optimizations}
 
-Structural passes operate on typed Rust representations of the full style document, enabling cross-layer and cross-source reasoning.
-\cref{tab:structural_passes} summarizes the implemented passes.
+Structural passes consume the typed Rust style of \cref{sub:pipeline} to perform cross-layer and cross-source reasoning.
+\Cref{tab:structural_passes} lists them.
 
 \begin{table}[htbp]
 \centering
@@ -889,9 +876,8 @@ Layer merging example.  Three adjacent line layers differing only in filter lite
 
 \subsection{Data-Level Optimizations}\label{sub:data_optimizations}
 
-Data-level optimizations transform the tile data itself, reducing transfer size and decoding cost without altering the rendered output (constraint to \cref{eq:visual_equivalence}).
-The encoding techniques used are surveyed in \cref{sec:data_encoding}.
-\cref{tab:data_passes} summarizes the techniques we implemented.
+Data-level passes act on the served tile payload introduced in \cref{sub:pipeline}, drawing on the encoding background surveyed in \cref{sec:data_encoding}.
+\Cref{tab:data_passes} lists them.
 
 \begin{table}[htbp]
 \centering
@@ -1259,18 +1245,18 @@ The encoder fully encodes the remaining candidates (typically two to four) and c
 String columns compete across four strategies, reflecting the two orthogonal dimensions of string compression: deduplication and byte-level compression.
 
 \begin{description}
-    \item[\textbf{Plain}] raw bytes with length prefixes.
+    \item[\textbf{Plain}] means raw bytes with length prefixes.
     The length stream is itself subject to the integer encoding competition.
-    \item[\textbf{Dictionary}] a deduplicated corpus with per-string offset indices.
+    \item[\textbf{Dictionary}] is a deduplicated corpus with per-string offset indices.
     Effective when many features share the same string value (e.g., road names that repeat across tiles).
-    \item[\textbf{\ac{FSST}} (\cref{sub:string_compression})]~\cite{bonczFSSTFastRandom2020}
-    A lightweight, random-access string compressor that learns a symbol table of up to~255 frequent byte sequences and replaces occurrences with single-byte codes.
+    \item[\textbf{\ac{FSST}} (\cref{sub:string_compression})]~\cite{bonczFSSTFastRandom2020} is a lightweight, random-access string compressor that learns a symbol table of up to~255 frequent byte sequences and replaces occurrences with single-byte codes.
     The encoder stores the symbol table once per column.
-The compressed corpus remains directly scannable without decompression.
-    \item[\textbf{\ac{FSST} + Dictionary}] \ac{FSST} applied to a deduplicated dictionary, combining both deduplication and byte-level compression.
+    The compressed corpus remains directly scannable without decompression.
+    \item[\textbf{\ac{FSST} + Dictionary}] combines both deduplication and byte-level compression.
 \end{description}
 
-A viability probe ensures that the encoder only attempts \ac{FSST} when the symbol-table overhead (up to \qty{2040}{\byte}) is likely to be recouped: it excludes columns below \num{2048}~raw bytes and evaluates a trial compression on a sample of up to \num{256} strings before committing.
+A viability probe ensures that the encoder only attempts \ac{FSST} when the symbol-table overhead (up to \qty{2040}{\byte}) is likely to be recouped.
+It excludes columns below \num{2048}~raw bytes and evaluates a trial compression on a sample of up to \num{256} strings before committing.
 The encoder caches trained \ac{FSST} compressors by column name and reuses them across all sort-strategy trials, avoiding redundant training.
 The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbols from the persisted table when inlining their occurrences as escaped literals costs fewer bytes than retaining the table entry, shrinking the symbol table without changing the decoder.
 
