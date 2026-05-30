@@ -9,9 +9,9 @@ runs `mlt convert` on the Germany dataset, and records the output mbtiles size.
 Results are written to thesis/scripts/data/minhash_sweep.csv.
 
 Modes:
-  hybrid       — max(exact, trigram) > threshold  (current default)
-  only-trigram — tri > threshold
-  only-plain   — exact > threshold
+  hybrid       - max(exact, trigram) > threshold  (current default)
+  only-trigram - tri > threshold
+  only-plain   - exact > threshold
 
 Thresholds: 0.025, 0.050, 0.075, 0.100, 0.125
 """
@@ -59,7 +59,7 @@ def patch_source(original: str, mode: str, threshold: float) -> str:
     # Patch the threshold constant
     text = THRESHOLD_RE.sub(rf"\g<1>{threshold};", text)
 
-    # Patch the comparison line — replace any of the three known patterns
+    # Patch the comparison line - replace any of the three known patterns
     for pattern in COMPARISON_PATTERNS.values():
         if pattern in text:
             text = text.replace(pattern, COMPARISON_PATTERNS[mode])

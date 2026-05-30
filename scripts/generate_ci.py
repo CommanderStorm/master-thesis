@@ -539,7 +539,7 @@ def main() -> int:
         interactions = sorted(r["interaction_pct"] for r in synergy_rows)
         med_int = float(np.median(interactions))
         print(
-            f"Interaction term — min: {interactions[0]:+.2f}%, "
+            f"Interaction term - min: {interactions[0]:+.2f}%, "
             f"median: {med_int:+.2f}%, max: {interactions[-1]:+.2f}%"
         )
     print(f"\nPer-scenario synergy CSV written to {synergy_path}")

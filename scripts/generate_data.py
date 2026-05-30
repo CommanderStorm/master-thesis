@@ -141,7 +141,7 @@ def main() -> None:
     if not mlt_rust_path.exists():
         convert_mvt_to_mlt(mlt_bin, mvt_path, mlt_rust_path)
     else:
-        print(f"Skipping conversion — {mlt_rust_path.name} already exists.")
+        print(f"Skipping conversion - {mlt_rust_path.name} already exists.")
 
     # Extract stats for each source
     all_rows: list[dict] = []

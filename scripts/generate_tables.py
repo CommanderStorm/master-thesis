@@ -282,7 +282,7 @@ def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
             f"{reduction:.1f}",
             f"{d_load:.1f}" if d_load is not None else "",
             f"{d_fps:.1f}" if d_fps is not None else "",
-            0, 0,  # isBold, midruleBefore — set below
+            0, 0,  # isBold, midruleBefore - set below
         ])
 
     for s in style_only:

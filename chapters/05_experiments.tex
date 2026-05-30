@@ -323,7 +323,32 @@ Bootstrap \qty{95}{\percent} confidence intervals confirm that the full-pipeline
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\linewidth]{figures/rendering_metrics_mlt.pdf}
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/rendering_metrics_mlt_fiord_loadMs.pdf}
+        \caption{Fiord - load time.}
+        \label{fig:rendering_metrics_mlt_fiord_load}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/rendering_metrics_mlt_fiord_fps.pdf}
+        \caption{Fiord - \ac{FPS}.}
+        \label{fig:rendering_metrics_mlt_fiord_fps}
+    \end{subfigure}
+
+    \medskip
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/rendering_metrics_mlt_liberty_loadMs.pdf}
+        \caption{Liberty - load time.}
+        \label{fig:rendering_metrics_mlt_liberty_load}
+    \end{subfigure}\hfill
+    \begin{subfigure}[t]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/rendering_metrics_mlt_liberty_fps.pdf}
+        \caption{Liberty - \ac{FPS}.}
+        \label{fig:rendering_metrics_mlt_liberty_fps}
+    \end{subfigure}
     \caption{
 Rendering metrics (load time, \ac{FPS}) across configurations~1-5, enabling direct comparison with Experiments~1-2 in the combined analysis.
 The figure shows the significant drop in both load time and increase in \ac{FPS} for tile shaving, as well as the fact that style-only optimization is ineffective.

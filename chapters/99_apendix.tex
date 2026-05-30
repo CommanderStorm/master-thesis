@@ -225,7 +225,7 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[trajstart] at (zz0) {};
 				\node[trajend]   at (zz7) {};
 
-				% zoom strip — 8 bars alternating z10/z14
+				% zoom strip - 8 bars alternating z10/z14
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 
@@ -239,7 +239,7 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip — 8 arrows, 0..105
+				% bearing strip - 8 arrows, 0..105
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i/\b in {0/0, 1/15, 2/30, 3/45, 4/60, 5/75, 6/90, 7/105} {
@@ -280,7 +280,7 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[trajstart] at (sp0)  {};
 				\node[trajend]   at (sp11) {};
 
-				% zoom strip — constant z12, 12 bars
+				% zoom strip - constant z12, 12 bars
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 				\pgfmathsetmacro{\hC}{\zTop{12}}
@@ -294,7 +294,7 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip — 12 arrows; camera tracks centre, so \b=270-30i (mod 360)
+				% bearing strip - 12 arrows; camera tracks centre, so \b=270-30i (mod 360)
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,11} {
@@ -331,7 +331,7 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[stationary] at (\mapcx, \mapcy) {};
 				\node[statlabel, anchor=north] at (\mapcx, \mapcy-0.15) {stationary};
 
-				% zoom strip — 7 bars z4,8,12,16,12,8,4
+				% zoom strip - 7 bars z4,8,12,16,12,8,4
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 
@@ -346,7 +346,7 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip — constant 0°, 7 north arrows
+				% bearing strip - constant 0°, 7 north arrows
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,6} {
@@ -388,7 +388,7 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[trajstart] at (ps0) {};
 				\node[trajend]   at (ps5) {};
 
-				% zoom strip — constant z12, 6 bars
+				% zoom strip - constant z12, 6 bars
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 				\pgfmathsetmacro{\hC}{\zTop{12}}
@@ -402,7 +402,7 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip — constant 0°, 6 north arrows
+				% bearing strip - constant 0°, 6 north arrows
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,5} {
@@ -434,7 +434,7 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[stationary] at (\mapcx, \mapcy) {};
 				\node[statlabel, anchor=north] at (\mapcx, \mapcy-0.15) {stationary};
 
-				% zoom strip — constant z12, 8 bars
+				% zoom strip - constant z12, 8 bars
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 				\pgfmathsetmacro{\hC}{\zTop{12}}
@@ -448,7 +448,7 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip — 8 arrows 0..315
+				% bearing strip - 8 arrows 0..315
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,7} {
