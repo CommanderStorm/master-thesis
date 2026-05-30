@@ -284,7 +284,7 @@ isHidden(zoom: number = this.minzoom, roundMinZoom: boolean = false) {
 \end{lstlisting}
 \end{minipage}
 
-\Cref{lst:ishidden_usage} reproduces the two call-sites that establish those two stages: the worker calls \texttt{layer.isHidden(this.zoom, true)} and \texttt{continue}s before bucket creation, and the painter's \texttt{renderLayer} returns immediately on \texttt{layer.isHidden(this.transform.zoom)} before dispatching any \texttt{draw.fill}/ \texttt{draw.line}/ \texttt{draw.symbol} call.
+The worker calls \texttt{layer.isHidden(this.zoom, true)} and \texttt{continue}s before bucket creation, and the painter's \texttt{renderLayer} returns immediately on \texttt{layer.isHidden(this.transform.zoom)} before dispatching any \texttt{draw.fill}/ \texttt{draw.line}/ \texttt{draw.symbol} call.
 \end{description}
 \end{description}
 
