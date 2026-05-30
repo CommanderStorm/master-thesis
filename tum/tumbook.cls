@@ -240,8 +240,7 @@
   For the comparison of my work with existing sources I agree that it shall be 
   entered in a database where it shall also remain after examination, to enable comparison with future theses submitted.
   Further rights of reproduction and usage, however, are not granted here.
-  This work was not previously presented to another examination board and has not been published. 
-
+  This work was not previously presented to another examination board and has not been published.%
 }{%
   Ich versichere hiermit, dass ich die von mir eingereichte Abschlussarbeit
   selbstständig verfasst und keine anderen als die angegebenen Quellen und
