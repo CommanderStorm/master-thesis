@@ -88,7 +88,7 @@ Marginal contribution of each expression pass to load time reduction shows the e
     \centering
     \includegraphics[width=\linewidth]{figures/marginal_styleParseMs.pdf}
     \caption{
-Marginal contribution of each expression pass to \texttt{styleParseMs}.
+Marginal contribution of each expression pass to parse the style in miliseconds.
 The size-reducing passes (default stripping in particular) shorten the parse step monotonically, even where their end-to-end load-time effect is within noise.
 This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.}
     \label{fig:marginal_styleParseMs}
@@ -581,27 +581,16 @@ Optimization yield is therefore not reliably predictable from complexity alone, 
     \label{fig:cross_style_complexity_scatter}
 \end{figure}
 
-\begin{table}[htbp]
-\centering
-\small
-\begin{tabular}{l r r r r r}
-\toprule
-\textbf{Metric} & \textbf{Min} & \textbf{P25} & \textbf{Median} & \textbf{P75} & \textbf{Max} \\
-\midrule
-Raw size reduction (\%)         &    3.2 &   22.3 &  31.4 & 38.2 & 67.7 \\
-Gzip size reduction (\%)        &    3.9 &    6.0 &  11.4 & 12.2 & 22.4 \\
-Brotli size reduction (\%)      &    0.7 &    3.1 &   9.8 & 11.9 & 17.0 \\
-Layer count reduction (\%)      &    0.0 &    0.8 &   4.8 &  7.0 & 27.0 \\
-\ac{AST} node count change (\%) & $-269.2$ & $-102.9$ & $-47.9$ & 0.0 & 62.2 \\
-\bottomrule
-\end{tabular}
-\caption{
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/cross_style_summary.pdf}
+    \caption{
 Distribution of style-size and complexity changes across the Maputnik generalization corpus (13 styles, static passes only).
-Median raw reduction is \qty{31.4}{\percent} and median Brotli reduction is \qty{9.8}{\percent}.
-The \ac{AST}-node row is signed: positive values denote a reduction in node count, negative values denote growth from expression rewriting (e.g.\ unrolling \texttt{match} into nested \texttt{case}).
+Top panel: raw, gzip, Brotli, and layer-count reductions share a single \%-reduction scale.
+Bottom panel: \ac{AST} node count change is signed -- positive values denote a reduction in node count, negative values denote growth from expression rewriting (e.g.\ unrolling \texttt{match} into nested \texttt{case}); the dashed line marks zero.
 Only three of the 13 styles see a net node-count reduction, indicating that the byte-size gains come predominantly from style-level passes (default stripping, layer merging, metadata stripping) rather than from expression simplification alone.}
-\label{tab:cross_style_summary}
-\end{table}
+    \label{fig:cross_style_summary}
+\end{figure}
 
 \subsection{Discussion}\label{sub:cross_discussion}
 
