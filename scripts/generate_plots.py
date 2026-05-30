@@ -75,7 +75,7 @@ COMPRESSION_DASHES = {
 
 LAYOUT_DEFAULTS = dict(
     template="plotly_white",
-    font=dict(family="Helvetica, Arial, sans-serif", size=12),
+    font=dict(family="Helvetica, Arial, sans-serif", size=14),
     margin=dict(l=70, r=30, t=40, b=60),
 )
 
@@ -241,7 +241,7 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
         fig.update_xaxes(
             title_text="Zoom level",
             title_standoff=5,
-            title_font_size=11,
+            title_font_size=13,
             dtick=2,
             row=r,
         )
@@ -674,7 +674,7 @@ def plot_interaction(df: pd.DataFrame) -> None:
     """Bar chart showing shaving-only vs style+shaving tile-data reductions.
 
     Uses tile_bytes (mbtiles file size) to measure actual tile data impact.
-    If the combined bar exceeds the shaving-only bar, style optimisation
+    If the combined bar exceeds the shaving-only bar, style optimization
     narrows the advisory and produces a measurable cascade effect."""
     print("Generating interaction_plot…")
 
@@ -726,9 +726,7 @@ def plot_rendering_metrics_mlt() -> None:
         return
 
     styles = ["fiord", "liberty"]
-    style_titles = {"fiord": "Fiord", "liberty": "Liberty"}
     metrics = ["loadMs", "fps"]
-    metric_titles = {"loadMs": "Load Time", "fps": "FPS"}
     y_titles = {"loadMs": "Load Time (ms)", "fps": "FPS"}
 
     config_order = [
@@ -761,11 +759,7 @@ def plot_rendering_metrics_mlt() -> None:
             fig.update_xaxes(tickangle=30, automargin=True)
             layout = {
                 **LAYOUT_DEFAULTS,
-                "title": dict(
-                    text=f"{style_titles[style]} - {metric_titles[metric]}",
-                    x=0.5, xanchor="center",
-                ),
-                "margin": dict(l=70, r=20, t=50, b=80),
+                "margin": dict(l=70, r=20, t=20, b=80),
             }
             fig.update_layout(**layout)
 

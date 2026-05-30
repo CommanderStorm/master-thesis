@@ -28,7 +28,7 @@ BAR_COLOR_ALT = "#56B4E9"   # sky blue
 
 LAYOUT_DEFAULTS = dict(
     template="plotly_white",
-    font=dict(family="Helvetica, Arial, sans-serif", size=12),
+    font=dict(family="Helvetica, Arial, sans-serif", size=14),
     margin=dict(l=110, r=60, t=40, b=60),
 )
 
@@ -92,7 +92,7 @@ def main() -> None:
         marker_color=BAR_COLOR,
         text=[f"{v:.1f}%" for v in df["reduction_pct"]],
         textposition="outside",
-        textfont=dict(size=10),
+        textfont=dict(size=12),
     ))
 
     fig.update_layout(

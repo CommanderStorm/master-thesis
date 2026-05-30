@@ -253,7 +253,7 @@ We credit that speedup to Rivian rather than ourselves, and therefore do not ana
 
 Beyond the thesis-wide formal optimization problem of \cref{sec:problem_statement}, two open problems specific to the data-level pipeline frame this experiment:
 
-\begin{enumerate}
+\begin{description}
     \item \textbf{Tiles carry data the style never uses, and how much depends on the style.}
     A general-purpose tile schema (e.g., OpenMapTiles) exposes hundreds of properties and multiple geometry types.
 Any specific style references only a fraction.
@@ -263,21 +263,21 @@ Any specific style references only a fraction.
     \item \textbf{Encoders ignore the data characteristics that shaving produces.}
     Existing \ac{MLT} encoders commit to a fixed encoding plan per column.
     After shaving, the surviving data has fewer distinct values, longer runs, and smaller string vocabularies, which a data-adaptive encoder (\cref{sub:encoding_strategies}) can exploit but a fixed-plan encoder cannot.
-\end{enumerate}
+\end{description}
 
 \subsection{Evaluation Design}\label{sub:mlt_evaluation}
 
 In this experiment we isolate the interaction between style-level and data-level optimizations and identify which level contributes the dominant share of the end-to-end savings.
 We use a cumulative design with five configurations, each adding one optimization layer:
 
-\begin{enumerate}
+\begin{description}
     \item \textbf{\ac{MVT} baseline}: unoptimized protobuf-encoded tiles served with the original style.
     \item \textbf{Style-only}: the optimized style from Experiments~1-2, served with unmodified \ac{MVT} tiles.
     \item \textbf{Shaving-only}: the original style with tile shaving applied (advisory-driven pruning of unused columns, geometry types, and property values), but without style optimizations.
     \item \textbf{Style + shaving}: The optimized style driving tile shaving.
     Dead layer elimination and metadata refinement may narrow the advisory relative to the unoptimized style.
     \item \textbf{Style + shaving + \ac{MLT} encoding}: encoding stage that delivers the shaved data to the wire via automatic encoding strategy selection (sort competition, per-stream profiling, string compression).
-\end{enumerate}
+\end{description}
 
 \noindent Configurations~2-4 isolate the interaction effect.
 If the combined reduction of style+shaving exceeds the sum of style-only and shaving-only, the two optimization categories are synergistic.
