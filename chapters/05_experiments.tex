@@ -366,61 +366,66 @@ The gap between the shaved \ac{MVT} and the shaved output of our encoder quantif
 Both formats benefit from shaving across all compression schemes, confirming that the advisory operates on the data itself rather than relying on format-specific redundancy.
 \cref{fig:encoder_comparison} reframes the same evidence as a ratio against the \ac{MVT} baseline, adding the reference \ac{MLT} encoder of Tremmel \& Zink~\cite{tremmelMapLibreTileNext2025b} for comparison: our encoder's curves remain at roughly $0.6$-$0.8\times$ \ac{MVT} throughout the zoom range, whereas the reference-encoder curves drift above $1.0\times$ at several zoom levels under brotli/zstd, underscoring that the gains attributed to the \ac{MLT} format in this thesis come almost entirely from the encoder-side strategy competition and not from the columnar format alone.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/shaving_effectiveness_per_zoom}
+    \caption{
+Total tile size per zoom level for unshaved and shaved variants of
+      both \ac{MVT} and our \ac{MLT} encoder, using the Liberty advisory.  The gap
+      between each format and its shaved counterpart quantifies the data removed
+      by the pruning advisory.
+The gap between the shaved \ac{MVT} and the
+      shaved output of our encoder quantifies the additional contribution of
+      columnar encoding}
+    \label{fig:shaving_effectiveness_per_zoom}
+\end{figure}
 
+\paragraph{Scope of the Encoder Contribution}
+We measured the \qty{28}{\percent} reduction reported in \cref{tab:mvt_mlt_comparison} on the \emph{unshaved} Germany tileset, so it is an encoder-only improvement, independent of the style-driven optimizations.
+It reflects the combined effect of sort-strategy competition, per-stream profiling, and shared-dictionary clustering.
+These three mechanisms are tightly coupled (sort order affects column distributions, which affect profiling decisions), so a per-mechanism decomposition is not feasible without re-engineering the encoder.
+This result is complementary to, but separate from, the style-data bridge: style-driven tile shaving reduces tile content before encoding, while the encoder improvements reduce the encoded size of whatever content remains.
+The two contributions stack (shaved tiles encoded with our encoder are smaller than shaved tiles encoded with the reference baseline), but they address orthogonal sources of redundancy.
 
 \paragraph{Isolating the Contribution of Our Encoder's Strategy Selection}
 To separate the contribution of the multi-strategy competition (this work) from that of the \ac{MLT} format as proposed by Tremmel and Zink~\cite{tremmelMapLibreTileNext2025b}, we report in \cref{fig:encoder_comparison} both a per-zoom breakdown and the total encoded size of the Germany OpenMapTiles tileset (zoom~0-14, \num{256588} tiles) under three encoders (\ac{MVT} as the row-oriented protobuf baseline, the reference \ac{MLT} encoder of Tremmel and Zink as the columnar baseline, and our \ac{MLT} encoder with sort-strategy competition, per-stream profiling, and shared-dictionary clustering) and across four wire compressions (none, gzip-9, Brotli-11, zstd-22).
 
 \begin{figure}[htbp]
 	\centering
-	\includegraphics[width=\linewidth]{figures/shaving_effectiveness_per_zoom}
-	\caption{
-		Total tile size per zoom level for unshaved and shaved variants of
-		both \ac{MVT} and our \ac{MLT} encoder, using the Liberty advisory.  The gap
-		between each format and its shaved counterpart quantifies the data removed
-		by the pruning advisory.
-		The gap between the shaved \ac{MVT} and the
-		shaved output of our encoder quantifies the additional contribution of
-		columnar encoding}
-	\label{fig:shaving_effectiveness_per_zoom}
-\end{figure}
-
-\begin{figure}[htbp]
-\centering
-    \begin{subfigure}[t]{0.95\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/encoder_comparison_per_zoom}
-        \caption{
-Per-zoom total tile size for the three encoders under four wire compressions}
-        \label{fig:encoder_comparison_per_zoom}
-    \end{subfigure}
-
-    \vspace{1em}
-
-    \begin{subfigure}[t]{\linewidth}
-        \centering
-        \begin{tblr}{colspec={l r r r r}, rows={font=\small}, row{1}={font=\small\bfseries}}
-        \toprule
-        Encoder & Plain (GB) & gzip (GB) & Brotli (GB) & zstd (GB) \\
-        \midrule
-        \ac{MVT}              & 4.24 & 3.08 & 3.13 & 3.16 \\
-        \ac{MLT} (reference) & 4.26 & 3.54 & 3.57 & 3.60 \\
-        \ac{MLT} (this work) & \textbf{3.06} &  \textbf{2.70} &  \textbf{2.72} &  \textbf{2.75} \\
-        \midrule
-        $\Delta$ ours vs.\ reference & $-28.3\%$ & $-23.8\%$ & $-23.7\%$ & $-23.6\%$ \\
-        $\Delta$ ours vs.\ \ac{MVT}  & $-27.9\%$ & $-12.3\%$ & $-13.1\%$ & $-12.9\%$ \\
-        \bottomrule
-        \end{tblr}
-        \caption{
-Total tileset size for the three encoders under four wire compressions.
-          The \ac{MLT} (reference) column reports the baseline from~\cite{tremmelMapLibreTileNext2025b}, updated with encoding improvements backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds).
-          The \ac{MLT} (this work) column reports the encoder developed in this thesis}
-        \label{tab:mvt_mlt_comparison}
-    \end{subfigure}
-\caption{Encoder comparison for the Germany OpenMapTiles tileset (zoom~0-14, \qty{256588}{\kilo tiles}).
-Our \ac{MLT} encoder achieves \qty{28.3}{\percent} smaller total size than the reference baseline under no wire compression.
-The reference encoder drifts above \ac{MVT} size at several zoom levels under Brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
-\label{fig:encoder_comparison}
+	\begin{subfigure}[t]{0.95\linewidth}
+		\centering
+		\includegraphics[width=\linewidth]{figures/encoder_comparison_per_zoom}
+		\caption{
+			Per-zoom total tile size for the three encoders under four wire compressions}
+		\label{fig:encoder_comparison_per_zoom}
+	\end{subfigure}
+	
+	\vspace{1em}
+	
+	\begin{subfigure}[t]{\linewidth}
+		\centering
+		\begin{tblr}{colspec={l r r r r}, rows={font=\small}, row{1}={font=\small\bfseries}}
+			\toprule
+			Encoder & Plain (GB) & gzip (GB) & Brotli (GB) & zstd (GB) \\
+			\midrule
+			\ac{MVT}              & 4.24 & 3.08 & 3.13 & 3.16 \\
+			\ac{MLT} (reference) & 4.26 & 3.54 & 3.57 & 3.60 \\
+			\ac{MLT} (this work) & \textbf{3.06} &  \textbf{2.70} &  \textbf{2.72} &  \textbf{2.75} \\
+			\midrule
+			$\Delta$ ours vs.\ reference & $-28.3\%$ & $-23.8\%$ & $-23.7\%$ & $-23.6\%$ \\
+			$\Delta$ ours vs.\ \ac{MVT}  & $-27.9\%$ & $-12.3\%$ & $-13.1\%$ & $-12.9\%$ \\
+			\bottomrule
+		\end{tblr}
+		\caption{
+			Total tileset size for the three encoders under four wire compressions.
+			The \ac{MLT} (reference) column reports the baseline from~\cite{tremmelMapLibreTileNext2025b}, updated with encoding improvements backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds).
+			The \ac{MLT} (this work) column reports the encoder developed in this thesis}
+		\label{tab:mvt_mlt_comparison}
+	\end{subfigure}
+	\caption{Encoder comparison for the Germany OpenMapTiles tileset (zoom~0-14, \qty{256588}{\kilo tiles}).
+		Our \ac{MLT} encoder achieves \qty{28.3}{\percent} smaller total size than the reference baseline under no wire compression.
+		The reference encoder drifts above \ac{MVT} size at several zoom levels under Brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
+	\label{fig:encoder_comparison}
 \end{figure}
 
 The headline is the \qty{28.3}{\percent} reduction our encoder achieves over the reference baseline under no wire compression.
@@ -434,13 +439,6 @@ The relative gap between our encoder and the reference is roughly constant acros
 This stability is consistent with the profiler capturing genuine redundancy that general-purpose compressors miss, but it could equally reflect that the profiler removes the same redundancy the compressors would have.
 The cleaner evidence for the profiler's value is the absolute comparison: our encoder, uncompressed (\qty{3.06}{\giga\byte}), is already smaller than \ac{MVT}+gzip (\qty{3.08}{\giga\byte}), confirming that per-stream encoding captures type-specific redundancy that LZ77-family compressors miss on the interleaved protobuf byte stream.
 This directly answers the question we posed at the start of \cref{sec:exp_mlt}: our encoder's contribution lives in the joint strategy-selection layer that sits on top of the columnar format, not in the format alone.
-
-\paragraph{Scope of the Encoder Contribution}
-We measured the \qty{28}{\percent} reduction reported in \cref{tab:mvt_mlt_comparison} on the \emph{unshaved} Germany tileset, so it is an encoder-only improvement, independent of the style-driven optimizations.
-It reflects the combined effect of sort-strategy competition, per-stream profiling, and shared-dictionary clustering.
-These three mechanisms are tightly coupled (sort order affects column distributions, which affect profiling decisions), so a per-mechanism decomposition is not feasible without re-engineering the encoder.
-This result is complementary to, but separate from, the style-data bridge: style-driven tile shaving reduces tile content before encoding, while the encoder improvements reduce the encoded size of whatever content remains.
-The two contributions stack (shaved tiles encoded with our encoder are smaller than shaved tiles encoded with the reference baseline), but they address orthogonal sources of redundancy.
 
 \paragraph{zstd-on-\acs{MVT} Comparison}
 A natural objection is that general-purpose compressors such as zstd-22 or Brotli-11 should be sufficient: if compression is the goal, simply applying the strongest available compressor to the existing \ac{MVT} wire format would avoid the complexity of a columnar encoder entirely.
