@@ -99,7 +99,7 @@ The three pass levels at the centre are:
     They run to a fixpoint with a hard cap of eight iterations.
     In practice every style in the benchmarking and Maputnik\footnote{\url{https://maputnik.github.io/}, last accessed 2026-05-23} corpora converges within two to three iterations, well below the cap, because human-authored styles tend to reuse a small repertoire of patterns.
     The formal termination measure and confluence (\cref{sub:fixpoint}) discussion are given alongside the pass descriptions.
-    \item \textbf{Structural passes} (\cref{sub:structural_optimizations}) deserialize the style into the typed Rust spec produced by the codegen front end and apply transformations that require cross-layer or cross-source reasoning, namely dead layer elimination, metadata refinement, layer merging, and cleanup.
+    \item \textbf{Structural passes} (\cref{sub:structural_optimizations}) deserialize the style into the typed spec produced by the codegen front end and apply transformations that require cross-layer or cross-source reasoning, namely dead layer elimination, metadata refinement, layer merging, and cleanup.
     A cross-phase \emph{filter-to-property constant propagation}, which substitutes equality constraints extracted from a layer's filter into that layer's paint and layout expressions, bridges the expression and structural phases and is detailed in \cref{sub:structural_optimizations}.
     \item \textbf{Data passes} (\cref{sub:data_optimizations}) transform the served tile data via a style-driven pruning advisory and the conversion from \ac{MVT} to \ac{MLT}.
 \end{enumerate}
@@ -345,7 +345,7 @@ Interpolation and step ramp simplification detects ramps, where all stops map to
 
 \paragraph{Default Stripping}
 The pass removes properties whose value equals the specification default.
-We derive the defaults from the code-generated Rust types: each property's default is known from the upstream \texttt{v8.json}.
+We derive the defaults from the code-generated types: each property's default is known from the upstream \texttt{v8.json}.
 The pass strips only plain scalar values.
 It never removes expression-valued properties, even if they would evaluate to the default at all zoom levels, to avoid the risk of changing renderer behavior when the expression's mere presence affects layout (e.g.\ \mlprop{text-radial-offset} suppresses \mlprop{text-offset} regardless of its value).
 
@@ -636,7 +636,7 @@ Each panel shows a before/after \ac{JSON} example pair demonstrating how these o
 \clearpage
 \subsection{Structural Optimizations}\label{sub:structural_optimizations}
 
-Structural passes consume the typed Rust style of \cref{sub:pipeline} to perform cross-layer and cross-source reasoning.
+Structural passes consume the typed style model of \cref{sub:pipeline} to perform cross-layer and cross-source reasoning.
 \Cref{tab:structural_passes} lists them.
 
 \begin{table}[htbp]
@@ -658,7 +658,7 @@ Source zoom tightening       & none      & Tighten source \mlprop{minzoom}/ \mlp
 \bottomrule
 \end{tblr}
 \caption{
-Structural optimization passes operating on the typed Rust style representation, each annotated with its data dependency and compiler-optimization analogue.  Passes marked \emph{none/sampling} run unconditionally but gain additional precision when tile statistics are available.}
+Structural optimization passes operating on the typed style representation, each annotated with its data dependency and compiler-optimization analogue.  Passes marked \emph{none/sampling} run unconditionally but gain additional precision when tile statistics are available.}
 \label{tab:structural_passes}
 \end{table}
 

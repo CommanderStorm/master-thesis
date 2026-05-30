@@ -3,7 +3,7 @@
 In the previous chapter we designed a three-level optimization pipeline (expression-level rewrites, structural passes, and data-level transformations) together with a cumulative ablation methodology for measuring each pass's contribution.
 This chapter applies that methodology empirically, mirroring the pipeline's own architecture.
 We evaluate the expression-level passes (\cref{sec:exp_expressions}), the structural passes with attention to the synergy between dead layer elimination and layer merging (\cref{sec:exp_structural}), and the data-level optimizations from advisory narrowing through tile shaving to the encoding strategy competition (\cref{sec:exp_mlt}).
-We then test generalization on 15 unseen styles (\cref{sec:exp_cross_style}) and bring all three levels together in an end-to-end combined ablation (\cref{sec:exp_combined}) that quantifies how style-level and data-level optimizations interact on tile volume, load time, and rendering stability.
+We then test generalization on 13 unseen styles (\cref{sec:exp_cross_style}) and bring all three levels together in an end-to-end combined ablation (\cref{sec:exp_combined}) that quantifies how style-level and data-level optimizations interact on tile volume, load time, and rendering stability.
 
 \begin{tcolorbox}[
   enhanced,
@@ -39,10 +39,8 @@ These four viewports are thus excluded from the reported tile rewrite results.
 
 \subsection{Evaluation}\label{sub:expr_evaluation}
 
-The first seven passes correspond to ablation steps~1-7 in the cumulative ablation defined in \cref{sub:ablation}.
-We evaluate selectivity reordering separately as step~16 because it requires the tile statistics introduced in \cref{sub:tile_statistics}.
-We describe the full rendering and static-size metric set in \cref{sub:metrics}.
-We report the effects on performance generalized beyond the benchmarking corpus in \cref{sub:cross_results} using the generalization corpus of \cref{sub:generalization_corpus}.
+The first seven passes correspond to ablation steps~1-7 of the cumulative ablation (\cref{sub:ablation}); selectivity reordering is deferred to step~16 because it requires the tile statistics of \cref{sub:tile_statistics}.
+The rendering and static-size metric set is defined in \cref{sub:metrics}.
 
 \subsection{Results}\label{sub:expr_results}
 
@@ -150,9 +148,8 @@ The practical consequence here is that the marginal contribution of each later p
 
 \subsection{Evaluation}\label{sub:structural_evaluation}
 
-Structural passes correspond to ablation steps~8-15 within the cumulative ablation of \cref{sub:ablation}.
-In addition to the rendering metrics from Experiment~1 (\cref{sub:metrics}), we report complexity metrics for the structural evaluation: layer count, filter count, and total expression node count.
-We report the effects on performance generalized in \cref{sub:cross_results} (over the generalization corpus of \cref{sub:generalization_corpus}) and the effect of the expression-level steps this work builds upon in \cref{sec:exp_expressions}.
+Structural passes correspond to ablation steps~8-15 of the cumulative ablation (\cref{sub:ablation}).
+Beyond the rendering metrics from Experiment~1, we add three structural-complexity metrics: layer count, filter count, and total expression-node count.
 
 \subsection{Results}\label{sub:structural_results}
 
@@ -188,13 +185,8 @@ Layer merging itself adds \qty{36}{\byte} of gzip because the merged filter expr
 
 \subsection{Discussion}\label{sub:structural_discussion}
 
-Two of the six structural passes (dead-layer elimination and layer merging) produce nearly all of the gain, cutting Fiord's gzip transfer by \qty{14.1}{\percent} and Liberty's by \qty{4.9}{\percent}.
-The following paragraphs unpack why those two dominate and how the remaining passes contribute indirectly or feed into the data-level pipeline downstream.
-
 \paragraph{Dominance of Dead Elimination and Layer Merging}
-Among the structural passes, dead elimination and layer merging produce the largest improvements in both rendering performance and style complexity.
-Dead elimination directly reduces the number of layers the renderer must process per frame.
-Layer merging reduces draw calls by combining multiple rendering passes into one.
+Dead elimination directly reduces the number of layers the renderer must process per frame, and layer merging reduces draw calls by combining multiple rendering passes into one.
 The interaction between the two is synergistic: styles with many narrowly-filtered layers (e.g., road styles that define separate layers for each road class) benefit most, as dead elimination first removes layers for road classes absent from the data, and layer merging then combines the remaining layers into a single multi-class layer.
 
 \paragraph{Size vs.\ Runtime Trade-Off in Layer Merging}
@@ -227,8 +219,7 @@ Dead layer elimination has a second-order effect beyond reducing per-frame draw 
 each eliminated layer removes its property references from the tile pruning advisory computed in the data-level pipeline (\cref{sub:tile_shaving}).
 If a removed layer was the sole consumer of a property column, that column is stripped from every tile at encoding time.
 Similarly, metadata refinement's tightened zoom bounds cause the advisory to mark additional zoom levels as unused for a given source-layer, potentially eliminating entire tiles.
-We characterize this interaction fully in \cref{sub:mlt_discussion} and quantify it in \cref{sub:mlt_results}.
-The aggregate data shows that the composition is additive rather than synergistic, but the advisory-narrowing effect is a necessary precondition for style-dependent tile shaving.
+We quantify this composition in \cref{sub:mlt_results} and discuss it in \cref{sub:mlt_discussion}; the advisory-narrowing effect is a necessary precondition for the style-dependent tile shaving measured there.
 
 
 \section{Experiment 3: Data-Level Optimizations}\label{sec:exp_mlt}
@@ -296,8 +287,7 @@ In this section we quantify the interaction between style-level and data-level o
 Comparing gzip-size reductions for style-only, shaving-only, and the combination: Fiord's combined reduction (\qty{14.7}{\percent}) sits \qty{0.2}{\percent} above its style-only figure (\qty{14.5}{\percent}), and Liberty's combined (\qty{4.8}{\percent}) matches its style-only (\qty{4.8}{\percent}).
 Both styles compose additively.
 Shaving alone is negligible for these two because Liberty references most tile properties and Fiord's gains already come from layer-level cleanup.
-This was the central empirical question of the thesis and the one we expected to answer in the affirmative going in.
-The data returned additivity, not synergy.
+This was the central empirical question of the thesis and the one we expected to answer in the affirmative going in -- the data did not bear that expectation out.
 Per-scenario load-time synergy (combined exceeding the sum) appears in 17 of 36 style-scenario pairs but is too sparse to lift the aggregate.
 
 \paragraph{Rendering Metrics across Configurations}
@@ -485,12 +475,7 @@ These micro-benchmark results complement the browser-based \texttt{loadMs} metri
 
 \subsection{Discussion}\label{sub:mlt_discussion}
 
-Tile shaving alone cuts pooled median load time by \qty{71.5}{\percent} and lifts \ac{FPS} by \qty{184}{\percent}, while style-only passes contribute \qty{-4.1}{\percent} on load.
-The two channels compose additively, not synergistically.
-We discuss why the channels stay additive, the cache-fragmentation trade-off that style-dependent tiles create on shared \acsp{CDN}, and the geometry-simplification axis we leave out of scope.
-
 \paragraph{Dominance of Tile Shaving and Additive Style-Pass Contribution}
-The headline finding of this experiment is that tile shaving is the dominant contributor to load-time and transfer-size improvements, while style-level passes provide a modest, additive assist.
 Dead layer elimination (Experiment~2) removes style layers whose filters are unsatisfiable.
 Each removed layer reduces the set of referenced properties in the pruning advisory, which in turn can eliminate columns from the encoded tile.
 Metadata refinement tightens zoom bounds, which causes the advisory to mark additional zoom levels as unused, potentially eliminating tiles entirely.
@@ -912,7 +897,6 @@ Where the same step appears across two complexity axes, we describe the connecti
 
 Composed end-to-end across the ten deep-corpus styles, the full pipeline cuts per-style median load time by \qty{71}{\percent} and lifts \ac{FPS} by \qty{152}{\percent}.
 The three optimization channels (expression, structural, data) compose additively because they target non-overlapping costs (simplification cannot shrink tiles, shaving cannot prune expressions).
-The following paragraphs decompose which channel each family acts on, separate the load-time levers from the frame-rate levers, and close with the measurement-noise caveats that bound these numbers.
 
 \paragraph{Three Plausible Improvement Channels}
 The full pipeline ablation points to three plausible channels, which we infer from proxy metrics (\ac{AST} node count, layer count, tile size) and the time breakdown (\cref{fig:time_breakdown}) since no renderer instrumentation separates them directly.

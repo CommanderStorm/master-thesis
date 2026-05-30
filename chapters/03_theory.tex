@@ -110,10 +110,10 @@ Although all of these resources can be optimized, tiles are usualy the most crit
 They usualy have a cumulatively higher data volume due to this, even though their individual tiles may be much smaller.
 All other resources may depend on locale slightly (for example loading different Unicode ranges or fonts), but are only handled one time.
 
-Real-world observations support this:
-the performance of highly optimized systems such as Microsoft Bing Maps differs significantly from less optimized deployments, such as basemap.de.
+Real-world observations support this.
+The performance of highly optimized systems such as Microsoft Bing Maps differs significantly from less optimized deployments, such as basemap.de.
 
-In the following sections we examine each resource in detail, focusing on the performance characteristics and optimization strategies relevant to our work:
+In the following sections we examine each resource in detail, focusing on the performance characteristics and optimization strategies relevant to our work.
 
 \subsection{Fonts}
 
@@ -125,8 +125,8 @@ For interactive use cases, this is prohibitive as the time to download this woul
 Some fonts need this shaping as they need to connect neigboring characters neatly, but Latin fonts do usually not.
 For latin-like characters, there is usually a clear 1:1 relationship between the Unicode code point and a rendered character.
 
-This is why a simpler way exists:
-Cutting fonts up into Unicode slices (\texttt{start..end}) and serving only the ranges that are needed to the client.
+A simpler approach therefore exists.
+Fonts are cut into Unicode slices (\texttt{start..end}) and only the ranges that the client needs are served.
 This cutting of fonts has the implicit advantage of pruning the space of possible font data to just the data that is needed to render the map.
 
 Common open-source renderers like MapLibre or source-available renderers like Mapbox do this by shipping pre-rasterised glyph ranges as \acp{PBF} encoded \acp{SDF}~\cite{greenImprovedAlphatestedMagnification2007}, indexed by Unicode range (e.g.\ \texttt{0-255.pbf}, \texttt{256-511.pbf}).
@@ -190,8 +190,8 @@ function sliceVectorTileLayer(sourceLayer, maxZoomTileID, targetTileID) {
 }
 \end{lstlisting}
 
-No symmetric \enquote{underzoom} behavior exists:
-If a source has no tile at a zoom lower than \mlprop{minzoom}, the layer is  not rendered there.
+No symmetric \enquote{underzoom} behavior exists.
+If a source has no tile at a zoom lower than \mlprop{minzoom}, the layer is not rendered there.
 
 A \emph{vector tile} encodes map data in a compact binary format rather than in a pre-rendered image.
 Each tile is organized into \emph{source layers} (for example, roads, buildings, water), and each source layer contains a set of \emph{features}.
@@ -233,7 +233,7 @@ Since \ac{MVT} is the established baseline and \ac{MLT} aims to improve upon it,
 
 \subsection{Styles}\label{sec:styles}
 
-A map style defines the complete visual appearance of a map: which data is shown, how it is colored, sized, and labelled, and at which zoom levels each element appears.
+A map style defines the complete visual appearance of a map, including which data is shown, how it is colored, sized, and labelled, and at which zoom levels each element appears.
 Three architectural approaches to map styling have been established:
 
 \begin{description}
@@ -360,8 +360,8 @@ Feature-state addressing further requires stable feature IDs, since the keying t
 
 \section{Compiler Optimization Techniques}\label{sec:compiler_optimizations}
 
-The style expressions used by map renderers such as MapLibre are small programs in a special purpose \ac{DSL}:
-they contain conditionals (\mlop{case}, \mlop{match}), boolean operators (\mlop{all}, \mlop{any}), arithmetic, and data access (\mlop{get}, \mlop{has}), and variables (lexical bindings via \mlop{let}/ \mlop{var}, and the runtime stores of \cref{sub:feature_state}).
+The style expressions used by map renderers such as MapLibre are small programs in a special purpose \ac{DSL}.
+They contain conditionals (\mlop{case}, \mlop{match}), boolean operators (\mlop{all}, \mlop{any}), arithmetic, and data access (\mlop{get}, \mlop{has}), and variables (lexical bindings via \mlop{let}/ \mlop{var}, and the runtime stores of \cref{sub:feature_state}).
 Optimising these expressions draws directly on techniques developed over decades in compiler construction~\cite{ahoCompilersPrinciplesTechniques2007}.
 In this section we introduce the foundational concepts we apply in \cref{ch:methods}.
 
@@ -466,8 +466,8 @@ Newcomb et~al.~\cite{newcombVerifyingImprovingHalides2020} reported similar conf
 
 \section{Query Optimization}\label{sec:query_optimizations}
 
-Style filters in map rendering are structurally equivalent to database query predicates:
-both select a subset of records (features) from a dataset (tile) based on attribute conditions.
+Style filters in map rendering are structurally equivalent to database query predicates.
+Both select a subset of records (features) from a dataset (tile) based on attribute conditions.
 Techniques from relational query optimizations therefore apply directly.
 
 \subsection{Cost-Based Query Optimization}
@@ -493,7 +493,7 @@ Compound predicates are estimated by combining individual selectivities:
 The independence assumption is known to be inaccurate when columns are correlated, but it provides a computationally cheap approximation that is effective in practice~\cite{selingerAccessPathSelection1979}.
 More sophisticated estimators (such as multi-dimensional histograms, sampling-based methods, or the lightweight graphical models proposed by Tzoumas et~al.~\cite{tzoumasLightweightGraphicalModels2011} that capture inter-attribute correlations without the full cost of joint-distribution estimation) improve accuracy at higher computational cost.
 
-Map-style filters are in fact known to violate independence:
+Map-style filters are in fact known to violate independence.
 In OpenMapTiles, for example, \texttt{class} and \texttt{subclass} are strongly correlated by schema design (every value of \texttt{subclass} implies a constrained set of \texttt{class} values), as are \texttt{admin\_level} and \texttt{maritime}.
 A joint-distribution estimator, such as the one we propose in \cref{sec:selectivity_reordering}, would therefore give tighter bounds, but our selectivity signal is consumed only by a \emph{reordering} heuristic (not by a cost-based plan chooser) and reordering is monotone in the ordering of the individual selectivities rather than in their absolute values.
 The independence-estimator error therefore propagates into the quality of the short-circuit ordering but never into the correctness of the rewritten style, which makes the cheap estimator an acceptable engineering choice for our use case.
@@ -501,7 +501,8 @@ The independence-estimator error therefore propagates into the quality of the sh
 \subsection{Partial Evaluation}\label{sub:partial_eval}
 
 \emph{Partial evaluation} (also called program specialization) transforms a program with respect to known static inputs, producing a residual program that depends only on the remaining dynamic inputs~\cite{jonesPartialEvaluationAutomatic1993}.
-The style optimizer performs partial evaluation of the rendering function: the style (static input) is known at optimization time, while tile data (dynamic input) varies at runtime.
+The style optimizer performs partial evaluation of the rendering function.
+The style (static input) is known at optimization time, while tile data (dynamic input) varies at runtime.
 Filter-to-property constant propagation (\cref{sub:structural_optimizations}) is a textbook instance.
 MapLibre paints only features that pass the filter (\cref{lst:bucket_populate}), so any equality constraint in the filter holds for every feature reaching the paint expression.
 The optimizer substitutes that constraint into the paint expression and folds away the branches it rules out, while the filter itself stays unchanged and still runs at render time against dynamic feature data.
