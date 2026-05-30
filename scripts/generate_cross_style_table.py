@@ -5,12 +5,7 @@
 #     "scipy>=1.10",
 # ]
 # ///
-"""Generate cross-style summary + per-style CSVs from cross_style.jsonl.
-
-Emits two CSVs and prints LaTeX-ready stats used by §5.4 of the thesis:
-  - cross_style_per_style.csv  one row per style, with all metrics
-  - cross_style_summary.csv    one row per metric, with min/p25/median/p75/max
-"""
+# emits two CSVs + prints stats for §5.4
 
 import argparse
 import csv
@@ -54,7 +49,7 @@ def safe_reduction(orig: pd.Series, opt: pd.Series) -> pd.Series:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, default=DATA_DIR / "cross_style.jsonl")
     parser.add_argument("--per-style-out", type=Path,
                         default=DATA_DIR / "cross_style_per_style.csv")

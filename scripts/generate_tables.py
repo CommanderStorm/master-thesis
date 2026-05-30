@@ -116,7 +116,6 @@ SUMMARY_ORDER: list[str] = [
 
 
 def load_jsonl(input_dir: Path) -> list[dict]:
-    """Load all ``*.jsonl`` files under *input_dir*."""
     rows: list[dict] = []
     for path in sorted(input_dir.glob("*.jsonl")):
         with path.open() as fh:
@@ -134,7 +133,6 @@ def load_jsonl(input_dir: Path) -> list[dict]:
 
 
 def filter_latest_session(records: list[dict]) -> list[dict]:
-    """Keep only the session with the most variants per style (latest ts tiebreak)."""
     by_style: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
     for r in records:
         style = r.get("style", "")
@@ -164,7 +162,6 @@ def parse_variant(variant: str) -> tuple[int, str]:
 
 
 def aggregate_steps(records: list[dict], style: str) -> list[dict]:
-    """Produce one row per ablation step, with deterministic + median runtime values."""
     recs = [r for r in records if r.get("style") == style]
     by_step: dict[int, list[dict]] = defaultdict(list)
     for r in recs:
@@ -204,7 +201,6 @@ MARGINAL_HEADER = ["step", "pass", "deltaRaw", "deltaGzip", "deltaBrotli", "delt
 
 
 def write_per_style_csv(path: Path, steps: list[dict]) -> None:
-    """Write a per-style ablation CSV."""
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(PER_STYLE_HEADER)
@@ -219,7 +215,6 @@ def write_per_style_csv(path: Path, steps: list[dict]) -> None:
 
 
 def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
-    """Write the per-style summary CSV."""
     style_only = [s for s in SUMMARY_ORDER if s not in FULL_PIPELINE_STYLES]
     full_pipe = [s for s in SUMMARY_ORDER if s in FULL_PIPELINE_STYLES]
 
@@ -310,7 +305,6 @@ def _fmt_median_int(vals: list[float]) -> str:
 
 
 def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
-    """Write the marginal contribution CSV."""
     max_step = max(s["step"] for steps in all_steps.values() for s in steps)
 
     rows: list[list] = []

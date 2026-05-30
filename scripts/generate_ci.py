@@ -115,7 +115,6 @@ KEY_CLAIMS = [
 
 
 def load_jsonl(input_dir: Path) -> list[dict]:
-    """Load all ``*.jsonl`` files under *input_dir*."""
     rows: list[dict] = []
     for path in sorted(input_dir.glob("*.jsonl")):
         with path.open() as fh:
@@ -133,7 +132,6 @@ def load_jsonl(input_dir: Path) -> list[dict]:
 
 
 def filter_latest_session(records: list[dict]) -> list[dict]:
-    """Keep only the session with the most variants per style (latest ts tiebreak)."""
     by_style: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
     for r in records:
         style = r.get("style", "")
@@ -168,10 +166,6 @@ def bootstrap_ci(
     confidence_level: float = 0.95,
     rng_seed: int = 42,
 ) -> tuple[float, float, float]:
-    """Compute median and bootstrap 95% CI.
-
-    Returns (median, ci_lo, ci_hi).
-    """
     if len(data) < 2:
         med = float(np.median(data))
         return med, med, med
@@ -190,13 +184,8 @@ def bootstrap_ci(
 
 
 def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
-    """Compute Wilcoxon signed-rank test p-value.
-
-    Both arrays must have the same length (paired samples: same scenarios x runs).
-    Returns p-value or None if test cannot be performed.
-    """
     if len(baseline) != len(treatment):
-        # Fall back to Mann-Whitney U when arrays are unpaired.
+        # unpaired -> fallback to Mann-Whitney
         if len(baseline) < 2 or len(treatment) < 2:
             return None
         try:
@@ -206,7 +195,6 @@ def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
             return None
 
     diff = treatment - baseline
-    # Wilcoxon cannot handle zero differences; drop them.
     nonzero = diff[diff != 0]
     if len(nonzero) < 10:
         return None
@@ -224,10 +212,6 @@ def collect_values(
     variant: str,
     metric: str,
 ) -> np.ndarray:
-    """Collect all individual run values for a (style, variant, metric) triple.
-
-    Returns values sorted by (scenario, run) for consistent pairing.
-    """
     recs = [
         r for r in records
         if r.get("style") == style
@@ -235,7 +219,6 @@ def collect_values(
         and r.get(metric) is not None
         and not r.get("deduped", False)
     ]
-    # Order by (scenario, run) so paired Wilcoxon tests line up.
     recs.sort(key=lambda r: (r.get("scenario", ""), r.get("run", 0)))
     return np.array([r[metric] for r in recs], dtype=np.float64)
 
@@ -245,14 +228,6 @@ def compute_synergy(
     styles: set[str],
     metric: str = "loadMs",
 ) -> list[dict]:
-    """Per-(style, scenario) style/shaving synergy at the median level.
-
-    For each (style, scenario) pair with complete data across the four
-    SYNERGY_VARIANTS, compute the percent reduction of style-only,
-    shaving-only, and combined configurations against the baseline, then
-    the interaction term ``combined_red - (style_only_red + shaving_only_red)``.
-    A positive interaction term indicates super-additive synergy.
-    """
     by_scenario: dict[tuple[str, str], dict[str, list[float]]] = defaultdict(
         lambda: defaultdict(list)
     )
@@ -349,7 +324,6 @@ def main() -> int:
                 vals = collect_values(filtered, style, variant, metric)
 
                 if len(vals) == 0:
-                    # Deduped step has no independent measurements.
                     done += 1
                     continue
 
@@ -463,7 +437,6 @@ def main() -> int:
         v = claim_data[final_key]
 
         reduction_pct = (b["median"] - v["median"]) / b["median"] * 100
-        # Worst-case bounds: pair baseline median against variant's CI extremes.
         red_lo = (b["median"] - v["ci_hi"]) / b["median"] * 100
         red_hi = (b["median"] - v["ci_lo"]) / b["median"] * 100
 

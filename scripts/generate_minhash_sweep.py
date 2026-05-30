@@ -2,19 +2,8 @@
 # requires-python = ">=3.10"
 # dependencies = []
 # ///
-"""Sweep MinHash Jaccard thresholds × similarity modes, measure output sizes.
-
-For each (mode, threshold) pair this script patches the Rust source, rebuilds,
-runs `mlt convert` on the Germany dataset, and records the output mbtiles size.
-Results are written to thesis/scripts/data/minhash_sweep.csv.
-
-Modes:
-  hybrid       - max(exact, trigram) > threshold  (current default)
-  only-trigram - tri > threshold
-  only-plain   - exact > threshold
-
-Thresholds: 0.025, 0.050, 0.075, 0.100, 0.125
-"""
+# sweep MinHash thresholds x modes, patch the rust source, rebuild, convert,
+# record output mbtiles size. writes minhash_sweep.csv.
 
 import csv
 import re
@@ -52,7 +41,6 @@ def read_source() -> str:
 
 
 def patch_source(original: str, mode: str, threshold: float) -> str:
-    """Patch the comparison line and threshold constant."""
     text = original
 
     text = THRESHOLD_RE.sub(rf"\g<1>{threshold};", text)

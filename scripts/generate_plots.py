@@ -7,7 +7,6 @@
 #     "kaleido>=0.4",
 # ]
 # ///
-"""Read tile-size CSVs and benchmark JSONL to generate plotly figures for the thesis."""
 
 import argparse
 import json
@@ -27,7 +26,7 @@ FORMATS = ["png", "pdf"]
 FIG_WIDTH = 700
 FIG_HEIGHT = 450
 
-# Okabe-Ito CVD-safe palette (https://jfly.uni-koeln.de/color/).
+# Okabe-Ito palette (CVD-safe)
 SOURCE_COLORS = {
     "MVT": "#0072B2",
     "MVT-shaved": "#56B4E9",
@@ -52,7 +51,6 @@ SOURCE_MARKERS = {
     "MLT-Rust-shaved": "cross",
 }
 
-# Internal IDs key into CSV columns; display labels are used for output.
 SOURCE_DISPLAY = {
     "MVT": "MVT",
     "MVT-shaved": "MVT (shaved)",
@@ -98,14 +96,9 @@ STEP_LABELS: dict[int, str] = {
     19: "MLT rewrite",
 }
 
-# Only fiord/liberty have measurements for these steps.
-FULL_PIPELINE_STEPS = {16, 17, 18, 19}
-
-
 def _bootstrap_ci(
     values: np.ndarray, n_boot: int = 10_000, seed: int = 42,
 ) -> tuple[float, float, float]:
-    """Percentile-bootstrap 95% CI for the median.  Returns (median, ci_lo, ci_hi)."""
     arr = np.asarray(values, dtype=np.float64)
     arr = arr[~np.isnan(arr)]
     n = len(arr)
@@ -145,7 +138,6 @@ def fmt_bytes(val: float) -> str:
 
 
 def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
-    """Two-panel composite: absolute bytes per zoom (top 2×2) and % of MVT (bottom 2×2)."""
     print("Generating encoder_comparison_per_zoom…")
 
     compressions = ["plain", "gzip", "brotli", "zstd"]
@@ -247,7 +239,6 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
 
 
 def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
-    """Bar chart: total tile size per zoom for MVT/MVT-shaved/MLT-Rust/MLT-Rust-shaved."""
     print("Generating shaving_effectiveness_per_zoom…")
 
     fig = make_subplots(
@@ -302,7 +293,6 @@ def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
 
 
 def plot_compression_ratio_per_zoom(df: pd.DataFrame) -> None:
-    """Line chart: size ratio (MLT-Java/MVT and MLT-Rust/MVT) per compression method."""
     print("Generating compression_ratio_per_zoom…")
 
     fig = go.Figure()
@@ -354,7 +344,6 @@ MODE_PATTERNS = {
 
 
 def plot_minhash_sweep(df: pd.DataFrame) -> None:
-    """Grouped bar chart: total mbtiles size per (mode, threshold)."""
     print("Generating minhash_sweep…")
 
     fig = go.Figure()
@@ -387,10 +376,6 @@ def plot_minhash_sweep(df: pd.DataFrame) -> None:
 
 
 def _load_ci_levels() -> pd.DataFrame | None:
-    """Load confidence_intervals.csv and return a (style, step) → loadMs pivot.
-
-    Missing (deduped) steps are forward-filled so that every step 0..max has a value.
-    """
     ci_csv = DATA_DIR / "confidence_intervals.csv"
     if not ci_csv.exists():
         return None
@@ -398,6 +383,7 @@ def _load_ci_levels() -> pd.DataFrame | None:
     load = ci[ci["metric"] == "loadMs"][["style", "step", "median"]].copy()
     pivot = load.pivot_table(index="step", columns="style", values="median")
     all_steps = range(int(pivot.index.min()), int(pivot.index.max()) + 1)
+    # forward-fill deduped (missing) steps so every step 0..max has a value
     pivot = pivot.reindex(all_steps).ffill()
     return pivot
 
@@ -412,10 +398,6 @@ _MLT_CONFIG_MAP = {
 
 
 def _load_mlt_config_ci() -> pd.DataFrame | None:
-    """Load confidence_intervals.csv filtered to fiord+liberty and the 5 thesis configs.
-
-    Returns DataFrame with columns: style, config, metric, median, ci_lo, ci_hi.
-    """
     ci_csv = DATA_DIR / "confidence_intervals.csv"
     if not ci_csv.exists():
         return None
@@ -428,7 +410,6 @@ def _load_mlt_config_ci() -> pd.DataFrame | None:
 
 
 def plot_waterfall_loadMs() -> None:
-    """Waterfall chart: cumulative load-time change per ablation step with bootstrap 95% CI."""
     print("Generating waterfall_loadMs…")
     pivot = _load_ci_levels()
     if pivot is None:
@@ -470,7 +451,6 @@ def plot_waterfall_loadMs() -> None:
             heights.append(0.0)
             colors.append("#BBBBBB")
         elif d <= 0:
-            # Improvement bar drawn from (running + d) upward by |d|.
             bases.append(running + d)
             heights.append(abs(d))
             colors.append("#009E73")
@@ -481,7 +461,7 @@ def plot_waterfall_loadMs() -> None:
         running += d
 
     fig = go.Figure()
-    # Transparent base bars stack the visible delta bars to the running total.
+    # invisble base bars to offset the visible deltas to the running total
     fig.add_trace(go.Bar(
         x=labels, y=bases,
         marker_color="rgba(0,0,0,0)", showlegend=False,
@@ -508,7 +488,6 @@ def plot_waterfall_loadMs() -> None:
 
 
 def plot_marginal_loadMs() -> None:
-    """Bar chart: marginal load-time contribution per ablation step with bootstrap 95% CI."""
     print("Generating marginal_loadMs…")
     pivot = _load_ci_levels()
     if pivot is None:
@@ -531,7 +510,7 @@ def plot_marginal_loadMs() -> None:
         per_style_delta = (pct.loc[s] - pct.loc[prev]).dropna().values
         m, lo, hi = _bootstrap_ci(per_style_delta)
 
-        # Deduped steps register as near-zero deltas; omit them.
+        # skip deduped steps (near-zero deltas)
         if abs(m) < 0.05 and abs(lo) < 0.1 and abs(hi) < 0.1:
             continue
 
@@ -598,8 +577,7 @@ def main() -> None:
     print(f"\nAll figures written to {OUTPUT_DIR}")
 
 
-# The "style-only" config is the last cumulative style pass before tile steps;
-# both step-15 (no selectivity) and step-16 (with selectivity) collapse to it.
+# step-15 (no selectivity) and step-16 (with selectivity) both collapse into "style-only"
 CONFIG_MAP = {
     "step-00-baseline": "1: MVT baseline",
     "step-15-layer_merge": "2: Style-only",
@@ -627,7 +605,6 @@ CONFIG_PATTERNS = {
 
 
 def load_bench_jsonl(paths: list[Path]) -> pd.DataFrame | None:
-    """Load benchmark JSONL and filter to the 5 thesis configurations."""
     rows = []
     for p in paths:
         with open(p) as f:
@@ -649,11 +626,6 @@ def load_bench_jsonl(paths: list[Path]) -> pd.DataFrame | None:
 
 
 def plot_interaction(df: pd.DataFrame) -> None:
-    """Bar chart showing shaving-only vs style+shaving tile-data reductions.
-
-    Uses tile_bytes (mbtiles file size) to measure actual tile data impact.
-    If the combined bar exceeds the shaving-only bar, style optimization
-    narrows the advisory and produces a measurable cascade effect."""
     print("Generating interaction_plot…")
 
     medians = df.groupby(["config", "style", "scenario"])["tile_bytes"].median().reset_index()
@@ -689,11 +661,8 @@ def plot_interaction(df: pd.DataFrame) -> None:
 
 
 def plot_rendering_metrics_mlt() -> None:
-    """One bar chart per (style, metric) panel with bootstrap 95% CI.
-
-    Each panel is exported as a standalone PDF so the LaTeX source can lay them
-    out as subfigures (tighter than plotly's inter-subplot whitespace).
-    """
+    # one panel per (style, metric), exported as standalone PDF so LaTeX can
+    # lay them out as subfigures
     print("Generating rendering_metrics_mlt panels…")
 
     ci = _load_mlt_config_ci()

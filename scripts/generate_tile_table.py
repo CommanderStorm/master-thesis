@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Generate per-zoom tile size CSV from tile_sizes.csv."""
 
 import csv
 from pathlib import Path

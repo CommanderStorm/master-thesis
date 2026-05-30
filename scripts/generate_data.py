@@ -5,11 +5,7 @@
 #     "zstandard>=0.23",
 # ]
 # ///
-"""Extract per-zoom tile size data from mbtiles files, save as CSV.
-
-For each source (MVT, MLT-Java, MLT-Rust), tiles are decompressed to raw bytes
-and then measured under four compression schemes: plain, gzip, brotli, zstd.
-"""
+# extarct per-zoom tile sizes from mbtiles, write CSV
 
 import csv
 import gzip
@@ -54,7 +50,6 @@ def is_gzip(data: bytes) -> bool:
 
 
 def raw_bytes(data: bytes) -> bytes:
-    """Decompress tile data if gzip-compressed, otherwise return as-is."""
     if is_gzip(data):
         return gzip.decompress(data)
     return data
@@ -84,7 +79,6 @@ def convert_mvt_to_mlt(mlt_bin: Path, src: Path, dst: Path) -> None:
 
 
 def extract_compressed_stats(mbtiles_path: Path, source_label: str) -> list[dict]:
-    """Read all tiles, decompress, recompress with each algorithm, aggregate per zoom."""
     print(f"  Processing {source_label} ({mbtiles_path.name})…", flush=True)
     con = sqlite3.connect(f"file:{mbtiles_path}?mode=ro", uri=True)
 

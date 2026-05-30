@@ -63,11 +63,10 @@ def load_jsonl(path: Path) -> pd.DataFrame:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate tile shave per-style figure.")
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "--input", type=Path,
         default=DATA_DIR / "tile_shave_per_style.jsonl",
-        help="JSONL input file",
     )
     args = parser.parse_args()
 
