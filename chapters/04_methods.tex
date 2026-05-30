@@ -939,8 +939,7 @@ The cascade mirrors the materialized-view maintenance problem, with the renderin
 \noindent The advisory captures the following per source-layer:
 
 \begin{description}
-    \item[\textbf{Used properties with zoom ranges}] for each property name appearing in a \texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]} expression in any live style layer, the zoom range over which it is referenced.
-    Properties not referenced at any zoom level are candidates for removal.
+    \item[\textbf{Used properties with zoom ranges}] for 
     \item[\textbf{Used geometry types with zoom ranges}] which of Point, LineString, and Polygon are needed, derived from the style layer types (e.g., \texttt{\mlval{fill}} $\to$ Polygon, \texttt{\mlval{circle}} $\to$ Point).
     The pass removes features with geometry types unused by any style layer at the current zoom level.
     \item[\textbf{Unused zoom levels}] zoom levels at which no style layer targets the source-layer.
@@ -951,12 +950,11 @@ The cascade mirrors the materialized-view maintenance problem, with the renderin
     When IDs are unused, the pass strips the entire ID column.
 \end{description}
 
-noindent The advisory captures five categories of information for each source-layer:
+\noindent The advisory captures five categories of information for each source-layer:
 
 \begin{description}
-	\item[\textbf{Property usage.}] Properties referenced through
-	\texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]},
-	together with the zoom ranges over which they are referenced.
+	\item[\textbf{Property usage.}] Each property name appearing in a \texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]} expression in any live style layer, the zoom range over which it is referenced.
+	Properties not referenced at any zoom level are candidates for removal.
 	
 	\item[\textbf{Geometry usage.}] Geometry types (Point, LineString, and
 	Polygon) required at each zoom level, inferred from the live style layers
