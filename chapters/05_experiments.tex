@@ -861,7 +861,7 @@ Preprocessing cost is therefore amortised over all subsequent tile deliveries an
 In this section we measure each of the four additive cost terms $C_\text{style}$, $C_\text{stats}$, $C_\text{adv}$, and $C_\text{enc}$ from the preprocessing cost model (\cref{eq:cost_model}, \cref{sub:preprocessing_cost_model}) on a real tileset, and confirm that the cost-control mechanisms formalised there keep the multi-strategy overhead well below the naive worst case.
 
 \paragraph{Measured Stage Costs}
-\Cref{tab:preprocessing_cost} reports wall-clock time for each stage of the preprocessing pipeline on the Germany OpenMapTiles tileset (\num{256156} tiles after pruning, zoom 0-14), which we measured on an AMD Ryzen~7 3700X (8 cores / 16 threads), \qty{46}{\gibi\byte} \ac{RAM}, NVMe SSD (median of three runs).
+\Cref{tab:preprocessing_cost} reports wall-clock time for each stage of the preprocessing pipeline on the Germany OpenMapTiles tileset (\num{256156} tiles after pruning, zoom 0-14), which we measured on \cref{tab:bench_hardware}.
 \emph{Style optimization} ($C_\text{style}$) and \emph{advisory computation} ($C_\text{adv}$) are negligible: Liberty's 111-layer style completes all passes in \qty{7.5}{\milli\second} and the advisory in \qty{1.1}{\milli\second}.
 \emph{Tile-statistics collection} ($C_\text{stats}$) takes \qty{57.4}{\second} for a single-threaded scan of all \num{256588} source tiles.
 \emph{Tile pruning and \ac{MVT} re-encoding} ($C_\text{enc}$, MVT) takes \qty{15.6}{\second} using Rayon\footnote{\url{https://github.com/rayon-rs/rayon}, last accessed 2026-05-23} parallelism.
