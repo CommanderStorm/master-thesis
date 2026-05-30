@@ -500,7 +500,7 @@
         % specify font and color for the header
         \fontfamily{phv}\selectfont\footnotesize\usebeamercolor[fg]{headline}
         % use phantoms here to ensure every line has the same height and depth
-        % (important if e.g. chair is empty)
+        % (important if e.g., chair is empty)
         \leavevmode\rlap{\theChairName}{\phantom{University}}\newline
         \rlap{\theDepartmentName}{\phantom{University}}\newline
         \theUniversityName\phantom{University}

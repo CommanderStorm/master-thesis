@@ -125,7 +125,7 @@
 \renewcommand*{\indexpagestyle}{TUM.insidepage.plain}
 
 
-% .:: Default book layout (e.g. for Lecture notes)
+% .:: Default book layout (e.g., for Lecture notes)
 
 \newlength{\@tum@cover@title@height@}
 
