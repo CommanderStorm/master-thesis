@@ -390,7 +390,7 @@ Total tileset size for the three encoders under four wire compressions.
           The \ac{MLT} (this work) column reports the encoder developed in this thesis}
         \label{tab:mvt_mlt_comparison}
     \end{subfigure}
-\caption[Encoder comparison: per-zoom breakdown and total tileset size]{Encoder comparison for the Germany OpenMapTiles tileset (zoom~0-14, \num{256588} tiles).
+\caption[Encoder comparison: per-zoom breakdown and total tileset size]{Encoder comparison for the Germany OpenMapTiles tileset (zoom~0-14, \qty{256588}{\kilo tiles}).
 Our \ac{MLT} encoder achieves \qty{28.3}{\percent} smaller total size than the reference baseline under no wire compression.
 The reference encoder drifts above \ac{MVT} size at several zoom levels under Brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
 \label{fig:encoder_comparison}
@@ -583,12 +583,26 @@ Optimization yield is therefore not reliably predictable from complexity alone, 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\linewidth]{figures/cross_style_summary.pdf}
-    \caption{
-Distribution of style-size and complexity changes across the Maputnik generalization corpus (13 styles, static passes only).
-Top panel: raw, gzip, Brotli, and layer-count reductions share a single \%-reduction scale.
-Bottom panel: \ac{AST} node count change is signed -- positive values denote a reduction in node count, negative values denote growth from expression rewriting (e.g.\ unrolling \texttt{match} into nested \texttt{case}); the dashed line marks zero.
-Only three of the 13 styles see a net node-count reduction, indicating that the byte-size gains come predominantly from style-level passes (default stripping, layer merging, metadata stripping) rather than from expression simplification alone.}
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/cross_style_summary.pdf}
+        \caption{Distribution of \%~reduction across the 13 styles for raw, gzip, and Brotli style sizes and for layer count.
+        All four metrics share the 0--70\,\% reduction scale; each dot is one style.}
+        \label{fig:cross_style_summary_sizes}
+    \end{subfigure}
+
+    \vspace{0.5em}
+
+    \begin{subfigure}[t]{\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{figures/cross_style_ast.pdf}
+        \caption{Original vs.\ optimized total \ac{AST} node count per style on a log scale, sorted by original size.
+        On the largest style (Americana) optimization roughly halves the node count; on small styles, expression canonicalization (e.g.\ unrolling \texttt{match} into nested \texttt{case}) inflates the absolute count by a few hundred nodes -- large in \%~terms but small in absolute terms.}
+        \label{fig:cross_style_summary_ast}
+    \end{subfigure}
+
+    \caption{Style-size and complexity changes across the Maputnik generalization corpus (13 styles, static passes only).
+    Only three styles (Americana, aws-hybrid, aws-standard) see a net node-count reduction, indicating that the byte-size gains come predominantly from style-level passes (default stripping, layer merging, metadata stripping) rather than from expression simplification alone.}
     \label{fig:cross_style_summary}
 \end{figure}
 
