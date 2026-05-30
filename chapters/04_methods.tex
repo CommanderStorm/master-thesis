@@ -916,12 +916,12 @@ Together they form a logical, physical, and cost pipeline: tile shaving eliminat
 
 The pipeline operates in three stages that mirror a database query optimizer's \emph{logical} rewriting, \emph{physical} strategy selection, and \emph{cost-based} competition.
 
-\begin{enumerate}
+\begin{description}
     \item \textbf{Style-driven tile shaving} (\cref{sub:tile_shaving}): the pipeline analyses the optimized style to produce a \emph{tile pruning advisory} that specifies, per source-layer and zoom level, which properties, geometry types, and property values to retain.
     It then prunes tiles according to this advisory before encoding.
     \item \textbf{Data transformations} (\cref{sub:string_property_interning,sub:feature_reordering}): the pipeline transforms remaining data to improve compressibility, replacing categorical string properties by frequency-ordered integers (\emph{string interning}) and reordering features to exploit spatial or categorical locality.
     \item \textbf{Encoding strategy selection} (\cref{sub:encoding_strategies}): the pipeline re-encodes the pruned, transformed data into \ac{MLT} using a multi-strategy competition that automatically profiles each data stream and selects the most compact encoding.
-\end{enumerate}
+\end{description}
 
 \noindent The three stages compose:
 shaving narrows the column set fed to Stage~2, which in turn determines the value distributions Stage~3 sees.
@@ -1151,13 +1151,13 @@ A layer dominated by a single repeated property value may benefit most from spat
 Because this balance shifts across layers, zoom levels, and tilesets, no single ordering dominates universally, and the choice cannot be resolved statically.
 
 The encoder therefore tries multiple sort strategies on the same data and retains the encoding with the smallest total byte count; \cref{fig:sort_competition} diagrams the resulting trial-and-retain loop, including the bounding-box pruning that skips spatial trials for large, widely-spread layers.
-The implemented strategies and their rationale are:
+The implemented strategies and their rationale are
 
 \begin{description}
-    \item[\textbf{Unsorted}] the encoder preserves the original feature order.
-    \item[\textbf{Spatial (Morton/Z-order)}] the encoder sorts features by the Z-order curve index of their first vertex, computed via bit-interleaving.  Fast to compute and provides reasonable spatial locality (\cref{sub:space_filling_curves}).
-    \item[\textbf{Spatial (Hilbert)}] the encoder sorts features by the Hilbert curve index of their first vertex.  Slower to compute than Morton but achieves superior spatial locality, as the Hilbert curve avoids the long jumps inherent in the Z-order curve's recursive structure~\cite{moonAnalysisClusteringProperties2001}.
-    \item[\textbf{ID}] the encoder sorts features by feature ID in ascending order.
+    \item[\textbf{Unsorted.}] The encoder preserves the original feature order.
+    \item[\textbf{Spatial (Morton/Z-order).}] The encoder sorts features by the Z-order curve index of their first vertex, computed via bit-interleaving.  Fast to compute and provides reasonable spatial locality (\cref{sub:space_filling_curves}).
+    \item[\textbf{Spatial (Hilbert).}] The encoder sorts features by the Hilbert curve index of their first vertex.  Slower to compute than Morton but achieves superior spatial locality, as the Hilbert curve avoids the long jumps inherent in the Z-order curve's recursive structure~\cite{moonAnalysisClusteringProperties2001}.
+    \item[\textbf{ID.}] The encoder sorts features by feature ID in ascending order.
 \end{description}
 
 For each candidate strategy, the encoder constructs a fresh \texttt{Encoder} instance, encodes the reordered layer, and measures the total output size (header + metadata + data).
