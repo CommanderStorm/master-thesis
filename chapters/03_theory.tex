@@ -258,7 +258,7 @@ The MapLibre style specification\footnote{\url{https://www.maplibre.org/maplibre
     \item[\textbf{Sources}] declare where tile data comes from (tile server URL, or inline \ac{GeoJSON}) and at which zoom levels tiles are available (\mlprop{minzoom}, \mlprop{maxzoom}).
 
     \item[\textbf{Layers}] are the central rendering unit.
-    Each layer references a source and a \emph{source-layer} within that source, specifies a \emph{type} (\texttt{\mlval{fill}}, \texttt{\mlval{line}}, \texttt{\mlval{circle}}, \texttt{\mlval{symbol}}, \texttt{\mlval{fill-extrusion}}, \texttt{\mlval{raster}}, \texttt{\mlval{background}} or \texttt{\mlval{hillshade}}) and carries a set of paint and layout properties that control its appearance.
+    Each layer references a source and a \emph{source-layer} within that source, specifies a \emph{type} (\mlval{fill}, \mlval{line}, \mlval{circle}, \mlval{symbol}, \mlval{fill-extrusion}, \mlval{raster}, \mlval{background} or \mlval{hillshade}) and carries a set of paint and layout properties that control its appearance.
     Layers are drawn in declaration order from bottom to top.
     \begin{description}
 

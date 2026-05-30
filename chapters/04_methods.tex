@@ -329,7 +329,7 @@ When the property is present in all features, it absorbs stops below $\mathrm{mi
 
 \noindent A cardinality threshold of \texttt{200} governs the granularity of value tracking: when the number of distinct values exceeds this threshold, the statistics switch from full value counts to cardinality-only mode.
 This bounds the cost on high-cardinality properties (names, identifiers) while retaining full information for the low-cardinality properties (class, subclass, administrative level) that benefit most from data-driven folding.
-We motivated the choice of 200 with the OpenMapTiles schema: every categorical property that is used as a \mlop{match}/ \mlop{case} discriminator in the benchmark styles (\texttt{\mlval{class}}, \texttt{\mlval{subclass}}, \texttt{\mlval{admin\_level}}, \texttt{\mlval{kind}}, land-use codes) has fewer than 200 distinct values across the Germany tileset, whereas high-cardinality string columns (feature names, identifiers) exceed it by one or more orders of magnitude.
+We motivated the choice of 200 with the OpenMapTiles schema: every categorical property that is used as a \mlop{match}/ \mlop{case} discriminator in the benchmark styles (\mlval{class}, \mlval{subclass}, \mlval{admin\_level}, \mlval{kind}, land-use codes) has fewer than 200 distinct values across the Germany tileset, whereas high-cardinality string columns (feature names, identifiers) exceed it by one or more orders of magnitude.
 The threshold therefore separates the \enquote{folding-useful} properties from the \enquote{folding-useless} ones without tuning for any specific style.
 
 We gate folds whose effect is irreversible (those that change the set of rendered features) on a full-census sample rate, as discussed in \cref{sub:tile_statistics}.
@@ -361,7 +361,7 @@ Interpolation and step ramp simplification detects ramps, where all stops map to
 The pass removes properties whose value equals the specification default.
 We derive the defaults from the code-generated Rust types: each property's default is known from the upstream \texttt{v8.json}.
 The pass strips only plain scalar values.
-It never removes expression-valued properties, even if they would evaluate to the default at all zoom levels, to avoid the risk of changing renderer behavior when the expression's mere presence affects layout (e.g.\ \texttt{\mlprop{text-radial-offset}} suppresses \texttt{\mlprop{text-offset}} regardless of its value).
+It never removes expression-valued properties, even if they would evaluate to the default at all zoom levels, to avoid the risk of changing renderer behavior when the expression's mere presence affects layout (e.g.\ \mlprop{text-radial-offset} suppresses \mlprop{text-offset} regardless of its value).
 
 \paragraph{Selectivity Reordering}\label{sec:selectivity_reordering}
 For variadic boolean expressions (\mlop{all}, \mlop{any}), the pass reorders predicates by estimated selectivity to exploit short-circuit evaluation, applying the selectivity-estimation framework of \cref{sec:query_optimizations}.
@@ -388,7 +388,7 @@ We estimate compound predicates under the standard independence assumption:
 \end{equation}
 
 \noindent The independence assumption is known to be imprecise for correlated predicates~\cite{selingerAccessPathSelection1979}, but as discussed in \cref{sec:query_optimizations} only a reordering heuristic consumes the selectivity signal here, not a cost-based plan chooser: what matters is the \emph{ordering} of predicates by selectivity, not their absolute values.
-Correlation between map-style predicates (e.g.\ \texttt{\mlval{class}} and \texttt{\mlval{subclass}} in OpenMapTiles) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
+Correlation between map-style predicates (e.g.\ \mlval{class} and \mlval{subclass} in OpenMapTiles) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
 Because the rendering benefit of predicate reordering depends on the proportion of evaluation cost attributable to predicate ordering (expected to be small for styles with short filters) we include this pass as an exploratory extension and do not separately benchmark its isolated impact.
 
 \paragraph{Termination and Confluence of the Fixpoint}
@@ -682,7 +682,7 @@ After removing dead layers, the pass prunes sources that no surviving layer refe
 This mirrors dead code elimination followed by unreachable function removal in a compiler (\cref{sec:compiler_optimizations}).
 Its downstream effect on the tile pruning advisory (\cref{sub:tile_shaving}) is the entry point for the data-level cascade evaluated in \cref{sub:mlt_results}.
 
-Geometry-type mismatch is particularly effective on schemas such as OpenMapTiles, where a single source layer (e.g.\ \texttt{transportation}) carries mixed geometry. \texttt{\mlval{fill}} layers require polygons, \texttt{\mlval{circle}} requires points, \texttt{\mlval{line}} draws on polygons or lines but not points, and \texttt{\mlval{symbol}} layers draw on all three and so are never killed by this rule.
+Geometry-type mismatch is particularly effective on schemas such as OpenMapTiles, where a single source layer (e.g.\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and so are never killed by this rule.
 The check requires tile statistics, so we provide both static and stats-driven variants of the pass.
 
 \paragraph{Metadata Refinement}
@@ -762,9 +762,9 @@ A property is mergeable if, according to the MIR field metadata,
   it is not a zoom ramp (\mlop{interpolate} or \mlop{step} over \texttt{[\mlop{"zoom"}]}).
   Both of these must remain at the top level of a property expression and cannot be nested inside a \mlop{case}/ \mlop{match} wrapper.
 Doing so would introduce an $\bot$ which is not allowed according to \cref{eq:visual_equivalence}.
-Camera-only properties (such as \texttt{\mlprop{line-dasharray}} or \texttt{\mlprop{*-translate}}) must be uniform across all layers in a merge group, since they cannot be conditioned on feature attributes.
-Layer types that support sort keys (\texttt{\mlval{fill}}, \texttt{\mlval{line}}, \texttt{\mlval{circle}}, \texttt{\mlval{fill-extrusion}}) are candidates.
-The \texttt{\mlval{symbol}} type is excluded for the placement-scope reason given above.
+Camera-only properties (such as \mlprop{line-dasharray} or \mlprop{*-translate}) must be uniform across all layers in a merge group, since they cannot be conditioned on feature attributes.
+Layer types that support sort keys (\mlval{fill}, \mlval{line}, \mlval{circle}, \mlval{fill-extrusion}) are candidates.
+The \mlval{symbol} type is excluded for the placement-scope reason given above.
 
 The merge pass has to preserve three invariants that collectively witness the visual-equivalence constraint of \cref{sec:problem_statement}.
 
@@ -776,10 +776,10 @@ This holds because the merged filter is the disjunction $\bigvee_i F_i$, the mer
 The per-layer draw order must be preserved so the top-most pixel at each screen position is unchanged.
 For layer types that expose \texttt{\{\mlprop{fill,line,circle}\}\mlprop{-sort-key}}, the pass synthezises a \mlop{case}/\mlop{match} sort key mapping each original layer's features to an ascending integer in declaration order, which the MapLibre renderer then applies before drawing.
 The pass refuses to merge any candidate that already carries an explicit sort key, since combining a user-declared key with a synthezised one would over-determine the ordering.
-\texttt{\mlprop{fill-extrusion}} layers are eligible in principle but inherit the same sort-key restriction, and their relative ordering is in any case dominated by the depth buffer rather than the painter's algorithm, so the synthezised key only breaks ties at co-planar surfaces.
+\mlprop{fill-extrusion} layers are eligible in principle but inherit the same sort-key restriction, and their relative ordering is in any case dominated by the depth buffer rather than the painter's algorithm, so the synthezised key only breaks ties at co-planar surfaces.
 
 \textbf{Layer scope.}
-Any MapLibre runtime behavior whose scope is the individual layer (per-layer symbol placement against the tile-wide \texttt{CollisionIndex}, \texttt{\mlop{feature-state}}, \texttt{\mlprop{*-translate}}, and other camera-only properties) must not have that scope widened by the merge.
+Any MapLibre runtime behavior whose scope is the individual layer (per-layer symbol placement against the tile-wide \texttt{CollisionIndex}, \mlop{feature-state}, \mlprop{*-translate}, and other camera-only properties) must not have that scope widened by the merge.
 This is guaranteed by excluding symbol layers from the candidate set, by the \texttt{expression.feature} gate forcing camera-only properties to stay uniform, and by refusing to merge layers with differing non-mergeable properties.
 
 \paragraph{Scope of Filter-to-Property Propagation}
@@ -800,13 +800,13 @@ This pattern is common in practice.
 Road styles frequently define separate layers for \texttt{highway} = \{\texttt{motorway}, \texttt{trunk}, \texttt{primary}, \texttt{secondary}, \texttt{tertiary}\}.
 These layers commonly differ only in width, color and layering, and for casing major roads there are usually two such layers per class.
 
-\Cref{fig:layer_merge_example} works through exactly this case: three adjacent \texttt{\mlval{line}} layers keyed on \texttt{\mlval{class}} collapse into a single layer whose filter, \mlprop{line-color}, \mlprop{line-width}, and synthezised \mlprop{line-sort-key} are all \mlop{match} expressions over the same discriminator, with Phase~\stepcirc{1} (mergeability) and Phase~\stepcirc{3} (identical zoom ranges) discharged trivially.
+\Cref{fig:layer_merge_example} works through exactly this case: three adjacent \mlval{line} layers keyed on \mlval{class} collapse into a single layer whose filter, \mlprop{line-color}, \mlprop{line-width}, and synthezised \mlprop{line-sort-key} are all \mlop{match} expressions over the same discriminator, with Phase~\stepcirc{1} (mergeability) and Phase~\stepcirc{3} (identical zoom ranges) discharged trivially.
 
 \emph{Phase}~\stepcirc{3} (zoom-tolerant merging) handles layers whose zoom ranges differ slightly.
 It wraps each sub-filter with zoom guards (\texttt{[\mlop{">="},\allowbreak~[\mlop{"zoom"}],\allowbreak~lo]}, \texttt{[\mlop{"<="},\allowbreak~[\mlop{"zoom"}],\allowbreak~hi]}) and unions the zoom ranges into the merged layer's bounds, trading a slightly more complex filter for one fewer layer.
 
 The synthezised \emph{sort key} that preserves inter-layer draw order uses the discriminator value as its index under a \mlop{match} pattern and tests filters in reverse order (last painter wins) under a \mlop{case} pattern.
-The pass emits a sort key only for layer types that support \texttt{\mlprop{*-sort-key}} and that do not already define one.
+The pass emits a sort key only for layer types that support \mlprop{*-sort-key} and that do not already define one.
 
 \paragraph{Source Zoom Tightening}
 After all layer-level passes, this pass tightens source \mlprop{minzoom}/ \mlprop{maxzoom} bounds to the effective zoom range of the layers that reference each source.
@@ -844,7 +844,7 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
             no existing sort-key};
         \node[right=1.4cm of l1, check, text width=4.2cm] (p2) {%
             \stepcirc{2}~\textbf{Match detection}\\[2pt]
-            all filters access the same property \texttt{\mlval{"class"}} with unique literals\\
+            all filters access the same property \mlval{"class"} with unique literals\\
             $\Rightarrow$ use \mlop{match} pattern};
         \node[right=1.4cm of l2, check, text width=4.2cm] (p3) {%
             \stepcirc{3}~\textbf{Zoom check}\\[2pt]
@@ -1022,7 +1022,7 @@ First, it reduces the per-feature storage cost from a variable-length string (wi
 Second, the frequency ordering means that common values receive small indices, which compress well under \ac{VarInt} and delta encoding.
 
 The optimizer rewrites the corresponding style expressions to reference the integer indices rather than the original string values.
-For example, the optimizer rewrites a filter \texttt{[\mlop{"=="}, [\mlop{"get"}, \mlval{"class"}], \mlval{"primary"}]} to \texttt{[\mlop{"=="}, [\mlop{"get"}, \mlval{"class"}], \mlval{0}]} if \texttt{\mlval{"primary"}} is the most frequent value.
+For example, the optimizer rewrites a filter \texttt{[\mlop{"=="}, [\mlop{"get"}, \mlval{"class"}], \mlval{"primary"}]} to \texttt{[\mlop{"=="}, [\mlop{"get"}, \mlval{"class"}], \mlval{0}]} if \mlval{"primary"} is the most frequent value.
 This rewriting ensures that the optimized style remains consistent with the transformed tile data.
 Because interned tiles encode property values as style-specific integer indices rather than original strings, they are only compatible with the paired optimized style.
 Other consumers (debugging tools, alternative renderers) would see opaque integers.
@@ -1276,7 +1276,7 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 
 \paragraph{Shared dictionary grouping}\label{sub:cardinality}
 The \ac{MLT} format supports shared dictionaries where multiple string columns reference a common deduplicated corpus, amortising dictionary overhead across columns with overlapping vocabularies.
-The reference encoder groups columns by naming prefix (e.g., \texttt{\mlval{name}}, \texttt{\mlval{name:en}}, \texttt{\mlval{name:de}}), which misses semantic overlaps (e.g., \texttt{\mlval{class}} and \texttt{\mlval{subclass}} in OpenMapTiles share many values).
+The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlval{name:en}, \mlval{name:de}), which misses semantic overlaps (e.g., \mlval{class} and \mlval{subclass} in OpenMapTiles share many values).
 
 \begin{sloppypar}
     Our encoder replaces prefix matching with MinHash-based similarity clustering (\cref{sub:lsh})~\cite{broderResemblanceContainmentDocuments1998}.
@@ -1308,11 +1308,11 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
                 \begin{tabular}{@{}l l@{}}
                     \textbf{Column} & \textbf{Distinct values (sample)} \\
                     \midrule
-                    \texttt{\mlval{name:de}}  & Straßburg, Freiburg, Mühlhausen, \ldots \\
-                    \texttt{\mlval{name:fr}}  & Strasbourg, Fribourg, Muhlhouse, \ldots \\
-                    \texttt{\mlval{class}}    & motorway, trunk, primary, \ldots \\
-                    \texttt{\mlval{subclass}} & motorway, trunk, primark, \ldots \\
-                    \texttt{\mlval{maxspeed}} & 30, 50, 80, \ldots
+                    \mlval{name:de}  & Straßburg, Freiburg, Mühlhausen, \ldots \\
+                    \mlval{name:fr}  & Strasbourg, Fribourg, Muhlhouse, \ldots \\
+                    \mlval{class}    & motorway, trunk, primary, \ldots \\
+                    \mlval{subclass} & motorway, trunk, primark, \ldots \\
+                    \mlval{maxspeed} & 30, 50, 80, \ldots
                 \end{tabular}%
             };
             \node[steplabel, above=1pt of tbl] {\circled{1} Column vocabularies};
@@ -1322,11 +1322,11 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
                 \begin{tabular}{@{}l c c@{}}
                     \textbf{Column} & \textbf{Exact sketch} & \textbf{Trigram sketch} \\
                     \midrule
-                    \texttt{\mlval{name:de}}  & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
-                    \texttt{\mlval{name:fr}}  & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
-                    \texttt{\mlval{class}}    & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
-                    \texttt{\mlval{subclass}} & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
-                    \texttt{\mlval{maxspeed}} & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
+                    \mlval{name:de}  & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
+                    \mlval{name:fr}  & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
+                    \mlval{class}    & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
+                    \mlval{subclass} & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
+                    \mlval{maxspeed} & $[h_1\!\ldots\!h_{128}]_{\text{val}}$ & $[h_1\!\ldots\!h_{128}]_{\text{3g}}$ \\
                 \end{tabular}%
             };
             \node[steplabel, above=1pt of hash] {\circled{2} MinHash signatures (128 permutations)};
@@ -1339,19 +1339,19 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             		$\hat{J}_{\text{tri}}$ &
             		\textbf{Observation} \\
             		\midrule
-            		\texttt{\mlval{name:de}} vs.\ \texttt{\mlval{name:fr}}
+            		\mlval{name:de} vs.\ \mlval{name:fr}
             		& 0.14 & \textbf{0.35}
             		& shared trigrams\\
 
-            		\texttt{\mlval{class}} vs.\ \texttt{\mlval{subclass}}
+            		\mlval{class} vs.\ \mlval{subclass}
             		& 0.45 & \textbf{0.57}
             		& shared values \\
 
-            		\texttt{\mlval{name:de}} vs.\ \texttt{\mlval{class}}
+            		\mlval{name:de} vs.\ \mlval{class}
             		& 0.00 & \textbf{0.01}
             		& unrelated \\
 
-            		\texttt{\mlval{maxspeed}} vs.\ others
+            		\mlval{maxspeed} vs.\ others
             		& 0.00 & 0.00
             		& no overlap \\
             	\end{tabular}%
@@ -1361,11 +1361,11 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             % Bottom-left (Step 4): Union-Find result
             \node[stepbox, cmp] at ($(tbl |- sim)$)  (res) {%
                 \textbf{Shared dictionary groups:}\\[3pt]
-                \fbox{\strut\texttt{\mlval{name:de}}, \texttt{\mlval{name:fr}}}\\[1pt]
+                \fbox{\strut\mlval{name:de}, \mlval{name:fr}}\\[1pt]
                 \quad{\scriptsize trigrams detected cross-language overlap}\\[4pt]
-                \fbox{\strut\texttt{\mlval{class}}, \texttt{\mlval{subclass}}}\\[1pt]
+                \fbox{\strut\mlval{class}, \mlval{subclass}}\\[1pt]
                 \quad{\scriptsize exact values detected semantic overlap}\\[4pt]
-                \texttt{\mlval{maxspeed}} - individual dictionary\\[1pt]
+                \mlval{maxspeed} - individual dictionary\\[1pt]
                 \quad{\scriptsize no overlap with any string column}%
             };
             \node[steplabel, below=1pt of res] {\circled{4} Union-Find clustering};
@@ -1382,8 +1382,8 @@ MinHash-based shared dictionary clustering (clockwise from top-left).
         \circled{2}~Two 128-permutation MinHash sketches are computed per column: one over exact string values, one over byte trigrams (3-byte sliding windows).
         \circled{3}~Pairwise Jaccard similarity is estimated by counting matching hash positions.
 The maximum of the two sketch types is compared against threshold $\tau = 0.075$.
-        Exact matching detects columns that share literal values (\texttt{\mlval{class}}/ \texttt{\mlval{subclass}}).
-Trigram matching detects cross-language morphological variants (\texttt{\mlval{name:de}}/ \texttt{\mlval{name:fr}} in a border region).
+        Exact matching detects columns that share literal values (\mlval{class}/ \mlval{subclass}).
+Trigram matching detects cross-language morphological variants (\mlval{name:de}/ \mlval{name:fr} in a border region).
         \circled{4}~Column pairs exceeding the threshold are unified via Union-Find.
 The resulting groups share a single deduplicated dictionary corpus}
     \label{fig:minhash_clustering}
