@@ -1444,7 +1444,7 @@ See \cref{app:animation_patterns} for the keyframe diagrams.
 Each scenario is a specific (location, animation) pair.
 The full cross-product of 15 locations and 5 animations is 75 pairs, which is too expensive\footnote{Each cell requires 15 repeat runs for statistical validity across 19 ablation steps and 15 styles, as this would result in $75 \times 15 \times 19 \times 15 = \num{320625}$ full animations} to run for every ablation step.
 We chose the 18 selected scenarios by stratified sampling so that every location appears at least once and every animation appears at least three times, and so that all combinations of density class (high/low) and script class (Latin/non-Latin) are represented.
-Within each stratum we selected the specific (location, animation) pair that exercises the most layers in the densest style in the corpus, ensuring that the sample is biased \emph{against} the null hypothesis of \enquote{no effect}, i.e.\ towards scenarios where any rendering-cost differences are most likely to be visible.
+Within each stratum we selected the specific (location, animation) pair that exercises the most layers in the densest style in the corpus, ensuring that the sample is biased \emph{against} the null hypothesis of \enquote{no effect}, i.e.\ toward scenarios where any rendering-cost differences are most likely to be visible.
 
 This is a convenience sample by design.
 We do not claim it is unbiased across all real-world usage patterns, but we claim it is a reasonable stress test of the optimizer across the dimensions (density, script, zoom trajectory, camera motion) that most plausibly interact with style and data-level optimizations.
@@ -1475,7 +1475,7 @@ Per run, the benchmark harness collects the following metrics:
     Within the rendering benchmark, decoding latency is embedded in \texttt{loadMs} rather than isolated, because the browser-based harness cannot separate decoder wall-clock time from the surrounding fetch and first-paint work without renderer-internal instrumentation.
     We instead measure isolated decoding throughput via Criterion\footnote{\url{https://github.com/bheisler/criterion.rs}, last accessed 2026-05-23} micro-benchmarks on our decoder (\cref{tab:decode_throughput}).
     \item[Style parse time] time spent parsing and compiling the style \ac{JSON} into the renderer's internal representation.
-    \item[Time to first tile] time from map initialisation until the first tile is decoded and ready for rendering.
+    \item[Time to first tile] time from map initialization until the first tile is decoded and ready for rendering.
     \item[Time to first frame] time until the first frame is composited and presented.
     \item[\ac{FPS}] average rendering throughput during the animation phase.
     \item[Frame time percentiles] distribution of per-frame render times, capturing both typical and worst-case latency.

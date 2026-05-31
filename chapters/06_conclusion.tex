@@ -53,7 +53,7 @@ Expressions are compositional and the rules are individually semantics-preservin
 
 \paragraph{R1: Size and Rendering Impact of Co-Optimizations}
 Yes, meaningfully.
-The headline tile-size and load-time numbers are summarised under C4 and tabulated in \cref{tab:per_style_summary,tab:tile_sizes_per_zoom}.
+The headline tile-size and load-time numbers are summarized under C4 and tabulated in \cref{tab:per_style_summary,tab:tile_sizes_per_zoom}.
 At the style level, structural optimizations reduce the gzip-compressed style by \qty{14.1}{\percent} for Fiord and \qty{4.9}{\percent} for Liberty at step~15 (\cref{sub:structural_results}).
 The pipeline is not uniformly effective.
 Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview-dominated scenarios benefit more than street-level panning (\cref{sub:combined_marginal}).
@@ -100,10 +100,10 @@ The end-point of this trajectory is direct integration of the optimized \ac{MLT}
 
 \paragraph{Selective Column Decoding}
 A complement on the decode side is selective column decoding.
-The \ac{MLT} columnar layout permits skipping unreferenced columns entirely, a form of \emph{late materialisation}~\cite{abadiMaterializationStrategiesColumnOriented2007} applied at the tile level rather than at the analytical-query level.
+The \ac{MLT} columnar layout permits skipping unreferenced columns entirely, a form of \emph{late materialization}~\cite{abadiMaterializationStrategiesColumnOriented2007} applied at the tile level rather than at the analytical-query level.
 Augmenting the decoder with a column projection derived from the style's property references would make decode cost scale with the number of columns actually used rather than with the total schema width.
 This composes with tile shaving rather than competing with it.
-Shaving removes columns at encoding time (early materialisation), selective decoding skips them at decode time (late materialisation), and the two are most valuable when they run together.
+Shaving removes columns at encoding time (early materialization), selective decoding skips them at decode time (late materialization), and the two are most valuable when they run together.
 
 \paragraph{Rewrite Engine and Encoder Improvements}
 On the rewrite engine itself, two improvements are worth flagging.

@@ -15,7 +15,7 @@ The map view is rendered using one of the following approaches:
 Using \acp{SVG} means one is limited to a 2D rendering approach due to not having a camera.\end{sloppypar}
 
 \item[Canvas 2D] is the HTML5 \texttt{<canvas>} immediate-mode drawing \ac{API}.
-OpenLayers\footnote{\url{https://openlayers.org/}, last accessed 2026-04-21} uses Canvas~2D as its primary renderer, rasterising vector features on the \ac{CPU} rather than submitting them to the \ac{GPU}.
+OpenLayers\footnote{\url{https://openlayers.org/}, last accessed 2026-04-21} uses Canvas~2D as its primary renderer, rasterizing vector features on the \ac{CPU} rather than submitting them to the \ac{GPU}.
 This avoids the complexity of \ac{GPU} pipeline management and shader compilation, but rendering throughput is \ac{CPU}-bound and does not benefit from hardware-accelerated geometry processing.
 Like \ac{SVG}, Canvas~2D is limited to 2D views without pitch or rotation.
 
@@ -124,7 +124,7 @@ A simpler approach therefore exists.
 Fonts are cut into Unicode slices (\texttt{start..end}) and only the ranges that the client needs are served.
 This cutting of fonts has the implicit advantage of pruning the space of possible font data to just the data that is needed to render the map.
 
-Common open-source renderers like MapLibre or source-available renderers like Mapbox do this by shipping pre-rasterised glyph ranges as \acp{PBF} encoded \acp{SDF}~\cite{greenImprovedAlphatestedMagnification2007}, indexed by Unicode range (e.g.,\ \texttt{0-255.pbf}, \texttt{256-511.pbf}).
+Common open-source renderers like MapLibre or source-available renderers like Mapbox do this by shipping pre-rasterized glyph ranges as \acp{PBF} encoded \acp{SDF}~\cite{greenImprovedAlphatestedMagnification2007}, indexed by Unicode range (e.g.,\ \texttt{0-255.pbf}, \texttt{256-511.pbf}).
 
 \subsection{Sprites}
 
@@ -150,7 +150,7 @@ A layer's effective visibility at a given camera zoom is therefore a function of
 This observation has direct consequences for any optimizer that rewrites zoom bounds.
 Removing a layer at zoom~14, for example, will suppress its rendering at zoom~15 and beyond if the source's \mlprop{maxzoom} is~14, because the renderer continues to display overzoomed tiles from the highest available source zoom.
 We turn this into the asymmetric \mlprop{minzoom}/ \mlprop{maxzoom} tightening rule in \cref{sub:structural_optimizations}.
-\Cref{lst:overzoom} shows the two operations the slicer performs to synthezise a target tile from the source's \mlprop{maxzoom} tile.
+\Cref{lst:overzoom} shows the two operations the slicer performs to synthesize a target tile from the source's \mlprop{maxzoom} tile.
 \stepcirc{1}~Rescale each coordinate by $2^{\Delta z}$ relative to the target-tile offset ($offsetX \notin \{null,0\} \lor offsetY \notin \{null,0\} \Rightarrow x = x * scale - offsetX$). \stepcirc{2}~Clip to the target extent with a 128-unit overdraw buffer for continuous edge geometry.
 Both operations consume the source's \mlprop{maxzoom} tile as input, which is what makes \mlprop{maxzoom} tightening risky in a way that \mlprop{minzoom} tightening is not.
 
@@ -187,17 +187,17 @@ The following formats are used for encoding and transferring data to the client:
     \item[\acf{MLT}] \begin{sloppypar} is a columnar vector tile format proposed by Tremmel et~al.~\cite{tremmelMapLibreTileNext2025b}.
     Instead of the row-major key-value-pair layout of \ac{MVT}, \ac{MLT} stores each property as an independent column with type-specific encoding.
     This columnar layout enables per-column compression strategies (for example, dictionary encoding for low-cardinality string columns, delta encoding for monotonically increasing integers, or run-length encoding for repeated values) and eliminates the per-feature tag overhead of the protobuf encoding.
-    Tremmel et~al.\ report up to $3\times$ tile size reduction on encoded tilesets and up to $6\times$ on certain large tiles, with the realised ratio depending on data characteristics.\end{sloppypar}
+    Tremmel et~al.\ report up to $3\times$ tile size reduction on encoded tilesets and up to $6\times$ on certain large tiles, with the realized ratio depending on data characteristics.\end{sloppypar}
 \end{description}
 
 Beyond the choice of tile format, a number of transfer-layer optimizations can improve delivery performance:
-utilising the approximately \qty{14}{\kilo\byte} TCP slow-start window as discussed by Nathaniel~\cite{WhyYourWebsite}, edge caching\footnote{such as suggested by \url{https://docs.here.com/map-rendering/docs/cache-maps-raster-tile-api}, last accessed 2026-03-16}, HTTP/2 multiplexing~\cite{belsheHypertextTransferProtocol2015} (and its QUIC-based successor HTTP/3~\cite{bishopHTTP32022} for lossy mobile networks), and modern content-encoding algorithms such as Zstandard~\cite{colletZstandardCompressionApplication2021} and brotli~\cite{alakuijalaBrotliCompressedData2016} that achieve higher compression ratios than gzip's LZ77 foundation~\cite{zivUniversalAlgorithmSequential1977}.
+utilizing the approximately \qty{14}{\kilo\byte} TCP slow-start window as discussed by Nathaniel~\cite{WhyYourWebsite}, edge caching\footnote{such as suggested by \url{https://docs.here.com/map-rendering/docs/cache-maps-raster-tile-api}, last accessed 2026-03-16}, HTTP/2 multiplexing~\cite{belsheHypertextTransferProtocol2015} (and its QUIC-based successor HTTP/3~\cite{bishopHTTP32022} for lossy mobile networks), and modern content-encoding algorithms such as Zstandard~\cite{colletZstandardCompressionApplication2021} and brotli~\cite{alakuijalaBrotliCompressedData2016} that achieve higher compression ratios than gzip's LZ77 foundation~\cite{zivUniversalAlgorithmSequential1977}.
 Tile archive formats such as PMTiles~\cite{PMTilesConceptsProtomaps} and COMTiles~\cite{tremmelCOMTILESCASESTUDY2023} address the container layer by enabling serverless, cloud-native tile delivery from a single file in blob storage.
 Since \ac{MVT} is the established baseline and \ac{MLT} aims to improve upon it, we evaluate both formats and use the transition from \ac{MVT} to \ac{MLT} as one of our data-level optimization strategies.
 
 \subsection{Styles}\label{sec:styles}
 
-A map style defines the complete visual appearance of a map, including which data is shown, how it is colored, sized, and labelled, and at which zoom levels each element appears.
+A map style defines the complete visual appearance of a map, including which data is shown, how it is colored, sized, and labeled, and at which zoom levels each element appears.
 Three architectural approaches to map styling have been established:
 
 \begin{description}
@@ -283,7 +283,7 @@ Feature-state addressing further requires stable feature IDs, since the keying t
 
 The style expressions used by map renderers such as MapLibre are small programs in a special purpose \ac{DSL}.
 They contain conditionals (\mlop{case}, \mlop{match}), boolean operators (\mlop{all}, \mlop{any}), arithmetic, and data access (\mlop{get}, \mlop{has}), and variables (lexical bindings via \mlop{let}/ \mlop{var}, and the runtime stores of \cref{sub:feature_state}).
-Optimising these expressions draws directly on techniques developed over decades in compiler construction~\cite{ahoCompilersPrinciplesTechniques2007}.
+Optimizing these expressions draws directly on techniques developed over decades in compiler construction~\cite{ahoCompilersPrinciplesTechniques2007}.
 In this section we introduce the foundational concepts we apply in \cref{ch:methods}.
 
 \subsection{Peephole Optimization}
@@ -430,12 +430,12 @@ Filter-to-property constant propagation (\cref{sub:structural_optimizations}) is
 MapLibre paints only features that pass the filter (\cref{lst:bucket_populate}), so any equality constraint in the filter holds for every feature reaching the paint expression.
 The optimizer substitutes that constraint into the paint expression and folds away the branches it rules out, while the filter itself stays unchanged and still runs at render time against dynamic feature data.
 The same framing covers the stats-driven folding pass, where the tile's value distribution (cardinalities, per-property frequencies, geometry-type counts) is the additional static input that lets the optimizer collapse \mlop{match} arms over absent values, tighten zoom bounds, and convert high-selectivity predicates into constants.
-This is distinct from profile-guided optimization, which would require measuring per-expression hotness at render time and specialising the hot paths.
-The style optimizer never observes render-time execution and therefore does not perform that kind of specialisation.
+This is distinct from profile-guided optimization, which would require measuring per-expression hotness at render time and specializing the hot paths.
+The style optimizer never observes render-time execution and therefore does not perform that kind of specialization.
 
 The encoding strategy competition (\cref{sub:encoding_strategies}) is no partial evaluation but a single-output search.
 It trials each candidate from a designer-specified set (sort orders $\times$ encoding schemes) on the actual data and emits the smallest, with a profiler pruning the search beforehand.
-We characterise this as \emph{exhaustive strategy selection} over a bounded candidate space, optimal within that space but blind to strategies outside it.
+We characterize this as \emph{exhaustive strategy selection} over a bounded candidate space, optimal within that space but blind to strategies outside it.
 
 \section{Data Encoding and Compression}\label{sec:data_encoding}
 
@@ -445,7 +445,7 @@ A column has to be both \emph{represented} as a value sequence and \emph{packed}
 Following the MLT specification, we call the first kind a \emph{logical-level technique} and the second a \emph{physical-level technique}.
 A column applies zero or more logical techniques in chain and then exactly one physical technique, for example DeltaRLE~$\rightarrow$~FastPFOR.
 
-\Cref{sub:logical_integer_encodings,sub:physical_integer_compressions} catalogue the techniques we use in our data-level optimizations of \cref{ch:methods}.
+\Cref{sub:logical_integer_encodings,sub:physical_integer_compressions} catalog the techniques we use in our data-level optimizations of \cref{ch:methods}.
 
 \subsection{Column-Oriented Storage}\label{sub:column_storage}
 
@@ -454,7 +454,7 @@ This layout is efficient for transactional workloads that access entire records,
 
 \emph{Column-oriented} (columnar) storage transposes this layout, storing all values of a single attribute contiguously~\cite{abadiDesignImplementationModern2013}.
 The foundational system in this space is by Dremel~\cite{melnikDremelInteractiveAnalysis}, who introducsed the record shredding and assembly algorithm for nested columnar data using definition and repetition levels, the representation pattern that directly inspired Apache Parquet and, by extension, the columnar layout that \ac{MLT} adapts for tile data.
-This layout offers three advantages for read-heavy workloads. \emph{Reduced I/O} follows from reading or transferring only the referenced columns. \emph{Better compression} follows from the higher local homogeneity of values of the same type and semantic domain compared to interleaved multi-type records. \emph{Vectorised processing} follows from the layout's natural fit for \ac{SIMD}-style batch operations over arrays of the same type.
+This layout offers three advantages for read-heavy workloads. \emph{Reduced I/O} follows from reading or transferring only the referenced columns. \emph{Better compression} follows from the higher local homogeneity of values of the same type and semantic domain compared to interleaved multi-type records. \emph{Vectorized processing} follows from the layout's natural fit for \ac{SIMD}-style batch operations over arrays of the same type.
 
 In the context of vector tiles, the row-oriented \ac{MVT} format stores all properties of a feature together, whereas the columnar \ac{MLT} format stores each property as an independent column.
 The columnar layout allows per-column encoding strategies.
@@ -582,11 +582,11 @@ Our evaluation in \cref{ch:experiments} follows their guidelines by reporting pe
 In the context of web maps, the candidate metrics span a range from deployment-critical on battery-constrained targets to directly user-visible ones on the desktop:
 
 \begin{description}
-    \item[Resource utilisation,] such as \ac{CPU} load, \ac{GPU} utilisation, and memory consumption to have pointers where further optimizations is possible.
+    \item[Resource utilization,] such as \ac{CPU} load, \ac{GPU} utilization, and memory consumption to have pointers where further optimizations is possible.
     \item[Latency and responsiveness,] measuring the time between initiating an operation (for example zooming) and the first visible result.
     \item[Throughput,] typically measured in \acp{FPS} or frame time, describing how many frames can be rendered per second.
     \item[Frame stability,] which captures variations in frame time and identifies dropped frames or rendering stutters.
-    \item[Network utilisation,] including transferred bytes, tile request rates, and bandwidth consumption.
+    \item[Network utilization,] including transferred bytes, tile request rates, and bandwidth consumption.
     \item[Power consumption] in Watts, which is relevant for mobile devices and battery-powered systems.
 We do not measure power consumption directly, since our benchmark host is a desktop workstation rather than a battery-constrained mobile device.
 We instead rely on transfer-size reductions and reduced draw-call counts as established proxies for energy savings on mobile targets, given that cellular radio energy is proportional to data volume and \ac{GPU} active time scales with draw-call count.

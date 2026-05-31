@@ -51,7 +51,7 @@ We characterize each rule by its pass assignment, scope (filter-only or both fil
 27 & Fold (stats) & both & stats & Prune unreachable \mlop{interpolate}/ \mlop{step} stops outside observed data range \\
 \midrule
 28 & Simplify & both & pure & Factor common operands:\newline \texttt{[\mlop{"any"},[\mlop{"all"},A,B],[\mlop{"all"},A,C]]} $\to$ \texttt{[\mlop{"all"},A,[\mlop{"any"},B,C]]} \\
-29 & Simplify & both & pure & Canonicalise \texttt{[\mlop{"exponential"},\mlval{1}]} $\to$ \texttt{[\mlop{"linear"}]} in interpolate curves \\
+29 & Simplify & both & pure & Canonicalize \texttt{[\mlop{"exponential"},\mlval{1}]} $\to$ \texttt{[\mlop{"linear"}]} in interpolate curves \\
 30 & Simplify & both & pure & Collapse \mlop{interpolate}/ \mlop{step} when all output values are structurally equal \\
 31 & Simplify & both & pure & Merge \mlop{match} arms with identical outputs; drop arms that equal the fallback \\
 32 & Simplify & both & pure & Strip \mlop{coalesce} wrapper from comparison when default fails anyway \\
@@ -360,7 +360,7 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip - 12 arrows; camera tracks centre, so \b=270-30i (mod 360)
+				% bearing strip - 12 arrows; camera tracks center, so \b=270-30i (mod 360)
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,11} {
@@ -574,7 +574,7 @@ The BasemapDE pair stops at the static passes (steps 0--15) because no tile sour
 \perstyleablation{klokan_basic}{Klokan Basic}
 \perstyleablation{toner}{Toner}
 \perstyleablation{osm_liberty}{OSM Liberty}
-\perstyleablation{basemap_col}{BasemapDE Colour}
+\perstyleablation{basemap_col}{BasemapDE Color}
 \perstyleablation{basemap_top}{BasemapDE Topo}
 \perstyleablation{icgc_fosc}{ICGC Fosc}
 \perstyleablation{icgc_gris}{ICGC Gris}
@@ -616,7 +616,7 @@ shaving + \ac{MLT} encoding) relative to the \ac{MVT} baseline}
 \end{table}
 
 
-\section{Maputnik Generalisation Corpus}\label{app_maputnik}
+\section{Maputnik Generalization Corpus}\label{app_maputnik}
 
 In \cref{tab:maputnik_full}, we list the 13 styles from the Maputnik editor catalog we used in the cross-style generalization study (\cref{sec:exp_cross_style}), together with per-style metrics.
 Two catalog entries were unavailable at the time of measurement (\ac{HTTP}~403).
@@ -704,9 +704,6 @@ Host operating system, kernel, and graphics driver stack.}
 
 \begin{table}[htbp]
 \centering
-% Pinned-in-source values are derived from the Cargo workspace manifests
-% (rust/Cargo.toml, maplibre-optimiser/Cargo.toml), the Gradle libs catalogue
-% and per-module build.gradle files, and the Python harness pyproject.toml.
 \begin{tabular}{@{}l l@{}}
 \toprule
 \textbf{Toolchain} & \textbf{Installed on bench host} \\
@@ -714,14 +711,13 @@ Host operating system, kernel, and graphics driver stack.}
 Rust (\texttt{rustc})  & \texttt{1.94.1} (2026-03-25) \\
 Cargo                  & \texttt{1.94.1} (2026-03-24) \\
 JDK                    & Eclipse Temurin \texttt{22.0.2+9} \\
-Gradle                 & uses gradlew \\
 Node.js                & \texttt{v25.8.1} \\
 npm                    & \texttt{11.12.1} \\
 Python                 & \texttt{3.13.2} \\
 \bottomrule
 \end{tabular}
 \caption{
-Language toolchains used to build and run the encoder, optimiser, harness, and analysis scripts.}
+Language toolchains used to build and run the encoder, optimizer, harness, and analysis scripts.}
 \label{tab:bench_toolchains}
 \end{table}
 
@@ -786,7 +782,7 @@ The separate visual-check harness is used offline for \texttt{pixelmatch}-based 
                                        & \texttt{flate2}                  & \texttt{1} \\
                                        & \texttt{criterion}               & \texttt{0.8} \\
 \midrule
-Optimiser                    & \texttt{mlt-core}                & \texttt{0.9} \\
+Optimizer                    & \texttt{mlt-core}                & \texttt{0.9} \\
                                        & \texttt{prost}                   & \texttt{0.13} \\
 \midrule
 \ac{MLT}-Java                          & \texttt{protobuf-java}           & \texttt{4.34.0} \\

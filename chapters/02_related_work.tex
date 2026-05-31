@@ -17,13 +17,13 @@ and \cref{sec:rw_benchmarking} for rendering benchmarking.
 
 The most direct approach to reduce tile transfer cost is to remove unreferenced data from a style.
 
-Mapbox developed \texttt{vtshaver}\footnote{\url{https://github.com/mapbox/vtshaver}, last accessed 2025-10-20}, a C++/Node.js tool that takes a vector tile and a Mapbox GL style, analyses which layers, features, and properties the style references, and strips everything else.
+Mapbox developed \texttt{vtshaver}\footnote{\url{https://github.com/mapbox/vtshaver}, last accessed 2025-10-20}, a C++/Node.js tool that takes a vector tile and a Mapbox GL style, analyzes which layers, features, and properties the style references, and strips everything else.
 This reduces tile size and decoding cost, but \texttt{vtshaver} operates exclusively on the data side.
 It does not modify the style itself and therefore cannot simplify filter expressions, merge redundant layers, or reduce per-frame rendering overhead.
 It also only shaves on a zoom-property-unaware row-column approach.
 
 Mapbox also offers \emph{style-optimized vector tiles} as a proprietary server-side feature~\cite{StyleoptimizedVectorTiles}.
-When a tile request includes style metadata, the server analyses the style's sources, filters, and zoom ranges, then strips all data not visible for that style.
+When a tile request includes style metadata, the server analyzes the style's sources, filters, and zoom ranges, then strips all data not visible for that style.
 This is the closest commercial precedent for style-data co-optimizations, but it is opaque, closed-source, and \ac{API}-only.
 It cannot be extended, audited, or deployed independently.
 The exact set of optimizations is not disclosed and given that MapBox does not have a open research stance (their terms of service explicitly forbid this), reverse-engineering would likely be illegal\footnote{\url{https://media.ccc.de/v/36c3-11089-reflections_on_the_new_reverse_engineering_law}, last accessed 2026-05-21}.
@@ -53,8 +53,8 @@ These systems define the data that enters the pipeline.
 Our optimizations operate downstream, on the data and style that emerge from such pipelines, and do not require re-running the generator.
 
 A rendering style is a declarative specification over a tabular feature set, which puts style-driven tile pruning in the same shape as the column- and predicate-skipping problems that database query optimizers have long attacked.
-Rule-based query rewriting was established as a distinct optimization phase by Pirahesh et~al.'s Starburst system~\cite{piraheshExtensibleRuleBased1992}, and projection and predicate pushdown~\cite{graefeQueryEvaluationTechniques1993} are the canonical mechanisms by which modern engines such as Spark SQL~\cite{armbrustSparkSQLRelational2015} avoid materialising columns the query never reads.
-Columnar storage systems built on Parquet (whose nested representation originates in Dremel's record shredding and assembly~\cite{melnikDremelInteractiveAnalysis}) or ORC depend on this pushdown, and Abadi et~al.~\cite{abadiMaterializationStrategiesColumnOriented2007} characterised the early versus late materialisation trade-off it implies.
+Rule-based query rewriting was established as a distinct optimization phase by Pirahesh et~al.'s Starburst system~\cite{piraheshExtensibleRuleBased1992}, and projection and predicate pushdown~\cite{graefeQueryEvaluationTechniques1993} are the canonical mechanisms by which modern engines such as Spark SQL~\cite{armbrustSparkSQLRelational2015} avoid materializing columns the query never reads.
+Columnar storage systems built on Parquet (whose nested representation originates in Dremel's record shredding and assembly~\cite{melnikDremelInteractiveAnalysis}) or ORC depend on this pushdown, and Abadi et~al.~\cite{abadiMaterializationStrategiesColumnOriented2007} characterized the early versus late materialization trade-off it implies.
 Our data level optimizations are explained in \cref{sub:data_optimizations}.
 
 \section{Tile Encoding and Format Innovation}\label{sec:rw_tile_encoding}
@@ -72,7 +72,7 @@ Removing properties and features changes column cardinalities and value distribu
 For instance, pruning rare road classes can convert a high-cardinality string column into one amenable to dictionary or run-length encoding, so the optimal encoding strategy for the shaved tile differs from the original.
 
 The encoding techniques used in \ac{MLT} draw on the columnar database compression literature.
-Lemire and Boytsov~\cite{lemireDecodingBillionsIntegers2015} introduced \ac{SIMD}-vectorised integer compression \ac{FastPFOR} achieving billions of integers per second in decompression throughput.
+Lemire and Boytsov~\cite{lemireDecodingBillionsIntegers2015} introduced \ac{SIMD}-vectorized integer compression \ac{FastPFOR} achieving billions of integers per second in decompression throughput.
 Boncz et al.~\cite{bonczFSSTFastRandom2020} developed \ac{FSST}, a lightweight string compression scheme using a static symbol table that supports random access without decompressing surrounding data.
 Kuschewski et al.~\cite{kuschewskiBtrBlocksEfficientColumnar2023} demonstrated with BtrBlocks that cascading multiple encoding schemes (including \ac{FSST}, bit-packing, \ac{RLE}, and dictionary encoding) with automatic per-block strategy selection achieves 2.2$\times$ faster scans than Parquet.
 The general finding that no single encoding is universally optimal, and that data-driven strategy selection is necessary, motivates the multi-strategy encoding competition we develop in this thesis.
@@ -87,7 +87,7 @@ Our encoding competition differs from these systems by operating at tile granula
 We also include application-specific optimizations like spatial sort-order dimension (ID, Hilbert, Morton) that database encoders do not consider.
 This competition is an instance of \emph{instance-optimized} system design as proposed by Kraska~\cite{dingSageDBInstanceOptimizedData2022}.
 Rather than committing to a fixed encoding plan, the encoder uses the data distribution of each tile to select optimal physical representations.
-That is the approach advocated by the SageDB vision~\cite{dingSageDBInstanceOptimizedData2022} and realised concretely by Ding et~al.~\cite{dingInstanceOptimizedDataLayouts2021}, who showed that instance-optimized data layouts reduce blocks accessed by 93\% on cloud analytics workloads, and at the column-block level by BtrBlocks~\cite{kuschewskiBtrBlocksEfficientColumnar2023}.
+That is the approach advocated by the SageDB vision~\cite{dingSageDBInstanceOptimizedData2022} and realized concretely by Ding et~al.~\cite{dingInstanceOptimizedDataLayouts2021}, who showed that instance-optimized data layouts reduce blocks accessed by 93\% on cloud analytics workloads, and at the column-block level by BtrBlocks~\cite{kuschewskiBtrBlocksEfficientColumnar2023}.
 Alternative approaches to encoding selection include Fehér et~al.'s~\cite{feherAdaptiveColumnCompression2022} adaptive compression family, which selects encodings at runtime using segment-level measurements, and Cen et~al.'s~\cite{cenLEALearnedEncoding2021} LEA, a learned encoding advisor that uses ML models to predict the best encoding per column, achieving 19\% lower latency and 26\% less space than heuristic selection on TPC-H.
 Our trial-based competition is closest in spirit to the instance-optimized approach, but substitutes exhaustive evaluation over a bounded candidate space for the learned or heuristic strategies used in database systems.
 

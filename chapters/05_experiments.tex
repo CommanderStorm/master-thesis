@@ -19,7 +19,7 @@ We then test generalization on 13 unseen styles (\cref{sec:exp_cross_style}) and
 \textbf{Corpus exclusions}\par\vspace{2pt}
 A handful of styles from the pre-screening set do not appear fully in the numbers below.
 
-\emph{BasemapDE Colour} and \emph{BasemapDE Topo} were not benchmarked within the project's time budget due to contracting delays in getting access to the underlying data.
+\emph{BasemapDE Color} and \emph{BasemapDE Topo} were not benchmarked within the project's time budget due to contracting delays in getting access to the underlying data.
 
 \emph{ICGC Fosc}, \emph{ICGC Gris} and \emph{Americana} use legacy \mlprop{text-field} syntax that an upstream bug in MapLibre's bundled style migrator (\texttt{gl-style-migrate}\footnote{\url{https://github.com/maplibre/maplibre-style-spec/tree/main/src/migrate}, last accessed 2026-05-31}) miscompiles, not anything in our pipeline.
 Layer merging (step~15) then builds on the wrong intermediate, so any later step would compare apples vs.\ oranges against the rest of the corpus.
@@ -844,7 +844,7 @@ Layer merging produced a large marginal improvement in draw-call-heavy styles (m
 
 \paragraph{Transfer Size Metrics}
 Passes that primarily reduce serialized style size (default stripping, metadata stripping, color minification) show smaller rendering improvements but contribute meaningfully to transfer size, particularly under compression (gzip, brotli).
-A smaller style reduces the time to first render because the \ac{JSON} must be fetched, decompressed, and parsed before the renderer can initialise.
+A smaller style reduces the time to first render because the \ac{JSON} must be fetched, decompressed, and parsed before the renderer can initialize.
 Data-level tile shaving dominates the transfer-size metric, as tiles are fetched continuously during map interaction whereas the style is loaded only once.
 
 \paragraph{Load Time Metrics}
@@ -971,7 +971,7 @@ The BasemapDE pair was additionally excluded because we lack access to their und
 For the 11 \ac{OMT} styles in the deep corpus whose referenced tile data is fully available to us (the 10 end-to-end styles plus Americana), we verified the tile-shaving step alone (advisory generation and \ac{MVT} pruning, without rendering) on the same Germany tileset (\cref{fig:tile_shave_per_style}), confirming that shaving effectiveness generalizes across styles with reductions of \qtyrange{19.8}{46.3}{\percent}.
 The ICGC pair is excluded from this sweep because their Catalonia accessory tile data is not available to us (see the corpus-exclusions note at the top of this chapter), even though their \texttt{openmaptiles} source uses the same OMT schema as the 11.
 The remaining limitation is that tile statistics at a sample rate of~1.0 require access to the underlying tile data, which is available only for \ac{OSM}-based tilesets accessed via a local \texttt{.mbtiles} file.
-The style-only results (Experiments~1-2) cover the 13 benchmarked styles (BasemapDE Colour and BasemapDE Topo are the only deep-corpus members without measurement data) and are not affected by this limitation.
+The style-only results (Experiments~1-2) cover the 13 benchmarked styles (BasemapDE Color and BasemapDE Topo are the only deep-corpus members without measurement data) and are not affected by this limitation.
 
 \paragraph{Construct Validity}
 We simulated network conditions via a fixed bandwidth throttle (\cref{sub:tile_data}) rather than measuring under real \ac{CDN} latency profiles.

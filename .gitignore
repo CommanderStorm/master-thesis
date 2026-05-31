@@ -16,3 +16,4 @@ scripts/__pycache__
 *.log
 main.pdf
 *.run.xml
+.build/
