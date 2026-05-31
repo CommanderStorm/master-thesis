@@ -910,16 +910,6 @@ Expression and structural passes improve both load time and frame rate, because 
 Data-level passes primarily improve load time (smaller tiles arrive faster) and have a smaller effect on sustained frame rate, since once tiles are decoded and resident in the \ac{GPU} the per-frame cost is dominated by expression evaluation and draw-call overhead rather than data size.
 The exception is tile shaving at overview zoom levels, where removing entire source-layers reduces the number of features the renderer must process per frame.
 
-\paragraph{What Varies, and Why}
-The cumulative ablation shows diminishing marginal returns.
-Early passes (constant folding, dead elimination) capture the largest improvements because they address the most common sources of waste, while later passes (color minification, metadata stripping) address less frequent patterns and contribute correspondingly less.
-The non-cumulative isolated-impact analysis confirms that each pass has a non-trivial standalone contribution, even when its cumulative-sequence contribution looks small.
-The marginal number is sensitive to which passes precede it, but the standalone number is not.
-
-Variation across styles is similarly structured.
-Styles with many narrowly-filtered layers (e.g.,\ detailed road styles) benefit most from layer merging, styles with broad filters from stats-driven dead elimination, and styles with large expression trees from constant folding.
-No single pass dominates across all styles, which is the empirical justification for the multi-pass design.
-
 \paragraph{Measurement Noise}
 The 15-run median smooths out most measurement noise, but tail metrics (p99 frame time, jank count) carry higher variance than central-tendency metrics, with \ac{GPU} thermals, browser garbage collection, and OS scheduling all contributing.
 We partly self-inflict this, because using real \ac{GPU} hardware (ANGLE/Vulkan) rather than a software rasterizer captures realistic rendering costs (\ac{GPU} buffer management, shader compilation) at the expense of slightly higher noise compared to deterministic software rendering.
