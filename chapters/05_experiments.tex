@@ -427,7 +427,7 @@ To separate the contribution of the multi-strategy competition (this work) from 
 The headline is the \qty{28.3}{\percent} reduction our encoder achieved over the reference baseline under no wire compression.
 The reference baseline already incorporates encoding fixes backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds), so the \qty{28}{\percent} isolates the contribution of automatic strategy selection over a correctly-implemented fixed-plan encoder rather than conflating bug fixes with the innovation we contribute.
 
-The finding in \cref{tab:mvt_mlt_comparison} that is easiest to overlook is that the reference baseline \ac{MLT} under no compression was \emph{worse} than the commonly gzip-compressed \ac{MVT} (\qty{3.54}{\giga\byte} vs.\ \qty{3.08}{\giga\byte}).
+The finding in \cref{tab:mvt_mlt_comparison} that is easiest to overlook is that the reference baseline \ac{MLT} under no compression was \emph{worse} than the commonly gzip-compressed \ac{MVT} (\qty{4.24}{\giga\byte} vs.\ \qty{3.08}{\giga\byte}).
 General-purpose LZ77-family compressors already exploit most of the row-level redundancy in the protobuf wire format, and a columnar encoder that uses fixed per-column schemes cannot keep up.
 The data-driven strategy selection in our encoder reclaimed this gap and went past it: our encoder under gzip was \qty{12.3}{\percent} smaller than \ac{MVT} under gzip, and the advantage held (\qty{12.9}{\percent}) even against zstd-22, the strongest general-purpose compressor in the comparison.
 
