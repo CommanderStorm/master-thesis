@@ -811,14 +811,6 @@ Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corp
 \label{tab:marginal_contribution}
 \end{table}
 
-\subsection{Marginal Contribution Analysis}\label{sub:combined_marginal}
-
-Not all passes contribute equally, and the marginal contribution of each pass depends on the metric under consideration.
-
-\paragraph{Rendering Time Metrics}
-After tile shaving, we observed that expression-level constant folding and structural dead elimination tended to produce the largest marginal improvements in frame time and \ac{FPS}, as they reduce the number of expressions the renderer must evaluate per feature per frame and the number of layers it must process, respectively.
-Layer merging produced a large marginal improvement in draw-call-heavy styles (many road layers, many boundary layers) but a smaller improvement in simple styles.
-
 \begin{figure}[H]
 	\centering
 	\includegraphics[height=0.91\textheight]{figures/heatmap_loadMs.pdf}
@@ -851,6 +843,15 @@ Layer merging produced a large marginal improvement in draw-call-heavy styles (m
 		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmapjankcount}
 \end{figure}
+
+
+\subsection{Marginal Contribution Analysis}\label{sub:combined_marginal}
+
+Not all passes contribute equally, and the marginal contribution of each pass depends on the metric under consideration.
+
+\paragraph{Rendering Time Metrics}
+After tile shaving, we observed that expression-level constant folding and structural dead elimination tended to produce the largest marginal improvements in frame time and \ac{FPS}, as they reduce the number of expressions the renderer must evaluate per feature per frame and the number of layers it must process, respectively.
+Layer merging produced a large marginal improvement in draw-call-heavy styles (many road layers, many boundary layers) but a smaller improvement in simple styles.
 
 \paragraph{Transfer Size Metrics}
 Passes that primarily reduce serialized style size (default stripping, metadata stripping, color minification) show smaller rendering improvements but contribute meaningfully to transfer size, particularly under compression (gzip, brotli).
