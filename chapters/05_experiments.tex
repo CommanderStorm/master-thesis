@@ -77,7 +77,7 @@ Cumulative ablation waterfall for load time.
 Each bar shows the median change introduced by adding one expression pass on top of all previous passes, aggregated across all 18 scenarios and the 13 styles of the deep corpus.
 We can see that in the extremes, unary simplification has the largest effect.
 The aggregate load-time improvement across all expression passes is modest (\qty{-2.0}{\percent} per-style median), with expression passes serving primarily as enablers for downstream structural and data-level passes.
-For caveats, please see \cref{sub:expr_discussion}}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:waterfall_loadMs}
 \end{figure}
 
@@ -86,7 +86,7 @@ For caveats, please see \cref{sub:expr_discussion}}
     \includegraphics[width=\linewidth]{figures/marginal_loadMs.pdf}
     \caption{
 Marginal contribution of each expression pass to load time reduction shows the effect of each of the passes cleanly.
-For caveats, please see \cref{sub:expr_discussion}}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:marginal_loadMs}
 \end{figure}
 
@@ -98,7 +98,7 @@ Marginal contribution of each expression pass to parse the style in miliseconds.
 Variance is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
 The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
 This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.
-For caveats, please see \cref{sub:expr_discussion}}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:marginal_styleParseMs}
 \end{figure}
 
@@ -177,7 +177,7 @@ Dead elimination rarely removes whole layers because styles are designed to expo
 Total expression-tree node count is driven mostly by the expression passes (steps~1--7).
 Structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.
 Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{true} filters that refinement leaves behind.
-For caveats, please see \cref{sub:expr_discussion}}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:complexity_metrics}
 \end{figure}
 
@@ -839,7 +839,8 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 Marginal contribution of each ablation step to style size (raw, gzip, brotli), load time, and layer count.
 Values are percentage of baseline, medians across the 13 benchmarked styles and 18 scenarios.
 Data-level tile shaving dominates transfer-size and load-time metrics.
-Style-level passes contribute primarily to parse-time and style-size reductions and serve as enablers for the data-level pipeline.}
+Style-level passes contribute primarily to parse-time and style-size reductions and serve as enablers for the data-level pipeline.
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 \label{tab:marginal_contribution}
 \end{table}
 
