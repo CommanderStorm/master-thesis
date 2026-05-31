@@ -129,7 +129,7 @@ A simpler approach therefore exists.
 Fonts are cut into Unicode slices (\texttt{start..end}) and only the ranges that the client needs are served.
 This cutting of fonts has the implicit advantage of pruning the space of possible font data to just the data that is needed to render the map.
 
-Common open-source renderers like MapLibre or source-available renderers like Mapbox do this by shipping pre-rasterised glyph ranges as \acp{PBF} encoded \acp{SDF}~\cite{greenImprovedAlphatestedMagnification2007}, indexed by Unicode range (e.g.\ \texttt{0-255.pbf}, \texttt{256-511.pbf}).
+Common open-source renderers like MapLibre or source-available renderers like Mapbox do this by shipping pre-rasterised glyph ranges as \acp{PBF} encoded \acp{SDF}~\cite{greenImprovedAlphatestedMagnification2007}, indexed by Unicode range (e.g.,\ \texttt{0-255.pbf}, \texttt{256-511.pbf}).
 
 \subsection{Sprites}
 
@@ -600,11 +600,11 @@ We instead rely on transfer-size reductions and reduced draw-call counts as esta
 These can be benchmarked at different workload levels~\cite{jainArtComputerSystems1991}:
 
 \begin{description}
-    \item[\textbf{Micro-benchmarks}] isolate a single operation (e.g.\ decoding a single tile, evaluating a single filter expression) and measure its cost in isolation.
+    \item[\textbf{Micro-benchmarks}] isolate a single operation (e.g.,\ decoding a single tile, evaluating a single filter expression) and measure its cost in isolation.
 They are useful for identifying bottlenecks but may not reflect real-world performance due to caching and concurrency effects.
-    \item[\textbf{Macro-benchmarks}] measure the performance of a complete subsystem (e.g.\ loading a full style and rendering a fixed camera path) under controlled conditions.
+    \item[\textbf{Macro-benchmarks}] measure the performance of a complete subsystem (e.g.,\ loading a full style and rendering a fixed camera path) under controlled conditions.
 They capture interactions between components but require careful setup to ensure reproducibility.
-    \item[\textbf{Application-level benchmarks}] measure end-to-end user-perceived performance (e.g.\ time from page load to interactive map) in a realistic deployment.
+    \item[\textbf{Application-level benchmarks}] measure end-to-end user-perceived performance (e.g.,\ time from page load to interactive map) in a realistic deployment.
 They are the most representative but also the noisiest due to network variability, browser behavior, and hardware differences.
 \end{description}
 

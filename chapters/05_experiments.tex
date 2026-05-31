@@ -614,7 +614,7 @@ Optimization yield is therefore not reliably predictable from complexity alone, 
         \includegraphics[width=\linewidth]{figures/cross_style_ast.pdf}
         \caption{Original vs.\ optimized total \ac{AST} node count per style on a log scale, sorted by original size.
         On the largest style (Americana) optimization roughly halves the node count.
-        On small styles, expression canonicalization (e.g.\ unrolling \texttt{match} into nested \texttt{case}) inflates the absolute count by a few hundred nodes, large in \%~terms but small in absolute terms.}
+        On small styles, expression canonicalization (e.g.,\ unrolling \texttt{match} into nested \texttt{case}) inflates the absolute count by a few hundred nodes, large in \%~terms but small in absolute terms.}
         \label{fig:cross_style_summary_ast}
     \end{subfigure}
 
@@ -822,7 +822,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
     \bottomrule},
   head to column names,
 ]{scripts/data/marginal_contribution.csv}{}%
-{\step & \pass\ifnum\dagger=1\textsuperscript{$\dagger$}\fi\ifnum\star=1\textsuperscript{$\ast$}\fi &
+{\step & \pass\ifnum\daggerflag=1\textsuperscript{$\dagger$}\fi\ifnum\starflag=1\textsuperscript{$\ast$}\fi &
  \fmtdelta{\deltaRaw} & \fmtdelta{\deltaGzip} & \fmtdelta{\deltaBrotli} &
  \fmtdelta{\deltaLoad} & \fmtdeltaint{\deltaLayers}}%
 \caption{
@@ -931,7 +931,7 @@ The non-cumulative isolated-impact analysis confirms that each pass has a non-tr
 The marginal number is sensitive to which passes precede it, but the standalone number is not.
 
 Variation across styles is similarly structured.
-Styles with many narrowly-filtered layers (e.g.\ detailed road styles) benefit most from layer merging, styles with broad filters from stats-driven dead elimination, and styles with large expression trees from constant folding.
+Styles with many narrowly-filtered layers (e.g.,\ detailed road styles) benefit most from layer merging, styles with broad filters from stats-driven dead elimination, and styles with large expression trees from constant folding.
 No single pass dominates across all styles, which is the empirical justification for the multi-pass design.
 
 \paragraph{Measurement Noise}
@@ -982,7 +982,7 @@ This inflates total feature counts and distorts absolute selectivity estimates, 
 We made this choice deliberatiley because the underlying features are not a concearn for the renderer on most layers (exception being symbol placement which is map-global instead of tile-local).
 
 The selectivity estimation model assumes independence between filter predicates (\cref{eq:selectivity_theory}), which may not hold for correlated properties.
-Map-style filters in practice do exhibit correlations (e.g.\ \mlval{class} and \mlval{subclass} in \ac{OMT}), so we treat the estimator as a first-order approximation rather than a calibrated model, and we understand selectivity-based reordering as a heuristic that produces a locally-good ordering rather than a provably-optimal one.
+Map-style filters in practice do exhibit correlations (e.g.,\ \mlval{class} and \mlval{subclass} in \ac{OMT}), so we treat the estimator as a first-order approximation rather than a calibrated model, and we understand selectivity-based reordering as a heuristic that produces a locally-good ordering rather than a provably-optimal one.
 
 The 15-run median reduces measurement noise from per-run outliers but does not quantify sampling uncertainty on its own.
 We computed bootstrap \qty{95}{\percent} confidence intervals~\cite{efronIntroductionBootstrap1998} (10\,000 resamples, percentile method) over the per-(style, variant) measurement pools for \texttt{loadMs} and \texttt{fps}.

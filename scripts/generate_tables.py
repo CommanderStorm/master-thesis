@@ -198,7 +198,7 @@ def aggregate_steps(records: list[dict], style: str) -> list[dict]:
 
 PER_STYLE_HEADER = ["step", "pass", "rawB", "gzipB", "brotliB", "loadMs", "fps", "layers"]
 SUMMARY_HEADER = ["style", "grp", "baseGzip", "optGzip", "reduction", "deltaLoad", "deltaFps", "isBold", "midruleBefore"]
-MARGINAL_HEADER = ["step", "pass", "deltaRaw", "deltaGzip", "deltaBrotli", "deltaLoad", "deltaLayers", "dagger", "star"]
+MARGINAL_HEADER = ["step", "pass", "deltaRaw", "deltaGzip", "deltaBrotli", "deltaLoad", "deltaLayers", "daggerflag", "starflag"]
 
 
 def write_per_style_csv(path: Path, steps: list[dict]) -> None:

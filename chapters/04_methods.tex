@@ -21,7 +21,7 @@ $\mathcal{O}$ pays a one-off preprocessing cost $C_\text{total}(S, T)$, analytic
 The deployment cost is intentionally not formalised as a single closed-form function.
 It depends on hardware, camera scenario, and tile cache state, and is therefore measured empirically rather than declared analytically.
 $\mathcal{O}$ is correspondingly not posed as a single-objective minimisation.
-Several passes (e.g.\ selectivity reordering, \cref{sub:expression_optimizations}) deliberately trade a small regression in load time for a larger improvement in FPS, and the encoder competition (\cref{sub:encoding_strategies}) locally minimises encoded byte size as a contributing quantity to load time without committing to any weighting between the deployment axes.
+Several passes (e.g.,\ selectivity reordering, \cref{sub:expression_optimizations}) deliberately trade a small regression in load time for a larger improvement in FPS, and the encoder competition (\cref{sub:encoding_strategies}) locally minimises encoded byte size as a contributing quantity to load time without committing to any weighting between the deployment axes.
 We characterise each pass empirically against the metric battery of \cref{sub:metrics} in the ablation of \cref{ch:experiments}, and the resulting per-axis breakdown is what lets an operator compose the pass set that suits the deployment priorities.
 
 $\mathcal{O}$ must satisfy two formal constraints.
@@ -221,7 +221,7 @@ Expression passes act on the raw \ac{JSON} representation introduced in \cref{su
 Pass & Data & Description [compiler analogy] \\
 \midrule
 Unary simplification         & none     & Unwrap single-argument \mlop{any}/ \mlop{all} wrappers [identity elimination] \\
-Expression kind normalization & none     & Rewrite negated comparisons to their direct form, e.g.\ \texttt{[\mlop{"!"}, [\mlop{"=="},a,b]]} $\to$ \texttt{[\mlop{"!="},a,b]} [operator strength reduction] \\
+Expression kind normalization & none     & Rewrite negated comparisons to their direct form, e.g.,\ \texttt{[\mlop{"!"}, [\mlop{"=="},a,b]]} $\to$ \texttt{[\mlop{"!="},a,b]} [operator strength reduction] \\
 Constant folding              & none     & Evaluate statically determinable expressions: boolean algebra, dead branch elimination, redundant coercion removal [constant folding, \acs{SCCP}] \\
 Stats-driven constant folding & sampling & Fold \mlop{has}/ \mlop{get}/ \mlop{geometry-type} expressions using tile statistics; prune unreachable \mlop{match}/ \mlop{in} arms; fold comparisons against known value ranges [sparse conditional constant propagation] \\
 Expression simplification     & none     & De~Morgan's laws, boolean flattening, coalesce flattening, \mlop{case}$\to$\mlop{match} rewriting, \mlop{let}/ \mlop{var} inlining, \mlop{any}$\to$\mlop{in} merging, interpolate/step collapsing [algebraic simplification] \\
@@ -239,7 +239,7 @@ Sampling passes additionally fold expressions using observed value distributions
 We organize the expression pass engine as a table of rewrite rules (\cref{tab:all_rewrite_rules}), each gated by a \emph{pass flag} (which pass must be enabled) and scoped to a \emph{rule scope} (whether the rule applies to filters only, to paint/layout properties, or to both).
 We further classify rules by their \emph{type}:
 	\emph{pure} rules operate on the expression array alone,
-	\emph{MIR-aware} rules additionally consult the specification's type metadata (e.g.\ to determine whether an operator is pure or to look up default values), and
+	\emph{MIR-aware} rules additionally consult the specification's type metadata (e.g.,\ to determine whether an operator is pure or to look up default values), and
 	\emph{stats-driven} rules are recursive tree folds that receive tile statistics and layer-level context.
 A post-order visitor walks every expression node in the style.
 At each node, it tests all applicable peephole rules and the first matching rule fires.
@@ -274,7 +274,7 @@ When two predicates constrain the same property to disjoint values, e.g.
 \noindent the enclosing \mlop{all} is rewritten to \mlval{false}, which the structural dead elimination pass will later exploit to remove the enclosing layer.
 This is the expression-level analogue of unsatisfiable-query detection in a database query planner.
 
-Range tightening detects overlapping range predicates on the same property and replaces them with the tighter bound, e.g.\ \texttt{[\mlop{"all"},~[\mlop{"<"},~x,~\mlval{30}],~[\mlop{"<"},~x,~\mlval{20}]]} becomes \texttt{[\mlop{"<"},~x,~\mlval{20}]}.
+Range tightening detects overlapping range predicates on the same property and replaces them with the tighter bound, e.g.,\ \texttt{[\mlop{"all"},~[\mlop{"<"},~x,~\mlval{30}],~[\mlop{"<"},~x,~\mlval{20}]]} becomes \texttt{[\mlop{"<"},~x,~\mlval{20}]}.
 Predicate subsumption generalizes this to remove predicates that are logically implied by a sibling.
 Pure operator evaluation computes the result of any operator whose arguments are all literals, covering mathematical functions, string operations, and color constructors.
 
@@ -353,7 +353,7 @@ Interpolation and step ramp simplification detects ramps, where all stops map to
 The pass removes properties whose value equals the specification default.
 We derive the defaults from the code-generated types, where each property's default is known from the upstream \texttt{v8.json}.
 The pass strips only plain scalar values.
-It never removes expression-valued properties, even if they would evaluate to the default at all zoom levels, to avoid the risk of changing renderer behavior when the expression's mere presence affects layout (e.g.\ \mlprop{text-radial-offset} suppresses \mlprop{text-offset} regardless of its value).
+It never removes expression-valued properties, even if they would evaluate to the default at all zoom levels, to avoid the risk of changing renderer behavior when the expression's mere presence affects layout (e.g.,\ \mlprop{text-radial-offset} suppresses \mlprop{text-offset} regardless of its value).
 
 \paragraph{Selectivity Reordering}\label{sec:selectivity_reordering}
 Selectivity reordering runs as a separate pass after the peephole rewrite table has stabilised.
@@ -376,7 +376,7 @@ We estimate compound predicates under the standard independence assumption from 
 
 \noindent The independence assumption is known to be imprecise for correlated predicates~\cite{selingerAccessPathSelection1979}, but as discussed in \cref{sec:query_optimizations} only a reordering heuristic consumes the selectivity signal here, not a cost-based plan chooser.
 What matters is the \emph{ordering} of predicates by selectivity, not their absolute values.
-Correlation between map-style predicates (e.g.\ \mlval{class} and \mlval{subclass} in \ac{OMT}) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
+Correlation between map-style predicates (e.g.,\ \mlval{class} and \mlval{subclass} in \ac{OMT}) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
 Because the rendering benefit of predicate reordering depends on the proportion of evaluation cost attributable to predicate ordering (expected to be small for styles with short filters) we include this pass as an exploratory extension and do not separately benchmark its isolated impact.
 
 \paragraph{Termination and Confluence of the Fixpoint}
@@ -388,7 +388,7 @@ The majority of the rules described above strictly decrease a lexicographic meas
     \mu(S) = (n_{\mathrm{AST}}(S),\, d_{\max}(S),\, n_{\mathrm{lit}}(S))
 \end{equation}
 where $n_{\mathrm{AST}}$ is the total number of \ac{AST} nodes in all expressions of $S$, $d_{\max}$ is the maximum expression nesting depth, and $n_{\mathrm{lit}}$ is the number of non-literal nodes.
-Rules either reduce $n_{\mathrm{AST}}$ (e.g.\ constant folding, boolean absorption, dead-branch elimination), keep $n_{\mathrm{AST}}$ unchanged but strictly reduce $d_{\max}$ (e.g.\ boolean flattening), or keep both unchanged but strictly reduce $n_{\mathrm{lit}}$ (e.g.\ redundant coercion removal).
+Rules either reduce $n_{\mathrm{AST}}$ (e.g.,\ constant folding, boolean absorption, dead-branch elimination), keep $n_{\mathrm{AST}}$ unchanged but strictly reduce $d_{\max}$ (e.g.,\ boolean flattening), or keep both unchanged but strictly reduce $n_{\mathrm{lit}}$ (e.g.,\ redundant coercion removal).
 Two further rules (\mlop{any}$\to$\mlop{in} merging and predicate reordering) are either strictly monotone in the measure (\mlop{any}$\to$\mlop{in} reduces $n_{\mathrm{AST}}$ because the merged \mlop{in} has fewer nodes than the original chain of equalities) or semantically idempotent after one application (selectivity reordering sorts predicates into a canonical order).
 
 Two rules can \emph{temporarily increase} $n_{\mathrm{AST}}$ within a single iteration, which is why the measure alone does not constitute a termination proof.
@@ -668,7 +668,7 @@ After removing dead layers, the pass prunes sources that no surviving layer refe
 This mirrors dead code elimination followed by unreachable function removal in a compiler (\cref{sec:compiler_optimizations}).
 Its downstream effect on the tile pruning advisory (\cref{sub:tile_shaving}) is the entry point for the data-level cascade evaluated in \cref{sub:mlt_results}.
 
-Geometry-type mismatch is particularly effective on schemas such as \ac{OMT}, where a single source layer (e.g.\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and so are never killed by this rule.
+Geometry-type mismatch is particularly effective on schemas such as \ac{OMT}, where a single source layer (e.g.,\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and so are never killed by this rule.
 The check requires tile statistics, so we provide both static and stats-driven variants of the pass.
 
 \paragraph{Metadata Refinement}
@@ -1474,7 +1474,7 @@ To ensure reproducibility across benchmark runs, we route all tile requests thro
 This eliminates network variability and guarantees that every ablation step operates on identical tile data (after an initial, discarded run).
 The model does not simulate packet loss, HTTP/2 multiplexing, TCP slow-start, or HTTP/3 (QUIC) with its 0-RTT connection resumption and absence of head-of-line blocking.
 All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving are a conservative lower bound on what a real deployment would observe.
-This ensures that we measure tile-fetch improvements (e.g.\ smaller tiles due to shaving) under conditions representative of a \ac{CDN}-served deployment while remaining deterministic across runs.
+This ensures that we measure tile-fetch improvements (e.g.,\ smaller tiles due to shaving) under conditions representative of a \ac{CDN}-served deployment while remaining deterministic across runs.
 The same network model also feeds the per-style \ac{CDN} break-even analysis in \cref{sub:mlt_discussion}, which extends this single-client setup to a multi-style cache.
 
 \subsection{Geographic and Use-Case Scenarios}\label{sub:scenarios}

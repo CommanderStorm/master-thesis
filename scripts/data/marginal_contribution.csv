@@ -1,4 +1,4 @@
-step,pass,deltaRaw,deltaGzip,deltaBrotli,deltaLoad,deltaLayers,dagger,star
+step,pass,deltaRaw,deltaGzip,deltaBrotli,deltaLoad,deltaLayers,daggerflag,starflag
 1,Unary simplification,0.0,0.0,-1.0,-1.8,0,0,0
 2,Kind normalisation,0.0,0.0,0.0,0.0,0,0,0
 3,Constant folding,-1.2,-1.0,-0.8,0.0,0,0,0
