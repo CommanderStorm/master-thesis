@@ -57,7 +57,7 @@ Lower bars mean a shorter end-to-end load.
 Read together, the two views separate \enquote{which passes are pulling their weight} from \enquote{how much does the stack as a whole improve over the baseline}.
 
 Across the 13 benchmarked styles, the seven expression passes reduced the per-style median load time by \qty{2.0}{\percent} (median across styles, range \qtyrange{-58.8}{+12.3}{\percent} per style).
-Per-style bootstrap confidence intervals showed that this aggregate effect was not consistently significant for individual styles.
+Per-style bootstrap \ac{CI} showed that this aggregate effect was not consistently significant for individual styles.
 The style-level load-time signal was small relative to measurement noise, and for some styles the median shifted in the opposite direction.
 We therefore see the primary value of expression passes not as a direct load-time reduction but as the \emph{enabling effect} on downstream structural and data-level passes (discussed in \cref{sub:structural_interactions}).
 The single largest marginal contributor to style size was default stripping (step~6), which accounted for \qty{-4.3}{\percent} of raw style size (\qty{-2.9}{\percent} under gzip).
@@ -94,7 +94,7 @@ Marginal contribution of each expression pass to load time reduction shows the e
     \includegraphics[width=\linewidth]{figures/marginal_styleParseMs.pdf}
     \caption{
 Marginal contribution of each expression pass to parse the style in miliseconds.
-\ac{CI} is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
+Variance is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
 The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
 This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.}
     \label{fig:marginal_styleParseMs}
@@ -313,7 +313,7 @@ Secondary overheads include the restriction to 128-bit \ac{WASM} \ac{SIMD} (wher
 Jangda et~al.~\cite{jangdaNotFastAnalyzing2019} measured a 45-55\% slowdown for \ac{WASM} relative to native on SPEC \ac{CPU} benchmarks, and although the computational gap has narrowed since 2019 the data-transfer boundary cost remains largely unchanged because the \ac{WASM}-JS interface still lacks zero-copy sharing of structured columnar buffers.
 We therefore expect a Rust-\ac{WASM} port to give the columnar decoder's full advantage only on larger, feature-dense tiles where the per-column setup and transfer cost is amortized. On smaller tiles the per-column dispatch overhead would narrow the gap to approximate parity with \ac{MVT}'s single-path protobuf parser, potentially introducing a small load-time regression at the boundary that the existing browser-side decoder does not pay.
 Shifting more decoding and data consumption into \ac{WASM} to reduce boundary-crossing overhead is left for future work.
-Bootstrap \qty{95}{\percent} confidence intervals confirmed that the full-pipeline load-time improvements were tight: Fiord's final load time was \qty{120.5}{\milli\second} (CI: [\num{119.3}, \num{121.5}]), Liberty's was \qty{133.7}{\milli\second} (CI: [\num{132.9}, \num{134.2}]), both with $p < 10^{-45}$ (Wilcoxon, $n = 270$ for Fiord across 18 scenarios and $n = 254$ for Liberty across 17 scenarios at the full-pipeline pool) against their respective baselines.
+Bootstrap \qty{95}{\percent} \ac{CI} confirmed that the full-pipeline load-time improvements were tight: Fiord's final load time was \qty{120.5}{\milli\second} (CI: [\num{119.3}, \num{121.5}]), Liberty's was \qty{133.7}{\milli\second} (CI: [\num{132.9}, \num{134.2}]), both with $p < 10^{-45}$ (Wilcoxon, $n = 270$ for Fiord across 18 scenarios and $n = 254$ for Liberty across 17 scenarios at the full-pipeline pool) against their respective baselines.
 
 \begin{figure}[H]
     \centering
@@ -988,7 +988,7 @@ The selectivity estimation model assumes independence between filter predicates 
 Map-style filters in practice do exhibit correlations (e.g.,\ \mlval{class} and \mlval{subclass} in \ac{OMT}), so we treat the estimator as a first-order approximation rather than a calibrated model, and we understand selectivity-based reordering as a heuristic that produces a locally-good ordering rather than a provably-optimal one.
 
 The 15-run median reduces measurement noise from per-run outliers but does not quantify sampling uncertainty on its own.
-We computed bootstrap \qty{95}{\percent} confidence intervals~\cite{efronIntroductionBootstrap1998} (10\,000 resamples, percentile method) over the per-(style, variant) measurement pools for \texttt{loadMs} and \texttt{fps}.
+We computed bootstrap \qty{95}{\percent} \ac{CI}~\cite{efronIntroductionBootstrap1998} (10\,000 resamples, percentile method) over the per-(style, variant) measurement pools for \texttt{loadMs} and \texttt{fps}.
 Error bars in the waterfall (\cref{fig:waterfall_loadMs}), and rendering-metrics (\cref{fig:rendering_metrics_mlt}) figures represent these bootstrap \qty{95}{\percent} CIs.
 Wilcoxon signed-rank tests (or Mann-Whitney~U where sample sizes differ) confirmed that the full-pipeline load-time reductions were highly significant for both end-to-end styles (Fiord: \qty{370.9}{\milli\second}$\to$\qty{120.5}{\milli\second}, $p < 10^{-45}$, $n = 270$, and Liberty: \qty{466.5}{\milli\second}$\to$\qty{133.7}{\milli\second}, $p < 10^{-74}$, $n = 254$).
 Fiord's pool covers all 18 scenarios $\times$ 15 runs.
