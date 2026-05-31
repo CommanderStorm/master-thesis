@@ -8,7 +8,7 @@ This chapter applies the compiler, database, and encoding analogues of \cref{ch:
 With the foundations of \cref{ch:theoretical_background} in place, we state the optimization problem formally.
 
 Let $\mathcal{S}$ be the set of syntactically valid MapLibre style~\ac{JSON} documents.\newline
-Let $\mathcal{T}$ be the set of tile sets, each a finite family of tiles indexed by source and $(x, y, z)$.\newline
+Let $\mathcal{T}$ be the set of tile sets, each a finite family of tiles indexed by source and $(x, y, z) \elem \mathcal{R}^3$.\newline
 Let $\mathcal{V}$ be the set of \emph{viewing states}: tuples $(\text{lat}_\text{center}, \text{lat}_\text{center}, z, \text{roll}, \text{pitch}, \text{bearing}, \text{viewport size})$, the six degrees of freedom plus the viewport.\newline
 Let $\mathcal{I}$ be the set of rasterized images and let $\bot \notin \mathcal{I}$ denote a runtime evaluation error that aborts rendering, as introduced for ill-formed feature-state and global-state references in \cref{sub:feature_state}.
 Let MapLibre's deterministic rendering function be
@@ -1209,7 +1209,7 @@ String columns compete across four strategies, reflecting the two orthogonal dim
     The length stream is itself subject to the integer encoding competition.
     \item[Dictionary] is a deduplicated corpus with per-string offset indices.
     Effective when many features share the same string value (e.g., road names that repeat across tiles).
-    \item[\ac{FSST} (\cref{sub:string_compression})]~\cite{bonczFSSTFastRandom2020} is a lightweight, random-access string compressor that learns a symbol table of up to~255 frequent byte sequences and replaces occurrences with single-byte codes.
+    \item[\ac{FSST}~\cite{bonczFSSTFastRandom2020} (\cref{sub:string_compression})] is a lightweight, random-access string compressor that learns a symbol table of up to~255 frequent byte sequences and replaces occurrences with single-byte codes.
     The encoder stores the symbol table once per column.
     The compressed corpus remains directly scannable without decompression.
     \item[\ac{FSST} + Dictionary] combines both deduplication and byte-level compression.
@@ -1392,15 +1392,15 @@ The focus of this thesis is on the delivery and rendering improvements that this
 
 \section{Gathering a Representative Sample}\label{sec:gathering_sample}
 
-Our deep evaluation runs 15 styles (\cref{sub:deep_corpus}) against reproducible tile data (\cref{sub:tile_data}) and a stratified scenario sample (\cref{sub:scenarios}).
+Our deep evaluation runs 13 styles (\cref{sub:deep_corpus}) against reproducible tile data (\cref{sub:tile_data}) and a stratified scenario sample (\cref{sub:scenarios}).
 A further 13 styles (\cref{sub:generalization_corpus}) carry static-only checks to test whether gains generalize beyond the deep tier.
 
 \subsection{Benchmarking Corpus}\label{sub:deep_corpus}
 
-We curated a corpus of 15 publicly available styles that use the \ac{OMT} or BasemapDE schema:
+We curated a corpus of 13 publicly available styles that use the \ac{OMT} schema:
 four \textbf{OpenFreeMap} styles (liberty, bright, positron, fiord);
 seven \textbf{\ac{OMT} community} styles (dark-matter, osm-bright, klokan-basic, toner, osm-liberty, americana, stadia-outdoors);
-and four \textbf{government and institutional} styles (ICGC~fosc, ICGC~gris, Basemap\-DE\footnote{\url{https://basemap.de/}, last accessed 2026-05-23} topo\-graphic, Basemap\-DE color).
+and two \textbf{government and institutional} styles (ICGC~fosc, ICGC~gris).
 
 These styles span a range of complexity, from minimal basemaps with fewer than 50~layers to verbose institutional styles with several hundred layers, and exercise different subsets of the expression language.
 
@@ -1408,7 +1408,6 @@ ICGC~Fosc, ICGC~Gris, and Americana use legacy \mlprop{\texttt{text-field}} synt
 Layer merging (step~15) then builds on the wrong intermediate, so any later step would compare apples vs.\ oranges against the rest of the corpus.
 We therefore cap these three at step~14 in the cumulative ablation.
 Step~17 (tile shave only, applied to the baseline) is still reported for Americana, but not for the two ICGC styles whose referenced Catalonia tile data is not available to us.
-The two BasemapDE styles use a different schema and were not benchmarked within the project's time budget, so the deep corpus carries 13 benchmarked styles of the 15 curated above.
 See the corpus-exclusions note at the head of \cref{ch:experiments} for the per-style consequences.
 
 \subsection{Generalization Corpus}\label{sub:generalization_corpus}
@@ -1420,7 +1419,6 @@ These styles are evaluated using static analysis only (style size, complexity me
 
 We sourced tile data from \ac{OSM} via Planetiler or the German government.
 We consume both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
-We access BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
 Only for \ac{OSM} is the underlying data fully available, so only for this source can we collect tile statistics at a sample rate of~1.0.
 To ensure reproducibility across benchmark runs, we route all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
 This eliminates network variability and guarantees that every ablation step operates on identical tile data (after an initial, discarded run).
@@ -1442,7 +1440,7 @@ and \emph{bearingspin} rotates bearing at high pitch.
 See \cref{app:animation_patterns} for the keyframe diagrams.
 
 Each scenario is a specific (location, animation) pair.
-The full cross-product of 15 locations and 5 animations is 75 pairs, which is too expensive\footnote{Each cell requires 15 repeat runs for statistical validity across 19 ablation steps and 15 styles, as this would result in $75 \times 15 \times 19 \times 15 = \num{320625}$ full animations} to run for every ablation step.
+The full cross-product of 15 locations and 5 animations is 75 pairs, which is too expensive\footnote{Each cell requires 15 repeat runs for statistical validity across 19 ablation steps and 13 styles, as this would result in $75 \times 13 \times 19 \times 15 = \num{277875}$ full animations} to run for every ablation step.
 We chose the 18 selected scenarios by stratified sampling so that every location appears at least once and every animation appears at least three times, and so that all combinations of density class (high/low) and script class (Latin/non-Latin) are represented.
 Within each stratum we selected the specific (location, animation) pair that exercises the most layers in the densest style in the corpus, ensuring that the sample is biased \emph{against} the null hypothesis of \enquote{no effect}, i.e.\ toward scenarios where any rendering-cost differences are most likely to be visible.
 
@@ -1509,7 +1507,7 @@ The benchmark harness itself is a Puppeteer\footnote{\url{https://pptr.dev/}, la
 The optimizer is a \textbf{three-level pipeline} (\cref{sub:pipeline}) operating on the $(S, T) \to (S', T')$ problem of \cref{sec:problem_statement}.
 Eight expression-level passes run to a fixpoint, six structural passes act on a typed style document, and data-level passes re-encode shaved tiles into \ac{MLT} via per-stream strategy competition.
 The \textbf{pruning advisory} derived from the optimized style ties the levels together as a projection-pushdown plan over the tile data.
-We measure the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
+We measure the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{13~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
 
 The following chapter applies this methodology to evaluate each optimization category in isolation, tests generalization beyond the benchmarking corpus, and analyzes the full pipeline's combined effect.
 \end{chaptersummary}
