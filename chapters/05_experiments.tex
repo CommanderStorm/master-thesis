@@ -747,7 +747,7 @@ The bulk of the heap savings comes from data-level passes (steps 17-19) where th
 Almost all of the style-size win landed by \texttt{strip\_metadata} (step~8), and the structural and refinement passes left the curve flat because their gains were concentrated in layer count rather than serialized bytes.
 The brief uptick at \texttt{tile\_shave\_only} corresponds to Configuration~3 of \cref{sub:mlt_evaluation} (shaving applied to the unoptimized style), and the subsequent \texttt{tile\_shave} and \texttt{tile\_rewrite} steps restored the optimized style and pushed the curve to the pipeline's overall minimum.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{figures/waterfall_gzip_bytes.pdf}
     \caption{
@@ -759,7 +759,7 @@ The \texttt{tile\_shave\_only} spike is the unoptimized-style baseline of Config
     \label{fig:waterfall_gzip_bytes}
 \end{figure}
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering\small
 \csvreader[
   tabular=l r r r r r,
@@ -782,8 +782,6 @@ Styles below the rule include tile-level optimizations (steps~1-19), and those a
 Tile shaving produces the most visible drops in load time and \ac{FPS} improvements.}
 \label{tab:per_style_summary}
 \end{table}
-
-\newpage
 
 \begin{figure}[H]
 	\centering
