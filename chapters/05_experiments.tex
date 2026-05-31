@@ -29,7 +29,7 @@ The bulk tile-shave sweep of \cref{fig:tile_shave_per_style} additionally exclud
 These four viewports are thus excluded from the reported tile rewrite results.
 
 \vspace{4pt}
-\textbf{Step markers used throughout this chapter.}\newline
+\textbf{\newline Step markers used throughout this chapter.}\newline
 $\dagger$ flags ablation steps whose aggregation drops to the 10 end-to-end styles, because the three styles capped at step~14 above are excluded from later steps.\newline
 $\ast$ flags steps that require tile data (statistics or tile bytes) at preprocessing time.
 \end{tcolorbox}
@@ -177,7 +177,7 @@ Dead elimination rarely removes whole layers because styles are designed to expo
 Total expression-tree node count is driven mostly by the expression passes (steps~1--7).
 Structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.
 Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{true} filters that refinement leaves behind.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:complexity_metrics}
 \end{figure}
 
@@ -376,7 +376,7 @@ Total tile size per zoom level for unshaved and shaved variants of
       by the pruning advisory.
 The gap between the shaved \ac{MVT} and the
       shaved output of our encoder quantifies the additional contribution of
-      columnar encoding}
+      columnar encoding.}
     \label{fig:shaving_effectiveness_per_zoom}
 \end{figure}
 
@@ -728,7 +728,7 @@ Data-level passes drove the bulk of the reduction: tile shaving (step~17) alone 
 Time breakdown across ablation steps: style parse, first tile, first frame, and remaining load time.
 Style-parse time shrinks monotonically with each expression pass.
 First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied (steps~17-19).
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:time_breakdown}
 \end{figure}
 
@@ -739,7 +739,7 @@ Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corp
 Mean heap used in MB across all scenarios and benchmark styles across ablation steps.
 Style-level passes (steps 1-15) reduce the heap by \qty{3.1}{\mega\byte}.
 The bulk of the heap savings comes from data-level passes (steps 17-19) where the in-memory tile payload itself shrinks, yielding a cumulative reduction of \qty{-35.7}{\percent} from baseline to step~19.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:memory_ablation}
 \end{figure}
 
@@ -755,7 +755,7 @@ Cumulative ablation of mean style gzip bytes across all 19 steps.
 The orange line is the mean across scenarios, and thin gray lines bound the per-scenario distribution.
 Most of the wire-size win lands by \texttt{strip\_metadata}.
 The \texttt{tile\_shave\_only} spike is the unoptimized-style baseline of Configuration~3, which \texttt{tile\_shave} and \texttt{tile\_rewrite} recover and surpass.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:waterfall_gzip_bytes}
 \end{figure}
 
@@ -792,7 +792,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 		Heatmap of load time across scenarios (rows) and ablation steps (columns), where darker cells indicate greater improvement relative to baseline.
 		Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
 		Structural passes produce concentrated gains where dead elimination or layer merging applies.
-		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
+		\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
 	}
 	\label{fig:heatmap_loadMs}
 \end{figure}
@@ -803,7 +803,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\caption{
 		Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
 		Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
-		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+		\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmap_fps}
 \end{figure}
 
@@ -814,7 +814,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 		Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
 		Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
 		Real consumer hardware caps well below this rate, so the same pauses would not cross the jank threshold there.
-		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+		\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmapjankcount}
 \end{figure}
 
