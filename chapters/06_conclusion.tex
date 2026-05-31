@@ -25,7 +25,7 @@ This thesis makes four main contributions, mirroring the structure of \cref{sec:
     The multi-strategy encoder competition increases single-threaded re-encoding cost by a factor of $1.95\times$ over a fixed-plan encoder.
     This is well below the naïve $4\times$ expectation, thanks to bounding-box pruning, data profiling, and warm-start caching.
 
-    \item The \textbf{empirical evaluation} (\cref{ch:experiments}), conducted across a 15-style deep corpus (13 benchmarked; the BasemapDE pair was excluded for data-access reasons), 18 scenarios, and 19 cumulative ablation steps.
+    \item The \textbf{empirical evaluation} (\cref{ch:experiments}), conducted across a 15-style deep corpus (13 benchmarked, with the BasemapDE pair excluded for data-access reasons), 18 scenarios, and 19 cumulative ablation steps.
     The full pipeline reduces total tile volume on the Germany \ac{OMT} tileset by \qty{36}{\percent} relative to gzip-compressed \ac{MVT} (\cref{tab:tile_sizes_per_zoom}).
     Our encoder alone accounts for \qty{12}{\percent}, with style-driven tile shaving providing the remainder.
     It also improves end-to-end load times by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) across the ten deep-corpus styles benchmarked with tile data.
@@ -57,8 +57,8 @@ The headline tile-size and load-time numbers are summarised under C4 and tabulat
 At the style level, structural optimizations reduce the gzip-compressed style by \qty{14.1}{\percent} for Fiord and \qty{4.9}{\percent} for Liberty at step~15 (\cref{sub:structural_results}).
 The pipeline is not uniformly effective.
 Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview-dominated scenarios benefit more than street-level panning (\cref{sub:combined_marginal}).
-All 11 \ac{OMT}-compatible styles in the deep corpus (the 10 end-to-end styles plus Americana) were measured for tile-shaving effectiveness on the Germany tileset (\qtyrange{19.8}{46.3}{\percent}, \cref{fig:tile_shave_per_style}).
-Americana, ICGC~Fosc, and ICGC~Gris are excluded from end-to-end rendering checks by an upstream bug in MapLibre's \texttt{gl-style-migrate} that miscompiles their legacy \mlprop{text-field} syntax (\cref{sub:deep_corpus}); of these three, only Americana is part of the 11-style shaving sweep.
+All 11 \ac{OMT} styles in the deep corpus whose referenced tile data is fully available to us (the 10 end-to-end styles plus Americana) were measured for tile-shaving effectiveness on the Germany tileset (\qtyrange{19.8}{46.3}{\percent}, \cref{fig:tile_shave_per_style}).
+Americana, ICGC~Fosc, and ICGC~Gris are excluded from end-to-end rendering checks by an upstream bug in MapLibre's \texttt{gl-style-migrate} that miscompiles their legacy \mlprop{text-field} syntax (\cref{sub:deep_corpus}). Of these three, only Americana is part of the shaving sweep. The ICGC pair is additionally absent because their Catalonia accessory tile data is not available to us, even though their primary \texttt{openmaptiles} source uses the OMT schema.
 The thirteen-style Maputnik generalization corpus was evaluated under static style passes alone.
 
 \paragraph{R2: Technique Effectiveness and Interactions}

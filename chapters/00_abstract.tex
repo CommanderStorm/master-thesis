@@ -10,11 +10,11 @@ On top of that, structural passes work on a typed representation of the full sty
 The third level leaves the style behind and reaches into the tile data.
 A pruning advisory derived from the optimized style removes unused properties, geometry types, and feature values, and the surviving content is re-encoded into the columnar MapLibre Tiles format with automatic encoding strategy selection.
 
-We evaluated across 15~styles and 18~scenarios, running 19~cumulative ablation steps and one plain-tile-shaving comparison.
+We evaluated across a 15-style deep corpus (13 benchmarked, with the BasemapDE pair excluded for data-access reasons) and 18~scenarios, running 19~cumulative ablation steps and one plain-tile-shaving comparison.
 Tile shaving dominates load-time improvements, achieving load-time reductions of \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and \ac{FPS} gains of \qtyrange{100}{200}{\percent} (median \qty{152}{\percent}) across the ten deep-corpus styles we benchmarked end-to-end.
-For the broader 11-style \ac{OMT}-compatible cohort (the ten end-to-end styles plus one additional), tile-shaving effectiveness measured at the tile-data layer alone varied \qtyrange{19.8}{46.3}{\percent}.
+For the broader 11-style shaving cohort (the ten end-to-end styles plus Americana), tile-shaving effectiveness measured at the tile-data layer alone varied \qtyrange{19.8}{46.3}{\percent}.
 Our new \ac{MLT} encoder reduces total tile volume by \qty{28}{\percent} over the uncompressed reference encoder and \qty{12}{\percent} over gzip-compressed \ac{MVT} on the Germany \ac{OMT} tileset.
-Style-level optimizations cut style transfer size and parse time. Compact basemaps benefit little; verbose institutional styles shrink by tens of percent. The effect on sustained rendering is indirect, working through the pruning advisory.
+Style-level optimizations cut style transfer size and parse time. Compact basemaps benefit little, while verbose institutional styles shrink by tens of percent. The effect on sustained rendering is indirect, working through the pruning advisory.
 Across 13 unseen styles in a static-only generalization corpus the static passes produce a median \qty{31.4}{\percent} raw reduction (after gzip median \qty{11.4}{\percent}, range \qtyrange{3.9}{22.4}{\percent}) with visually equivalent rendering output (within the upstream MapLibre render harness's perceptual-difference tolerance).
 We find that the two levels (style-level, combining expression and structural passes, and data-level) compose additively rather than synergistically at the aggregate level.
 Per-scenario synergy appears in 17 of 36 style-scenario pairs, but is too sparse to lift the aggregate above the additive expectation.

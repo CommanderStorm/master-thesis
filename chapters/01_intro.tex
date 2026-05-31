@@ -60,7 +60,7 @@ We make the following main contributions:
     \item An \textbf{empirical evaluation on four complementary corpora}.
     The Germany \ac{OMT} tileset provides an encoder-only, style-independent baseline.
     The ten-style \ac{OMT} deep corpus carries the end-to-end browser benchmarks.
-    An eleven-style \ac{OMT}-compatible subset is measured for tile-shaving effectiveness only.
+    An eleven-style \ac{OMT} subset whose referenced tile data is fully available to us is measured for tile-shaving effectiveness only.
     A thirteen-style Maputnik generalization corpus is evaluated under static style passes alone.
     Together they span 18 scenarios and 19 cumulative ablation steps under fixed pass ordering (interaction effects discussed in \cref{sec:threats}).
     We quantify load-time, tile-volume, and \ac{FPS} effects, and answer the additive-versus-synergistic question of R2 at both the aggregate and per-scenario levels.
@@ -69,4 +69,4 @@ We make the following main contributions:
 \section{Outline}\label{sec:outline}
 
 The pipeline composes expression-level rewrites, structural style passes, and a style-driven pruning advisory that feeds \ac{MLT} re-encoding. \Cref{ch:methods} states the joint problem formally under the constraint of \cref{eq:visual_equivalence,eq:idempotency} and details the three levels, with the prior-art positioning and theoretical background in \cref{ch:related_work} and \cref{ch:theoretical_background}.
-\Cref{ch:experiments} measures the isolated and combined effects through a cumulative ablation across 15~styles and 18~scenarios, and \cref{ch:conclusion} revisits R1-R3 in \cref{sec:rq_revisited} and names tile shaving and columnar re-encoding as the primary levers.
+\Cref{ch:experiments} measures the isolated and combined effects through a cumulative ablation across a 15-style deep corpus (13 benchmarked) and 18~scenarios, and \cref{ch:conclusion} revisits R1-R3 in \cref{sec:rq_revisited} and names tile shaving and columnar re-encoding as the primary levers.

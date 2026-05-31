@@ -582,7 +582,7 @@ Tables below list per-style, per-ablation-step results: size (raw bytes, gzip le
 Performance metrics are medians across all combinations of scenarios and animations.
 For ICGC fosc, ICGC gris, and Americana, the cumulative ablation stops at step 14.
 Layer merging (step 15) and the cascaded passes 16, 18, and 19 are skipped because their legacy \mlprop{text-field} migration (\cref{sub:deep_corpus}) would render incorrectly under those passes.
-Step 17 (tile shave only, applied to the baseline tile data without prior structural rewrites) is still reported for them, leaving these three styles at 16 of 20 cumulative steps.
+Step 17 (tile shave only, applied to the baseline tile data without prior structural rewrites) is still reported for them, leaving these three styles with measurements at 15 of the 19 cumulative steps plus the plain-shave comparison (16 of 20 configurations in total).
 The BasemapDE pair stops at the static passes (steps 0--15) because no tile source could be provisioned in time (\cref{sub:deep_corpus}), despite attempts to contact the tile provider.
 
 \perstyleablation{liberty}{Liberty}

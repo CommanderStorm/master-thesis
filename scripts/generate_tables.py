@@ -198,7 +198,7 @@ def aggregate_steps(records: list[dict], style: str) -> list[dict]:
 
 PER_STYLE_HEADER = ["step", "pass", "rawB", "gzipB", "brotliB", "loadMs", "fps", "layers"]
 SUMMARY_HEADER = ["style", "grp", "baseGzip", "optGzip", "reduction", "deltaLoad", "deltaFps", "isBold", "midruleBefore"]
-MARGINAL_HEADER = ["step", "pass", "deltaRaw", "deltaGzip", "deltaBrotli", "deltaLoad", "deltaLayers", "dagger"]
+MARGINAL_HEADER = ["step", "pass", "deltaRaw", "deltaGzip", "deltaBrotli", "deltaLoad", "deltaLayers", "dagger", "star"]
 
 
 def write_per_style_csv(path: Path, steps: list[dict]) -> None:
@@ -350,13 +350,14 @@ def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
             continue
 
         label = MARGINAL_LABELS.get(step_num, f"Step {step_num}")
-        dagger = 1 if step_num >= 16 else 0
+        dagger = 1 if step_num >= 15 else 0
+        star = 1 if step_num in {4, 10, 13, 16, 17, 18, 19} else 0
 
         rows.append([
             step_num, label,
             _fmt_median(d_raw), _fmt_median(d_gzip), _fmt_median(d_brotli),
             _fmt_median(d_load) if d_load else "0.0",
-            _fmt_median_int(d_layers), dagger,
+            _fmt_median_int(d_layers), dagger, star,
         ])
 
     with path.open("w", newline="", encoding="utf-8") as f:
