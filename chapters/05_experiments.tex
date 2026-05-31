@@ -868,7 +868,7 @@ We measured each of the four additive cost terms $C_\text{style}$, $C_\text{stat
 \paragraph{Measured Stage Costs}
 \Cref{tab:preprocessing_cost} reports wall-clock time for each stage of the preprocessing pipeline on the Germany \ac{OMT} tileset..
 \emph{Style optimization} ($C_\text{style}$) and \emph{advisory computation} ($C_\text{adv}$) were negligible: Liberty's 111-layer style completed all passes in \qty{7.5}{\milli\second} and the advisory in \qty{1.1}{\milli\second}.
-\emph{Tile-statistics collection} ($C_\text{stats}$) took \qty{57.4}{\second} for a single-threaded scan of all \num{256588} source tiles.
+\emph{Tile-statistics collection} ($C_\text{stats}$) took \qty{57.4}{\second} for a single-threaded scan of all \qty{256.5}{\kilo tiles}.
 \emph{Tile pruning and \ac{MVT} re-encoding} ($C_\text{enc}$, MVT) took \qty{15.6}{\second} using Rayon\footnote{\url{https://github.com/rayon-rs/rayon}, last accessed 2026-05-23} parallelism.
 \emph{\ac{MLT} encoding with sort-strategy competition} ($C_\text{enc}$, \ac{MLT} auto) was the dominant term: \qty{5}{\minute}\,\qty{42}{\second} single-threaded, or \qty{47}{\second} with 16 threads.
 Without the competition ($C_\text{enc}$, \ac{MLT} none), single-threaded encoding took \qty{2}{\minute}\,\qty{55}{\second}.
