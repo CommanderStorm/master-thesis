@@ -783,33 +783,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 \label{tab:per_style_summary}
 \end{table}
 
-\begin{table}[htbp]
-\centering
-\small
-\csvreader[
-  tabular=r l r r r r r,
-  table head={\toprule
-    \textbf{Step} & \textbf{Pass} & \textbf{$\Delta$ Raw} &
-    \textbf{$\Delta$ Gzip} & \textbf{$\Delta$ brotli} &
-    \textbf{$\Delta$ Load} & \textbf{$\Delta$ Layers} \\
-     & & \textbf{(\%)} & \textbf{(\%)} & \textbf{(\%)} & \textbf{(\%)} & \\
-    \midrule},
-  table foot={\midrule
-    \multicolumn{7}{l}{\footnotesize $\dagger$ end-to-end styles only (see corpus-exclusions note).\quad $\ast$ requires tile data.} \\
-    \bottomrule},
-  head to column names,
-]{scripts/data/marginal_contribution.csv}{}%
-{\step & \pass\ifnum\daggerflag=1\textsuperscript{$\dagger$}\fi\ifnum\starflag=1\textsuperscript{$\ast$}\fi &
- \fmtdelta{\deltaRaw} & \fmtdelta{\deltaGzip} & \fmtdelta{\deltaBrotli} &
- \fmtdelta{\deltaLoad} & \fmtdeltaint{\deltaLayers}}%
-\caption{
-Marginal contribution of each ablation step to style size (raw, gzip, brotli), load time, and layer count.
-Values are percentage of baseline, medians across the 13 benchmarked styles and 18 scenarios.
-Data-level tile shaving dominates transfer-size and load-time metrics.
-Style-level passes contribute primarily to parse-time and style-size reductions and serve as enablers for the data-level pipeline.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
-\label{tab:marginal_contribution}
-\end{table}
+\clearpage
 
 \begin{figure}[H]
 	\centering
@@ -908,7 +882,7 @@ Taken together, the cost-control mechanisms formalized in \cref{sub:preprocessin
 We empirically confirmed that the trial-and-retain loop cost $k$ encode passes plus $\mathcal{O}(1)$ bookkeeping rather than $k$ encode passes plus $k$ full buffer clones.
 We pay this cost once per tileset build and amortize it over every subsequent tile request.
 The total single-threaded pipeline time (statistics collection through \ac{MLT} encoding with full competition) was under \qty{7}{\minute} on the Germany tileset.
-With 16-thread parallelism the end-to-end wall-clock time dropped to approximately \qty{2}{\minute}, perfectly acceptable for an offline build stage.
+With 16-thread parallelism the end-to-end wall-clock time dropped to approximately \qty{2}{\minute}, acceptable for a global, offline build stage.
 The effect of this on client side performance is not as big as it could currently be, because internally we transform data to \acsp{MVT} instead of a more efficient in-memory-structure.
 
 \subsection{Complexity Metrics}\label{sub:combined_complexity}
