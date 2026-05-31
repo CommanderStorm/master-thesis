@@ -1452,7 +1452,12 @@ and four \textbf{government and institutional} styles (ICGC~fosc, ICGC~gris, Bas
 
 These styles span a range of complexity, from minimal basemaps with fewer than 50~layers to verbose institutional styles with several hundred layers, and exercise different subsets of the expression language.
 
-Three of these styles -- ICGC~Fosc, ICGC~Gris, and Americana -- use legacy \mlprop{\texttt{text-field}} syntax that an upstream bug in MapLibre's bundled style migrator (\texttt{gl-style-migrate}) miscompiles. Layer merging (step~15) then builds on the wrong intermediate, so any later step would compare apples vs.\ oranges against the rest of the corpus. We therefore cap these three at step~14 in the cumulative ablation. Step~17 (tile shave only, applied to the baseline) is still reported for Americana, but not for the two ICGC styles whose referenced Catalonia tile data is not available to us. The two BasemapDE styles use a different schema and were not benchmarked within the project's time budget, so the deep corpus carries 13 benchmarked styles of the 15 curated above. See the corpus-exclusions note at the head of \cref{ch:experiments} for the per-style consequences.
+ICGC~Fosc, ICGC~Gris, and Americana use legacy \mlprop{\texttt{text-field}} syntax that an upstream bug in MapLibre's bundled style migrator (\texttt{gl-style-migrate}) miscompiles.
+Layer merging (step~15) then builds on the wrong intermediate, so any later step would compare apples vs.\ oranges against the rest of the corpus.
+We therefore cap these three at step~14 in the cumulative ablation.
+Step~17 (tile shave only, applied to the baseline) is still reported for Americana, but not for the two ICGC styles whose referenced Catalonia tile data is not available to us.
+The two BasemapDE styles use a different schema and were not benchmarked within the project's time budget, so the deep corpus carries 13 benchmarked styles of the 15 curated above.
+See the corpus-exclusions note at the head of \cref{ch:experiments} for the per-style consequences.
 
 \subsection{Generalisation Corpus}\label{sub:generalization_corpus}
 

@@ -411,10 +411,12 @@ Selinger et~al.~\cite{selingerAccessPathSelection1979} introduced the foundation
 For a single equality predicate $A = v$ on a column with $d$ distinct values, the estimated selectivity is $s = 1/d$ (uniform distribution assumption).
 When value-frequency histograms are available, the estimate improves to $s = \mathit{freq}(v) / N$, where $N$ is the total number of records.
 Compound predicates are estimated by combining individual selectivities:
-\begin{align*}\label{eq:selectivity_theory}
+\begin{equation}\label{eq:selectivity_theory}
+\begin{aligned}
     s(p_1 \land p_2) &= s(p_1) \cdot s(p_2)\\
     s(p_1 \lor p_2) &= 1 - (1 - s(p_1))(1 - s(p_2))
-\end{align*}
+\end{aligned}
+\end{equation}
 
 The independence assumption is known to be inaccurate when columns are correlated, but it provides a computationally cheap approximation that is effective in practice~\cite{selingerAccessPathSelection1979}.
 More sophisticated estimators (such as multi-dimensional histograms, sampling-based methods, or the lightweight graphical models proposed by Tzoumas et~al.~\cite{tzoumasLightweightGraphicalModels2011} that capture inter-attribute correlations without the full cost of joint-distribution estimation) improve accuracy at higher computational cost.
