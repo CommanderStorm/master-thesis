@@ -794,7 +794,7 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
         \node[layer, below=0.5cm of l0] (l1) {\mlval{line}\\\texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"primary"}}\\\texttt{\mlprop{line-color}: \mlval{\#fcd6a4}}\\\texttt{\mlprop{line-width}: \mlval{2}}};
         \node[layer, below=0.5cm of l1] (l2) {\mlval{line}\\\texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"secondary"}}\\\texttt{\mlprop{line-color}: \mlval{\#f7fabf}}\\\texttt{\mlprop{line-width}: \mlval{1.5}}};
 
-        \node[above=0.15cm of l0, font=\small\bfseries] {Input: 3 adjacent line layers};
+        \node[above=0.15cm of l0, font=\small\bfseries] {Three adjacent line layers as input};
 
         \node[right=1.4cm of l0, check, text width=4.2cm] (p1) {%
             \stepcirc{1}~\textbf{Candidate check}\\[2pt]
@@ -829,7 +829,7 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
             \texttt{~~~\mlval{"motorway"},\,\mlval{0},\,\mlval{"primary"},\,\mlval{1},\,\mlval{2}]}
         };
 
-        \node[above=0.15cm of out, font=\small\bfseries] {Output: 1 merged layer};
+        \node[above=0.15cm of out, font=\small\bfseries] {One merged layer as output};
 
         \draw[arrow] (l0.east) -- (p1.west);
         \draw[arrow] (l1.east) -- (p2.west);
