@@ -23,7 +23,7 @@ This thesis makes four main contributions, mirroring the structure of \cref{sec:
     The full single-threaded pipeline completes in under \qty{7}{\minute}.
     With 16-thread parallelism the wall-clock time drops to approximately \qty{2}{\minute}, paid once per tileset build and amortized over every subsequent tile request.
     The multi-strategy encoder competition increases single-threaded re-encoding cost by a factor of $1.95\times$ over a fixed-plan encoder.
-    This is well below the naïve $4\times$ expectation, thanks to bounding-box pruning, data profiling, and warm-start caching.
+    This is well below the naive $4\times$ expectation, thanks to bounding-box pruning, data profiling, and warm-start caching.
 
     \item The \textbf{empirical evaluation} (\cref{ch:experiments}), conducted across a 13-style deep corpus, 18 scenarios, and 19 cumulative ablation steps.
     The full pipeline reduces total tile volume on the Germany \ac{OMT} tileset by \qty{36}{\percent} relative to gzip-compressed \ac{MVT} (\cref{tab:tile_sizes_per_zoom}).
@@ -34,8 +34,8 @@ This thesis makes four main contributions, mirroring the structure of \cref{sec:
 \section{Key Findings}
 
 Two findings from the evaluation went against our prior expectations.
-We expected the three pass families to compound on tile size, since style-level dead elimination narrows the pruning advisory that the data-level passes consume.
-The aggregate data shows the combined style+shaving reduction is approximately the sum of the individual reductions (\cref{sub:mlt_discussion}).
+We \emph{expected the three pass families to compound} on tile size, since style-level dead elimination narrows the pruning advisory that the data-level passes consume.
+The \emph{aggregate data shows the combined style+shaving reduction is approximately the sum of the individual reductions} (\cref{sub:mlt_discussion}).
 The three families are independently useful and can be deployed selectively rather than requiring joint adoption.
 Practically this means a deployment can apply, or skip, any one of them without losing the benefit of the others.
 A mobile deployment on a constrained network should prioritize tile shaving and re-encoding.
