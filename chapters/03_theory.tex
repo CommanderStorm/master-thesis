@@ -451,7 +451,7 @@ A column applies zero or more logical techniques in chain and then exactly one p
 \subsection{Column-Oriented Storage}\label{sub:column_storage}
 
 Traditional database systems store data in \emph{row-oriented} layouts, where all attributes of a single record are stored contiguously in memory.
-This layout is efficient for transactional workloads that access entire records, but wasteful for analytical queries that access only a few columns, as the entire record must be read to access each single attribute.
+This layout is efficient for transactional workloads that access entire records, but wasteful for analytical queries that access only a few columns, as the entire record must be read to access every single attribute.
 
 \emph{Column-oriented} (columnar) storage transposes this layout, storing all values of a single attribute contiguously~\cite{abadiDesignImplementationModern2013}.
 The foundational system in this space is by Dremel~\cite{melnikDremelInteractiveAnalysis}, who introduced the record shredding and assembly algorithm for nested columnar data using definition and repetition levels, the representation pattern that directly inspired Apache Parquet and, by extension, the columnar layout that \ac{MLT} adapts for tile data.
