@@ -383,7 +383,7 @@ The gap between the shaved \ac{MVT} and the
 \paragraph{Scope of the Encoder Contribution}
 We measured the \qty{28}{\percent} reduction reported in \cref{tab:mvt_mlt_comparison} on the \emph{unshaved} Germany tileset, so it is an encoder-only improvement, independent of the style-driven optimizations.
 It reflects the combined effect of sort-strategy competition, per-stream profiling, and shared-dictionary clustering.
-These three mechanisms are tightly coupled (sort order affects column distributions, which affect profiling decisions), so a per-mechanism decomposition is not feasible without re-engineering the encoder.
+These three mechanisms are tightly coupled as sort order affects column distributions, which affect profiling decisions, so a per-mechanism decomposition is not feasible without re-engineering the encoder.
 This result is complementary to, but separate from, the style-data bridge: style-driven tile shaving reduces tile content before encoding, while the encoder improvements reduce the encoded size of whatever content remains.
 The two contributions stack (shaved tiles encoded with our encoder are smaller than shaved tiles encoded with the reference baseline), but they address orthogonal sources of redundancy.
 
