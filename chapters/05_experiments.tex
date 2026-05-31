@@ -176,7 +176,8 @@ Layer count drops for Liberty only when layer merging fires, while Fiord benefit
 Dead elimination rarely removes whole layers because styles are designed to expose parts of the map rather than leave layers unreferenced.
 Total expression-tree node count is driven mostly by the expression passes (steps~1--7).
 Structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.
-Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{true} filters that refinement leaves behind.}
+Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{true} filters that refinement leaves behind.
+For caveats, please see \cref{sub:expr_discussion}}
 	\label{fig:complexity_metrics}
 \end{figure}
 
