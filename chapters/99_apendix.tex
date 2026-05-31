@@ -20,10 +20,8 @@ We characterize each rule by its pass assignment, scope (filter-only or both fil
 \toprule
 \# & Pass & Scope & Type & Description \\
 \midrule
-% Expression Kind
 1 & Expr.\ kind & both & MIR & Negate comparison: \texttt{[\mlop{"!"},[\mlop{op},a,b]]} $\to$ \texttt{[\mlop{neg(op)},a,b]} when negated operator exists \\
 \midrule
-% Constant Fold
 2 & Const.\ fold & both & pure & Boolean algebra: fold \mlop{any}/ \mlop{all} with literal operands; absorb \mlval{true} from \mlop{all}, \mlval{false} from \mlop{any} \\
 3 & Const.\ fold & both & pure & Fold negation: \texttt{[\mlop{"!"}, \mlval{true}]} $\to$ \mlval{false} \\
 4 & Const.\ fold & both & pure & Fold comparisons (\mlop{==}, \mlop{!=}, \texttt{<}, etc.) with two literal operands \\
@@ -42,7 +40,6 @@ We characterize each rule by its pass assignment, scope (filter-only or both fil
 17 & Const.\ fold & both & pure & Remove redundant type coercions on already-typed values \\
 18 & Const.\ fold & both & pure & Strip explicit \texttt{[\mlop{"properties"}]} argument from \mlop{get}/ \mlop{has} \\
 \midrule
-% Constant Fold Stats
 19 & Fold (stats) & filter & stats & Fold \texttt{[\mlop{"has"},p]} $\to$ true/false when stats confirm property presence \\
 20 & Fold (stats) & both & stats & Fold \texttt{[\mlop{"get"},p]} to literal when property has a single value \\
 21 & Fold (stats) & filter & stats & Fold geometry-type comparison from observed types in tile statistics \\
@@ -53,7 +50,6 @@ We characterize each rule by its pass assignment, scope (filter-only or both fil
 26 & Fold (stats) & both & stats & Fold \mlop{coalesce} when \mlop{get} arm is always or never present \\
 27 & Fold (stats) & both & stats & Prune unreachable \mlop{interpolate}/ \mlop{step} stops outside observed data range \\
 \midrule
-% Simplify Expressions
 28 & Simplify & both & pure & Factor common operands:\newline \texttt{[\mlop{"any"},[\mlop{"all"},A,B],[\mlop{"all"},A,C]]} $\to$ \texttt{[\mlop{"all"},A,[\mlop{"any"},B,C]]} \\
 29 & Simplify & both & pure & Canonicalise \texttt{[\mlop{"exponential"},\mlval{1}]} $\to$ \texttt{[\mlop{"linear"}]} in interpolate curves \\
 30 & Simplify & both & pure & Collapse \mlop{interpolate}/ \mlop{step} when all output values are structurally equal \\
@@ -74,7 +70,6 @@ We characterize each rule by its pass assignment, scope (filter-only or both fil
 45 & Simplify & both & pure & Merge adjacent \mlop{in} expressions on the same variable inside \mlop{any} \\
 46 & Simplify & both & pure & Inline single-use \mlop{let}/ \mlop{var} bindings \\
 \midrule
-% Selectivity
 47 & Selectivity & both & stats & Reorder \mlop{any}/ \mlop{all} operands by estimated selectivity for short-circuit evaluation \\
 \bottomrule
 \end{longtblr}
@@ -276,7 +271,6 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 	\providecommand{\zPad}{0.04}%
 	\providecommand{\zTop}[1]{\zPad + ((#1-1)/23)*(\striph-2*\zPad)}%
 
-	%% ── (a) zigzag ────────────────────────────────────────────────────────────
 	\begin{subfigure}[t]{0.31\linewidth}
 		\centering\vspace{0pt}%
 		\resizebox{\linewidth}{!}{%
@@ -301,7 +295,6 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[trajstart] at (zz0) {};
 				\node[trajend]   at (zz7) {};
 
-				% zoom strip - 8 bars alternating z10/z14
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 
@@ -315,7 +308,6 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip - 8 arrows, 0..105
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i/\b in {0/0, 1/15, 2/30, 3/45, 4/60, 5/75, 6/90, 7/105} {
@@ -331,7 +323,6 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 		\label{fig:app_anim_zigzag}
 	\end{subfigure}
 	\hfill
-	%% ── (b) spiral ────────────────────────────────────────────────────────────
 	\begin{subfigure}[t]{0.31\linewidth}
 		\centering\vspace{0pt}%
 		\resizebox{\linewidth}{!}{%
@@ -356,7 +347,6 @@ for (const {feature, id, index, sourceLayerIndex} of features) {
 				\node[trajstart] at (sp0)  {};
 				\node[trajend]   at (sp11) {};
 
-				% zoom strip - constant z12, 12 bars
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 				\pgfmathsetmacro{\hC}{\zTop{12}}
@@ -389,7 +379,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 		\label{fig:app_anim_spiral}
 	\end{subfigure}
 	\hfill
-	%% ── (c) zoomdrill ─────────────────────────────────────────────────────────
 	\begin{subfigure}[t]{0.31\linewidth}
 		\centering\vspace{0pt}%
 		\resizebox{\linewidth}{!}{%
@@ -407,7 +396,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[stationary] at (\mapcx, \mapcy) {};
 				\node[statlabel, anchor=north] at (\mapcx, \mapcy-0.15) {stationary};
 
-				% zoom strip - 7 bars z4,8,12,16,12,8,4
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 
@@ -422,7 +410,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip - constant 0°, 7 north arrows
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,6} {
@@ -438,7 +425,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 
 	\vspace{0.5em}
 
-	%% ── (d) pansweep ──────────────────────────────────────────────────────────
 	\begin{subfigure}[b]{0.31\linewidth}
 		\centering\vspace{0pt}%
 		\resizebox{\linewidth}{!}{%
@@ -464,7 +450,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[trajstart] at (ps0) {};
 				\node[trajend]   at (ps5) {};
 
-				% zoom strip - constant z12, 6 bars
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 				\pgfmathsetmacro{\hC}{\zTop{12}}
@@ -478,7 +463,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip - constant 0°, 6 north arrows
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,5} {
@@ -492,7 +476,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 		\label{fig:app_anim_pansweep}
 	\end{subfigure}
 	\hfill
-	%% ── (e) bearingspin ───────────────────────────────────────────────────────
 	\begin{subfigure}[b]{0.31\linewidth}
 		\centering\vspace{0pt}%
 		\resizebox{\linewidth}{!}{%
@@ -510,7 +493,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[stationary] at (\mapcx, \mapcy) {};
 				\node[statlabel, anchor=north] at (\mapcx, \mapcy-0.15) {stationary};
 
-				% zoom strip - constant z12, 8 bars
 				\draw[framebox] (\stripx, \zstripy) rectangle (\stripx+\stripw, \zstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \zstripy+\striph/2) {$z$};
 				\pgfmathsetmacro{\hC}{\zTop{12}}
@@ -524,7 +506,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hHi) {24};
 				\node[striplabel, anchor=west] at (\stripx+\stripw-0.01, \zstripy+\hLo) {1};
 
-				% bearing strip - 8 arrows 0..315
 				\draw[framebox] (\stripx, \bstripy) rectangle (\stripx+\stripw, \bstripy+\striph);
 				\node[axislabel, anchor=east] at (\stripx-0.04, \bstripy+\striph/2) {$\theta$};
 				\foreach \i in {0,...,7} {
@@ -541,7 +522,6 @@ This isolates render cost from tile-load cost via a stable tile set.}
 		\label{fig:app_anim_bearingspin}
 	\end{subfigure}
 	\hfill
-	%% ── (f) DOF matrix + keyframe counts ──────────────────────────────────────
 	\begin{subfigure}[b]{0.31\linewidth}
 		\centering\vspace{0pt}%
 		\begin{tblr}{

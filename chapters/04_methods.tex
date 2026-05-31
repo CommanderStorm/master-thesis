@@ -133,7 +133,6 @@ Finally, the data phase processes the fully optimized style so that pruning reco
             every edge node/.append style={text=cvdvermillion}
         },
     ]
-        % Codegen pipeline (top row)
         \node[src]  (v8)     {\texttt{v8.json}};
         \node[mir,  right=of v8]   (parsed) {ParsedSpec};
         \node[mir,  right=of parsed] (mir)    {MIR};
@@ -143,7 +142,6 @@ Finally, the data phase processes the fully optimized style so that pruning reco
         \draw[arrow] (parsed) -- node[above, label] {normalize} (mir);
         \draw[arrow] (mir)    -- node[above, label] {generate} (serial);
 
-        % Data pipeline (bottom row)
         \node[src, below=2.5cm of v8] (proto) {Protobuf\\{\scriptsize (\acs{MVT})}};
         \node[data, right=of proto] (mvt) {MVTLayer};
         \node[data, right=of mvt]   (scan) {DataScanner};
@@ -283,11 +281,11 @@ When tile statistics are available, the optimizer extends constant folding with 
 These rules receive tile statistics for the relevant source layer and fold expressions that are statically indeterminate but data-determinate:
 
 \begin{description}
-    \item[\textbf{Property presence folding}] if a property is present in every feature, \texttt{[\mlop{"has"},~\mlval{"p"}]} folds to \mlval{true}.
+    \item[Property presence folding] if a property is present in every feature, \texttt{[\mlop{"has"},~\mlval{"p"}]} folds to \mlval{true}.
 If present in none, it folds to \mlval{false}.
-    \item[\textbf{Single-value folding}] if a property has cardinality~1 and is present in all features, \texttt{[\mlop{"get"},~\mlval{"p"}]} folds to the single known value.
-    \item[\textbf{Geometry-type folding}] if a source layer contains only one geometry type, comparisons against \mlop{geometry-type} fold to a boolean.
-    \item[\textbf{Range folding}] numeric comparisons against a property with known data range $[\mathrm{min},\, \mathrm{max}]$ are folded when the predicate is trivially satisfied or violated.
+    \item[Single-value folding] if a property has cardinality~1 and is present in all features, \texttt{[\mlop{"get"},~\mlval{"p"}]} folds to the single known value.
+    \item[Geometry-type folding] if a source layer contains only one geometry type, comparisons against \mlop{geometry-type} fold to a boolean.
+    \item[Range folding] numeric comparisons against a property with known data range $[\mathrm{min},\, \mathrm{max}]$ are folded when the predicate is trivially satisfied or violated.
     We apply the following folding rules:
     \begin{equation}\label{eq:range_folding}
     \begin{aligned}
@@ -308,10 +306,10 @@ If present in none, it folds to \mlval{false}.
     A stats min/max pair derived from observed doubles may legitimately exclude a literal by a trailing-bit margin, but the filter is still defined (and, for correctness, treated as non-foldable).
     We apply strict-inequality folds on floating-point columns at the reported min/max values exactly.
 Stats collection uses the observed extrema rather than synthetic bounds, so the boundary comparison coincides with a value that actually occurs, which is the only case where the fold is unconditionally sound.
-    \item[\textbf{Match/in arm pruning}] the pass removes arms referencing values absent from the tile statistics.
+    \item[Match/in arm pruning] the pass removes arms referencing values absent from the tile statistics.
 If all arms are pruned, the expression collapses to its fallback.
-    \item[\textbf{Match arm reordering}] the pass reorders arms by descending frequency so the renderer evaluates the most common case first.
-    \item[\textbf{Data-ramp pruning}] for \mlop{step} and \mlop{interpolate} expressions driven by a numeric property with known data range $[\mathrm{min},\, \mathrm{max}]$, the pass prunes stops outside the observed range.
+    \item[Match arm reordering] the pass reorders arms by descending frequency so the renderer evaluates the most common case first.
+    \item[Data-ramp pruning] for \mlop{step} and \mlop{interpolate} expressions driven by a numeric property with known data range $[\mathrm{min},\, \mathrm{max}]$, the pass prunes stops outside the observed range.
     In a \mlop{step} expression, it removes stops with thresholds above $\mathrm{max}$.
 When the property is present in all features, it absorbs stops below $\mathrm{min}$ into the default.
     In an \mlop{interpolate} expression, it prunes stops outside the $[\mathrm{min},\, \mathrm{max}]$ interval symmetrically.
@@ -329,17 +327,13 @@ At lower sample rates the statistics are used only for reordering and selectivit
 
 \paragraph{Expression Simplification}
 Applying the algebraic identities from \cref{sec:compiler_optimizations}, De~Morgan's laws push negations inward to expose further folding:
-%
 \begin{quote}
 \texttt{[\mlop{"!"},~[\mlop{"all"},~a,~b]]}~$\to$~\texttt{[\mlop{"any"},~[\mlop{"!"},~a],~[\mlop{"!"},~b]]}
 \end{quote}
-%
 \noindent Boolean flattening merges nested \mlop{all}/ \mlop{any}:
-%
 \begin{quote}
 \texttt{[\mlop{"all"},~[\mlop{"all"},~a,~b],~c]}~~$\to$~~\texttt{[\mlop{"all"},~a,~b,~c]}
 \end{quote}
-%
 \noindent The \mlop{any}$\to$\mlop{in} rewrite detects two or more equality tests against the same property within an \mlop{any} and merges them into a single \mlop{in} expression that the renderer can evaluate as a set membership test.
 Within \mlop{match} expressions, the pass merges duplicate arms and removes arms whose output equals the fallback.
 
@@ -377,10 +371,10 @@ We estimate compound predicates under the standard independence assumption from 
 \noindent The independence assumption is known to be imprecise for correlated predicates~\cite{selingerAccessPathSelection1979}, but as discussed in \cref{sec:query_optimizations} only a reordering heuristic consumes the selectivity signal here, not a cost-based plan chooser.
 What matters is the \emph{ordering} of predicates by selectivity, not their absolute values.
 Correlation between map-style predicates (e.g.,\ \mlval{class} and \mlval{subclass} in \ac{OMT}) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
-Because the rendering benefit of predicate reordering depends on the proportion of evaluation cost attributable to predicate ordering (expected to be small for styles with short filters) we include this pass as an exploratory extension and do not separately benchmark its isolated impact.
+Because the rendering benefit of predicate reordering depends on the proportion of evaluation cost attributable to predicate ordering (expected to be small for styles with few/short filters), we include this pass as an exploratory extension and do not separately benchmark its isolated impact.
 
 \paragraph{Termination and Confluence of the Fixpoint}
-Per the \ac{TRS} framing of \cref{sub:fixpoint}, the expression-level phase applies the entire rewrite rule set until the style \ac{JSON} stops changing, the standard normal-form criterion.
+Per the \ac{TRS} framing of \cref{sub:fixpoint}, the expression-level phase applies to the entire rewrite rule set until the style \ac{JSON} stops changing, the standard normal-form criterion.
 We impose a hard cap of \texttt{8} iterations as a safety bound.
 
 The majority of the rules described above strictly decrease a lexicographic measure
@@ -411,9 +405,6 @@ To illustrate how expression passes compose, \cref{fig:expr_before_after} shows 
 \begin{figure}[ht]
 	\centering
 
-	% =========================================================
-	% A
-	% =========================================================
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
@@ -472,9 +463,6 @@ Expression rewriting via distributive factoring and \mlop{any}$\to$\mlop{in} pro
 
 	\vspace{4mm}
 
-	% =========================================================
-	% B
-	% =========================================================
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
@@ -527,9 +515,6 @@ Filter to Property Constant Propagation simplifying data-driven to constant.}
 
 	\vspace{4mm}
 
-	% =========================================================
-	% C
-	% =========================================================
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
@@ -576,9 +561,6 @@ Duplicate predicate elimination via subsumption.}
 
 	\vspace{4mm}
 
-	% =========================================================
-	% D
-	% =========================================================
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
@@ -668,7 +650,7 @@ After removing dead layers, the pass prunes sources that no surviving layer refe
 This mirrors dead code elimination followed by unreachable function removal in a compiler (\cref{sec:compiler_optimizations}).
 Its downstream effect on the tile pruning advisory (\cref{sub:tile_shaving}) is the entry point for the data-level cascade evaluated in \cref{sub:mlt_results}.
 
-Geometry-type mismatch is particularly effective on schemas such as \ac{OMT}, where a single source layer (e.g.,\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and so are never killed by this rule.
+Geometry-type mismatch is particularly effective on schemas such as \ac{OMT}, where a single source layer (e.g.,\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and hence are never killed by this rule.
 The check requires tile statistics, so we provide both static and stats-driven variants of the pass.
 
 \paragraph{Metadata Refinement}
@@ -816,14 +798,12 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
         label/.style={font=\scriptsize\itshape, text=black!90},
         check/.style={font=\scriptsize, text=black!90},
     ]
-        % Input layers (left)
         \node[layer]   (l0) {\mlval{line}\\ \texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"motorway"}}\\\texttt{\mlprop{line-color}: \mlval{\#e892a2}}\\\texttt{\mlprop{line-width}: \mlval{3}}};
         \node[layer, below=0.5cm of l0] (l1) {\mlval{line}\\\texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"primary"}}\\\texttt{\mlprop{line-color}: \mlval{\#fcd6a4}}\\\texttt{\mlprop{line-width}: \mlval{2}}};
         \node[layer, below=0.5cm of l1] (l2) {\mlval{line}\\\texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"secondary"}}\\\texttt{\mlprop{line-color}: \mlval{\#f7fabf}}\\\texttt{\mlprop{line-width}: \mlval{1.5}}};
 
         \node[above=0.15cm of l0, font=\small\bfseries] {Input: 3 adjacent line layers};
 
-        % Phase annotations (middle)
         \node[right=1.4cm of l0, check, text width=4.2cm] (p1) {%
             \stepcirc{1}~\textbf{Candidate check}\\[2pt]
             same type and source,
@@ -839,7 +819,6 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
             all zoom ranges identical\\
             $\Rightarrow$ no guards needed};
 
-        % Output (right)
         \node[merged, right=1.4cm of p2, text width=6.0cm] (out) {%
             \textbf{Merged \mlval{line} layer}\\[3pt]
             \texttt{\mlprop{filter}:}\\
@@ -860,7 +839,6 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
 
         \node[above=0.15cm of out, font=\small\bfseries] {Output: 1 merged layer};
 
-        % Arrows
         \draw[arrow] (l0.east) -- (p1.west);
         \draw[arrow] (l1.east) -- (p2.west);
         \draw[arrow] (l2.east) -- (p3.west);
@@ -925,21 +903,21 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
 \noindent The advisory captures five categories of information for each source-layer:
 
 \begin{description}
-	\item[\textbf{Property usage.}] Each property name appearing in a \texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]} expression in any live style layer, the zoom range over which it is referenced.
+	\item[Property usage.] Each property name appearing in a \texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]} expression in any live style layer, the zoom range over which it is referenced.
 	Properties not referenced at any zoom level are candidates for removal.
 	
-	\item[\textbf{Geometry usage.}] Geometry types (Point, LineString, and
+	\item[Geometry usage.] Geometry types (Point, LineString, and
 	Polygon) required at each zoom level, inferred from the live style layers
 	targeting the source-layer.
 	
-	\item[\textbf{Zoom-level coverage.}] Zoom levels for which at least one live
+	\item[Zoom-level coverage.] Zoom levels for which at least one live
 	style layer references the source-layer.
 	
-	\item[\textbf{Categorical-value usage.}] Property values referenced by
+	\item[Categorical-value usage.] Property values referenced by
 	equality filters and match expressions, together with their applicable zoom
 	ranges.
 	
-	\item[\textbf{Feature-ID usage.}] Whether any live style layer references
+	\item[Feature-ID usage.] Whether any live style layer references
 	\texttt{[\mlop{"id"}]} or
 	\texttt{[\mlop{"feature-state"},~\ldots]}.
 	
@@ -959,18 +937,14 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
         steps/.style={rectangle, draw, dashed, rounded corners=2pt, font=\small,
                       align=left, inner sep=6pt, text=black!80},
     ]
-        % Row 1: style-side and data-side inputs
         \node[style] (sopt) {Style optimizations\\{\scriptsize (\cref{sub:expression_optimizations,sub:structural_optimizations})}};
 
-        % Row 2: advisory
         \node[both, right=3cm of sopt] (adv) {Tile pruning advisory};
         \draw[arrow] (sopt) -- node[above, lbl] {optimized style} (adv);
 
-        % Row 3:
         \node[data, right=3cm of adv] (stats) {Tile statistics};
         \draw[arrow] (stats) -- node[above, lbl] {property/\\geom distribution} (adv);
 
-        % Row 3: MVT -> prune -> MLT
         \node[data, below=1.0cm of adv] (prune) {Prune \& transform};
         \node[data] at ($(sopt |- prune)$) (mvt) {\ac{MVT} tile};
         \node[data] at ($(stats |- prune)$) (mlt) {\ac{MLT} tile};
@@ -979,7 +953,6 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
         \draw[arrow] (mvt) -- (prune);
         \draw[arrow] (prune) -- node[above, lbl] {re-encode} (mlt);
 
-        % Pruning steps annotation
         \node[steps, below=0.5cm of prune] (ops) {%
             \textbf{Pruning operations (in order):}\\[2pt]
             1.\;Remove entire source-layers not referenced by any style layer.\\
@@ -1060,7 +1033,6 @@ Combined with warm-start caching of \ac{FSST} compressors and vertex-strategy de
             lbl/.style={font=\scriptsize\itshape, text=darkgray},
             node distance=1.7cm,
         ]
-            % Main pipeline on centre line (x=0)
             \node[io]     (u8)     {Wire bytes};
             \node[decode, below=of u8, minimum width=3.2cm, align=center]     (name)
                 {Columnar layer\\{\scriptsize per column: raw bytes}\\{\scriptsize or parsed values}};
@@ -1068,7 +1040,6 @@ Combined with warm-start caching of \ac{FSST} compressors and vertex-strategy de
             \node[decode, below=of name] (tile)   {Row-oriented features};
             \draw[arrow] (name) -- node[left, lbl, align=right] {convert to\\row format} (tile);
 
-            % Decoder off-centre towards the middle (right side)
             \node[dec, right=3.5cm of name.center, anchor=center] (decnode)
             {Decoder\\{\scriptsize reusable buffers,}\\{\scriptsize memory budget}\\{\scriptsize lazy decoding}};
             \draw[-Stealth, thick, densely dashed]
@@ -1076,10 +1047,8 @@ Combined with warm-start caching of \ac{FSST} compressors and vertex-strategy de
             \draw[-Stealth, thick, densely dashed]
             (decnode.south) -- ++(0,-0.8) -| ($(name.south) + (1,0)$);
 
-            % Phantom to balance bounding box
             \path (-4, 0);
 
-            % Decoder arrows
         \end{tikzpicture}
         \caption{
 Decoding pipeline.
@@ -1100,23 +1069,19 @@ The columnar data is converted to row-oriented features as needed.}
             lbl/.style={font=\scriptsize\itshape, text=darkgray},
             node distance=1.2cm,
         ]
-            % Main pipeline on centre line (x=0)
             \node[io]     (write)   {Byte sink};
             \node[encode, below=of write]   (encoded) {Wire-ready bytes};
             \node[encode, below=1.4cm of encoded] (staged)  {Staged columnar layer};
             \node[encode, below=of staged]  (tile)    {Row-oriented features};
 
-            % Encoder off-centre towards the middle (left side)
             \node[enc] at ($(staged)!0.5!(encoded) + (-2.5,0)$) (encnode) {Encoder\\{\scriptsize reusable buffers,}\\{\scriptsize caching}};
 
             \draw[arrow] (tile)    -- node[right, lbl, align=left] {convert to\\columnar} (staged);
             \draw[arrow] (staged)  -- node[right, lbl, align=left] {fully encode to\\wire-ready format} (encoded);
             \draw[arrow] (encoded) -- node[right, lbl] {zero-copy} (write);
 
-            % Phantom to balance bounding box
             \path (3.5, 0);
 
-            % Encoder arrows
             \draw[-Stealth, thick, densely dashed] (staged.west) -| (encnode.south);
             \draw[-Stealth, thick, densely dashed] (encnode.north) |- (encoded.west);
         \end{tikzpicture}
@@ -1133,7 +1098,7 @@ Encoder~\subref{fig:arch_enc_sub} and decoder~\subref{fig:arch_dec_sub} data-flo
 In an outer loop, the encoder runs a sort-strategy competition.
 Reordering features within a layer permutes every parallel column (geometry, IDs, and all properties) simultaneously.
 Different orderings favour different encoding schemes.
-Spatial orderings cluster nearby geometries and their correlated properties, improving \ac{RLE} run lengths.
+Spatial orderings cluster nearby geometries and their correlated properties, improving \texttt{\ac{RLE}} run lengths.
 ID ordering produces sequential integer sequences amenable to delta-\acs{RLE}.
 Which ordering wins depends on the value distributions and cardinalities of the specific layer.
 A layer dominated by a single repeated property value may benefit most from spatial clustering, while a layer with sequential IDs and high-cardinality properties may favour ID ordering.
@@ -1144,10 +1109,10 @@ The encoder therefore tries multiple sort strategies on the same data and retain
 The implemented strategies and their rationale are
 
 \begin{description}
-    \item[\textbf{Unsorted.}] The encoder preserves the original feature order.
-    \item[\textbf{Spatial (Morton/Z-order).}] The encoder sorts features by the Z-order curve index of their first vertex, computed via bit-interleaving.  Fast to compute and provides reasonable spatial locality (\cref{sub:space_filling_curves}).
-    \item[\textbf{Spatial (Hilbert).}] The encoder sorts features by the Hilbert curve index of their first vertex.  Slower to compute than Morton but achieves superior spatial locality, as the Hilbert curve avoids the long jumps inherent in the Z-order curve's recursive structure~\cite{moonAnalysisClusteringProperties2001}.
-    \item[\textbf{ID.}] The encoder sorts features by feature ID in ascending order.
+    \item[Unsorted.] The encoder preserves the original feature order.
+    \item[Spatial (Morton/Z-order).] The encoder sorts features by the Z-order curve index of their first vertex, computed via bit-interleaving.  Fast to compute and provides reasonable spatial locality (\cref{sub:space_filling_curves}).
+    \item[Spatial (Hilbert).] The encoder sorts features by the Hilbert curve index of their first vertex.  Slower to compute than Morton but achieves superior spatial locality, as the Hilbert curve avoids the long jumps inherent in the Z-order curve's recursive structure~\cite{moonAnalysisClusteringProperties2001}.
+    \item[ID.] The encoder sorts features by feature ID in ascending order.
 \end{description}
 
 For each candidate strategy, the encoder constructs a fresh \texttt{Encoder} instance, encodes the reordered layer, and measures the total output size (header + metadata + data).
@@ -1171,47 +1136,37 @@ We considered property-based sort strategies but did not include them in the cur
         arrow/.style={-Stealth, thick},
         label/.style={font=\scriptsize\itshape, text=darkgray},
         ]
-        % Input
         \node[input] (layer) {\texttt{TileLayer01}};
 
-        % Prep: group_string_properties
         \node[prep, below=of layer] (grp)
         {\texttt{group\_string\_properties()}};
         \draw[arrow] (layer) -- (grp);
 
-        % Prep: collect_sort_strategies
         \node[prep, below=of grp] (coll)
         {\texttt{collect\_sort\_strategies()}};
         \draw[arrow] (grp) -- (coll);
 
-        % Loop guard
         \node[decision, below=1.0cm of coll] (more) {more strategies?};
         \draw[arrow] (coll) -- (more);
 
-        % Sort + columnarize
         \node[stage, below=1.0cm of more] (sort)
         {Sort + columnarize\\%
             {\scriptsize\texttt{from\_tile(clone, sort, groups)}}};
         \draw[arrow] (more) -- node[right, label] {yes} (sort);
 
-        % Encode
         \node[encoder, below=of sort] (enc)
         {Encode all columns\\{\scriptsize (per-stream competition)}};
         \draw[arrow] (sort) -- (enc);
 
-        % Compare
         \node[decision, below=of enc] (cmp) {size $<$ best?};
         \draw[arrow] (enc) -- node[right, label] {\texttt{total\_len()}} (cmp);
 
-        % Yes: update best, then loop back
         \node[stage, below=0.5cm of cmp] (upd) {Update best};
         \draw[arrow] (cmp) -- node[right, label] {yes} (upd);
 
-        % No: discard, loop back
         \draw[arrow] (upd.west) -| ($(more.west)+(-4cm,0)$) |- node[above, label] {no} (more.west);
         \draw[arrow] (cmp.west) -| ($(more.west)+(-4cm,0)$) |- (more.west);
 
-        % Exit loop
         \node[output, right=2.2cm of more] (best) {Emit smallest encoding\\{\scriptsize\texttt{best.into\_layer\_bytes()}}};
         \draw[arrow] (more.east) -- node[above, label] {no} (best.west);
     \end{tikzpicture}
@@ -1231,18 +1186,18 @@ The encoder always tries small layers (below the threshold), since the absolute 
 We derived the thresholds experimentally from Germany-wide \ac{OMT}.
 
 In an inner loop, a per-stream encoding competition tries every viable integer encoding for the data stream.
-Each candidate pairs a \emph{logical} encoding (Plain, Delta, \ac{RLE}, or DeltaRle) with a \emph{physical} encoding (\ac{VarInt} or \ac{FastPFOR}~\cite{lemireDecodingBillionsIntegers2015}).
+Each candidate pairs a \emph{logical} encoding (\texttt{Plain}, \texttt{Delta}, \texttt{\ac{RLE}}, or \texttt{DeltaRle}) with a \emph{physical} encoding (\ac{VarInt} or \ac{FastPFOR}~\cite{lemireDecodingBillionsIntegers2015}).
 The general stream competition currently covers these four logical encodings.
 The encoder applies geometry-specific strategies (Morton-delta, componentwise-delta) via a separate encoding path optimized for coordinate data, since their semantics are tied to the two-dimensional structure of vertex sequences and do not generalize to property columns.
 Extending the general competition to include additional strategies (e.g., frame-of-reference without delta, or hybrid schemes) is a direction for future work, though the current candidate set captures the dominant encoding patterns observed in the benchmark tileset.
 The naive approach of encoding every combination and comparing would be prohibitively expensive for large tiles.
 Instead, a \emph{data profiler} samples a contiguous block taken from the middle of the stream.
 It profiles streams with at most $512$ values in full, and profiles longer streams over $\lfloor |s| / 100 \rfloor$ values clamped to $[512,\, 16384]$.
-We chose the contiguous mid-stream window over a random sample because permutation destroys \ac{RLE} run lengths and delta-bit-width statistics, and because the middle of a spatially or ID-sorted stream is a representative point away from the boundary artefacts at the ends.
+We chose the contiguous mid-stream window over a random sample because permutation destroys \texttt{\ac{RLE}} run lengths and delta-bit-width statistics, and because the middle of a spatially or ID-sorted stream is a representative point away from the boundary artefacts at the ends.
 The profiler completes a single pass over the sample to prune candidates before any full encoding is attempted.
-It excludes \ac{RLE} when the average run length $\bar{S} = |s| / n_{\text{runs}}$ falls below 2.0.
-It excludes Delta when the stream is non-monotonic and the summed bit width of the zigzag-encoded deltas exceeds that of the raw values.
-It excludes DeltaRle when the delta-stream average run length $\bar{S}_\Delta = (|s|-1) / n_{\Delta\text{-runs}}$ falls below 2.0 and neither \ac{RLE} nor Delta is independently viable.
+It excludes \texttt{\ac{RLE}}, when the average run length $\bar{S} = |s| / n_{\text{runs}}$ falls below 2.0.
+It excludes \texttt{Delta}, when the stream is non-monotonic and the summed bit width of the zigzag-encoded deltas exceeds that of the raw values.
+It excludes \texttt{DeltaRle}, when the delta-stream average run length $\bar{S}_\Delta = (|s|-1) / n_{\Delta\text{-runs}}$ falls below 2.0 and neither \texttt{\ac{RLE}} nor \texttt{Delta} is independently viable.
 The encoder only offers \ac{FastPFOR} for 32-bit integer types, as the algorithm's block structure is designed for fixed-width words.
 The encoder fully encodes the remaining candidates (typically two to four) and commits the smallest output.
 
@@ -1250,14 +1205,14 @@ The encoder fully encodes the remaining candidates (typically two to four) and c
 String columns compete across four strategies, reflecting the two orthogonal dimensions of string compression, namely deduplication and byte-level compression.
 
 \begin{description}
-    \item[\textbf{Plain}] means raw bytes with length prefixes.
+    \item[Plain] means raw bytes with length prefixes.
     The length stream is itself subject to the integer encoding competition.
-    \item[\textbf{Dictionary}] is a deduplicated corpus with per-string offset indices.
+    \item[Dictionary] is a deduplicated corpus with per-string offset indices.
     Effective when many features share the same string value (e.g., road names that repeat across tiles).
-    \item[\textbf{\ac{FSST}} (\cref{sub:string_compression})]~\cite{bonczFSSTFastRandom2020} is a lightweight, random-access string compressor that learns a symbol table of up to~255 frequent byte sequences and replaces occurrences with single-byte codes.
+    \item[\ac{FSST} (\cref{sub:string_compression})]~\cite{bonczFSSTFastRandom2020} is a lightweight, random-access string compressor that learns a symbol table of up to~255 frequent byte sequences and replaces occurrences with single-byte codes.
     The encoder stores the symbol table once per column.
     The compressed corpus remains directly scannable without decompression.
-    \item[\textbf{\ac{FSST} + Dictionary}] combines both deduplication and byte-level compression.
+    \item[\ac{FSST} + Dictionary] combines both deduplication and byte-level compression.
 \end{description}
 
 A viability probe ensures that the encoder only attempts \ac{FSST}, when the symbol-table overhead (up to \qty{2040}{\byte}) is likely to be recouped.
@@ -1280,7 +1235,7 @@ The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlva
 The low threshold reflects that even small vocabulary overlap reduces the marginal cost of adding a column to an existing dictionary.
     The encoder discards groups with fewer than two members.
     We selected the threshold and similarity mode via a sweep over $[2.5\%, 20\%]$ on the Germany \ac{OMT} tileset under three similarity modes (\emph{hybrid} taking $\max(\hat{J}_\text{exact}, \hat{J}_\text{trigram})$, \emph{only-trigram}, \emph{only-exact}), summarised in \cref{fig:minhash_sweep} in the appendix.
-    Hybrid mode wins at every threshold at no significant performance cost, and the curve is nearly flat below \qty{7.5}{\percent}, where the empirical optimum at \qty{2.5}{\percent} saves only an additional \qty{1.6}{\mega\byte} on the \qty{3.14}{\giga\byte} tileset at the cost of false-positive union risk on tilesets with less correlated vocabularies.
+    Hybrid mode wins at every threshold at no significant performance cost, and the curve is nearly flat below \qty{7.5}{\percent}, where the empirical optimum at \qty{2.5}{\percent} saves only an additional \qty{1.6}{\mega\byte} on the \qty{3.14}{\giga\byte} tileset, at the cost of false-positive union risk on tilesets with less correlated vocabularies.
     We therefore retain \qty{7.5}{\percent} as a conservative default that captures the majority of the grouping benefit.
 \end{sloppypar}
 
@@ -1294,7 +1249,6 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             stepbox/.style={draw, rounded corners=3pt, inner sep=5pt, font=\scriptsize},
             steplabel/.style={font=\scriptsize\bfseries},
             ]
-            % Top-left (Step 1): Column value table
             \node[stepbox] (tbl) {%
                 \begin{tabular}{@{}l l@{}}
                     \textbf{Column} & \textbf{Distinct values (sample)} \\
@@ -1308,7 +1262,6 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             };
             \node[steplabel, above=1pt of tbl] {\circled{1} Column vocabularies};
 
-            % Top-right (Step 2): MinHash sketch generation
             \node[stepbox, right=0.8cm of tbl, anchor=west] (hash) {%
                 \begin{tabular}{@{}l c c@{}}
                     \textbf{Column} & \textbf{Exact sketch} & \textbf{Trigram sketch} \\
@@ -1322,7 +1275,6 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             };
             \node[steplabel, above=1pt of hash] {\circled{2} MinHash signatures (128 permutations)};
 
-            % Bottom-right (Step 3): Pairwise Jaccard
             \node[stepbox, anchor=north] (sim) at ($(hash.south)+(0,-0.8cm)$) {%
             	\begin{tabular}{@{}l c c l@{}}
             		\textbf{Column pair} &
@@ -1349,7 +1301,6 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             };
             \node[steplabel, below=1pt of sim] {\circled{3} Pairwise comparison ($\hat{J} = |\{i : h_i^{(a)} = h_i^{(b)}\}| \,/\, 128$)};
 
-            % Bottom-left (Step 4): Union-Find result
             \node[stepbox, cmp] at ($(tbl |- sim)$)  (res) {%
                 \textbf{Shared dictionary groups:}\\[3pt]
                 \fbox{\strut\mlval{name:de}, \mlval{name:fr}}\\[1pt]
@@ -1361,7 +1312,6 @@ The low threshold reflects that even small vocabulary overlap reduces the margin
             };
             \node[steplabel, below=1pt of res] {\circled{4} Union-Find clustering};
 
-            % Arrows (clockwise)
             \draw[arrow] (tbl) -- node[above, font=\scriptsize\itshape] {hash} (hash);
             \draw[arrow] (hash) -- (sim);
             \draw[arrow] (sim) -- node[above, font=\scriptsize\itshape] {$>\tau$} (res);
@@ -1383,16 +1333,16 @@ The resulting groups share a single deduplicated dictionary corpus}
 \paragraph{Geometry encoding}
 The encoder encodes geometry vertices as either \emph{componentwise deltas} (CWD), \emph{Hilbert-code dictionaries}, \emph{Morton-code dictionaries} or plain vertices.
 CWD encodes each vertex as the delta from the previous vertex, producing a single interleaved stream $[x_0, y_0, \Delta x_1, \Delta y_1, \ldots]$ that is then compressed via the per-stream integer competition.
-The Morton/Hilbert-code dictionary approach computes a Z-order code for each unique vertex pair, stores the deduplicated codes as a sorted dictionary, and references them via per-vertex offset indices, producing two streams (offsets and dictionary deltas) instead of one.
+The Morton/Hilbert-code dictionary approach computes a Z-order code for each unique vertex pair, stores the deduplicated codes as a sorted dictionary, and references them via per-vertex offset indices.
+This produces two streams (offsets and dictionary deltas) instead of one.
 The encoder tries both strategies (when the coordinate range permits Morton encoding, i.e., both axes fit within 16~bits after shifting) and retains the smaller result.
-
 
 \paragraph{Feature IDs encoding}
 The encoder encodes feature IDs through the same per-stream integer competition as other integer columns, with an explicit tag selecting between 32-bit and 64-bit word widths.
 The encoder narrows 64-bit-declared ID columns to 32 bits when every observed value fits.
 
 The same data profiler that drives the inner competition discovers structural patterns.
-Sequential IDs reach DeltaRle, constant IDs reach \ac{RLE}, and short or irregular sequences fall back to plain \ac{VarInt}.
+Sequential IDs reach \texttt{DeltaRle}, constant IDs reach \texttt{\ac{RLE}}, and short or irregular sequences fall back to plain \ac{VarInt}.
 
 \paragraph{Encoder correctness validation}\label{par:encoder_validation}
 Because \ac{FastPFOR} disclaims input validation and the encoder's narrowing, run-encoding, and dictionary rebuild stages have independent failure modes, we validate correctness through property-based round-trips per integer encoder, coverage-guided fuzzing over full layer round-trips, snapshot tests over the profiler's candidate selection, and the pixel-exact end-to-end check from \cref{sec:visual_correctness}.
@@ -1407,17 +1357,19 @@ The optimizer accepts either an MBTiles database, in which case the scan runs on
 For each source layer, the phase collects the following statistics:
 
 \begin{description}
-    \item[\textbf{Feature count}] total number of features across all tiles\footnote{Contrary to naive reasoning, features appearing in multiple tiles at different zoom levels are counted multiple times, as the optimizer reasons per-tile, not per-geographic-entity.
-This creates bias, but bias that is representative to the usecase of rendering maps, where tiled features are used instead of geographic features.}.
-    \item[\textbf{Features by zoom}] a per-zoom-level feature count, used by metadata refinement to determine the first and last zoom level at which data exists.
-    \item[\textbf{Geometry types}] counts of Point, LineString, and Polygon features, used by dead elimination to detect geometry-type mismatches.
-    \item[\textbf{Feature ID presence}] whether any feature carries a non-zero feature ID, used by the advisory to decide whether to strip the ID column.
-    \item[\textbf{Per-property statistics}] for each property name, the statistics depend on the wire type:
+    \item[Feature count.] Total number of features across all tiles\footnote{
+    Counterintuitively, a feature that appears in multiple tiles - including the same feature across zoom levels - is counted once per tile.
+    This is intentional as our optimizer reasons per tile, not per geographic entity.
+    The resulting bias is representative of the map-rendering use case, since client-side maps render tiled features rather than geographic ones.}.
+    \item[Features by zoom.] A per-zoom-level feature count, used by metadata refinement to determine the first and last zoom level at which data exists.
+    \item[Geometry types.] Counts of Point, LineString, and Polygon features, used by dead elimination to detect geometry-type mismatches.
+    \item[Feature ID presence.] Whether any feature carries a non-zero feature ID, used by the advisory to decide whether to strip the ID column.
+    \item[Per-property statistics.] For each property name, the statistics depend on the wire type:
     \begin{description}
-        \item[\emph{Boolean}] present count and true count.
-        \item[\emph{Integer/unsigned integer}] present count, minimum, maximum, cardinality, and (if cardinality $\leq 200$) a full value-frequency map.
-        \item[\emph{Double}] present count, minimum, maximum, cardinality (no value-frequency map, since floating-point equality is unreliable for folding).
-        \item[\emph{String}] present count, cardinality, and (if cardinality $\leq 200$) a value-frequency map sorted by descending frequency.
+        \item[\emph{Boolean}] Present count and true count.
+        \item[\emph{Integer}] Present count, minimum, maximum, cardinality, and (if cardinality $\leq 200$) a full value-frequency map.
+        \item[\emph{Double}] Present count, minimum, maximum, cardinality (no value-frequency map, since floating-point equality is unreliable for folding).
+        \item[\emph{String}] Present count, cardinality, and (if cardinality $\leq 200$) a value-frequency map sorted by descending frequency.
     \end{description}
 \end{description}
 
@@ -1441,7 +1393,7 @@ The focus of this thesis is on the delivery and rendering improvements that this
 \section{Gathering a Representative Sample}\label{sec:gathering_sample}
 
 Our deep evaluation runs 15 styles (\cref{sub:deep_corpus}) against reproducible tile data (\cref{sub:tile_data}) and a stratified scenario sample (\cref{sub:scenarios}).
-A further 13 styles (\cref{sub:generalization_corpus}) carry static-only checks to test whether gains generalise beyond the deep tier.
+A further 13 styles (\cref{sub:generalization_corpus}) carry static-only checks to test whether gains generalize beyond the deep tier.
 
 \subsection{Benchmarking Corpus}\label{sub:deep_corpus}
 
@@ -1466,15 +1418,15 @@ These styles are evaluated using static analysis only (style size, complexity me
 
 \subsection{Tile Data and Caching}\label{sub:tile_data}
 
-We source tile data from \ac{OSM} via Planetiler or the German government.
-We consume both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
-We access BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
-Only for \ac{OSM} is the underlying data fully available, so only for this source can we collect tile statistics at a sample rate of~1.0.
-To ensure reproducibility across benchmark runs, we route all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
+We sourced tile data from \ac{OSM} via Planetiler or the German government.
+We consumed both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
+We accessed BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
+Only for \ac{OSM} is the underlying data was fully available, so only for this source we could collect tile statistics at a sample rate of~1.0.
+To ensure reproducibility across benchmark runs, we routed all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
 This eliminates network variability and guarantees that every ablation step operates on identical tile data (after an initial, discarded run).
 The model does not simulate packet loss, HTTP/2 multiplexing, TCP slow-start, or HTTP/3 (QUIC) with its 0-RTT connection resumption and absence of head-of-line blocking.
-All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving are a conservative lower bound on what a real deployment would observe.
-This ensures that we measure tile-fetch improvements (e.g.,\ smaller tiles due to shaving) under conditions representative of a \ac{CDN}-served deployment while remaining deterministic across runs.
+All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving were a conservative lower bound on what a real deployment would observe.
+This ensures that we measured tile-fetch improvements (e.g.,\ smaller tiles due to shaving) under conditions representative of a \ac{CDN}-served deployment while remaining deterministic across runs.
 The same network model also feeds the per-style \ac{CDN} break-even analysis in \cref{sub:mlt_discussion}, which extends this single-client setup to a multi-style cache.
 
 \subsection{Geographic and Use-Case Scenarios}\label{sub:scenarios}
@@ -1505,12 +1457,13 @@ The rest of this section defines the methodology that chapter applies.
 Our evaluation reports the deployment metrics framed in \cref{sec:problem_statement} along several axes, namely data savings (which feed the load-time axis), rendering performance, optimization cost (the $C_\text{total}$ breakdown of \cref{sub:preprocessing_cost_model}), and qualitative efficiency.
 
 \begin{description}
-    \item[\textbf{Data savings}] reduction in style size (raw, gzip, and Brotli) and tile transfer volume.
-    \item[\textbf{Rendering performance}] client-side metrics including load time, frames per second, frame time percentiles (p50, p95, p99), jank count, style parse time, time to first tile, and time to first frame.
-    \item[\textbf{Optimization cost}] preprocessing time introduced by each pass, measured as wall-clock time on the optimizer's host machine.
-This is an offline cost amortised over all subsequent tile deliveries.
-    \item[\textbf{Efficiency}] \emph{qualitative} discussion of the energy implications of reduced data transfer and fewer rendering operations.  We perform no direct power or energy measurement (\ac{RAPL}, battery delta), because the benchmark harness runs on a desktop workstation rather than a thermaly and battery-constrained mobile device.
-Any quantitative energy claim would require a different hardware platform and we defer it to future work.
+    \item[Data savings] reduction in style size (raw, gzip, and Brotli) and tile transfer volume.
+    \item[Rendering performance] client-side metrics including load time, frames per second, frame time percentiles (p50, p95, p99), jank count, style parse time, time to first tile, and time to first frame.
+    \item[Optimization cost] preprocessing time introduced by each pass, measured as wall-clock time on the optimizer's host machine.
+    This is an offline cost amortised over all subsequent tile deliveries.
+    \item[Efficiency] \emph{qualitative} discussion of the energy implications of reduced data transfer and fewer rendering operations. 
+    We perform no direct power or energy measurement (\ac{RAPL}, battery delta), because the benchmark harness runs on a desktop workstation rather than a thermally- and battery-constrained mobile device.
+    Any quantitative energy claim would require a different hardware platform and we defer it to future work.
 \end{description}
 
 \subsection{Metrics}\label{sub:metrics}
@@ -1518,17 +1471,17 @@ Any quantitative energy claim would require a different hardware platform and we
 Per run, the benchmark harness collects the following metrics:
 
 \begin{description}
-    \item[\textbf{Load time}] wall-clock time from requesting the map to completion of the initial render, including style parsing, tile fetching, tile decoding, and first paint.
+    \item[Load time] wall-clock time from requesting the map to completion of the initial render, including style parsing, tile fetching, tile decoding, and first paint.
     Within the rendering benchmark, decoding latency is embedded in \texttt{loadMs} rather than isolated, because the browser-based harness cannot separate decoder wall-clock time from the surrounding fetch and first-paint work without renderer-internal instrumentation.
     We instead measure isolated decoding throughput via Criterion\footnote{\url{https://github.com/bheisler/criterion.rs}, last accessed 2026-05-23} micro-benchmarks on our decoder (\cref{tab:decode_throughput}).
-    \item[\textbf{Style parse time}] time spent parsing and compiling the style \ac{JSON} into the renderer's internal representation.
-    \item[\textbf{Time to first tile}] time from map initialisation until the first tile is decoded and ready for rendering.
-    \item[\textbf{Time to first frame}] time until the first frame is composited and presented.
-    \item[\textbf{\ac{FPS}}] average rendering throughput during the animation phase.
-    \item[\textbf{Frame time percentiles}] distribution of per-frame render times, capturing both typical and worst-case latency.
-    \item[\textbf{Jank count}] number of frames whose render time exceeds twice the median, indicating visible stuttering relative to typical frame pacing.
-    \item[\textbf{Heap memory}] JavaScript heap usage during the benchmark, capturing the memory cost of style structures and tile data.
-    \item[\textbf{Idle time}] time the renderer spends idle (waiting for tiles or \ac{GPU} sync), indicating headroom.
+    \item[Style parse time] time spent parsing and compiling the style \ac{JSON} into the renderer's internal representation.
+    \item[Time to first tile] time from map initialisation until the first tile is decoded and ready for rendering.
+    \item[Time to first frame] time until the first frame is composited and presented.
+    \item[\ac{FPS}] average rendering throughput during the animation phase.
+    \item[Frame time percentiles] distribution of per-frame render times, capturing both typical and worst-case latency.
+    \item[Jank count] number of frames whose render time exceeds twice the median, indicating visible stuttering relative to typical frame pacing.
+    \item[Heap memory] JavaScript heap usage during the benchmark, capturing the memory cost of style structures and tile data.
+    \item[Idle time] time the renderer spends idle (waiting for tiles or \ac{GPU} sync), indicating headroom.
 \end{description}
 
 \noindent Additionally, we compute static metrics for each optimized style without running the renderer.
@@ -1540,7 +1493,7 @@ Per run, the benchmark harness collects the following metrics:
 Our primary evaluation methodology is cumulative ablation.
 We add passes one at a time in a fixed order and re-run the full benchmark suite after each addition.
 This reveals both the marginal contribution of each pass and the interactions between passes.
-The ablation comprises 19~cumulative steps (a baseline with no optimizations followed by passes added incrementally in the order listed in \crefrange{tab:expression_passes}{tab:data_passes}) plus one additional configuration that applies plain tile shaving on top of the unoptimized style, included to isolate the style$\leftrightarrow$shaving interaction in \cref{sub:mlt_results}.
+The ablation comprises 19~cumulative steps (a baseline with no optimizations followed by passes added incrementally in the order listed in \crefrange{tab:expression_passes}{tab:data_passes}) plus one additional configuration that applies plain tile shaving on top of the unoptimized style, included isolating the style$\leftrightarrow$shaving interaction in \cref{sub:mlt_results}.
 \cref{sub:combined_ablation,tab:marginal_contribution} present the step-by-step results.
 
 We execute each scenario/style combination for 15~runs.
@@ -1550,13 +1503,13 @@ To reduce measurement noise, the benchmark harness pins rendering to real \ac{GP
 This ensures that we measure \ac{GPU}-bound workloads (fragment shading, texture sampling, blend operations) realistically.
 
 We serve all tile requests from a local caching proxy as described in \cref{sub:tile_data}.
-The benchmark harness itself is a Puppeteer\footnote{\url{https://pptr.dev/}, last accessed 2026-05-23}-driven headless browser that programmatically loads the MapLibre GL~JS renderer, applies a camera animation scenario, and collects performance counters via the \texttt{Performance} \ac{API}\footnote{\url{https://developer.mozilla.org/en-US/docs/Web/API/Performance_API}, last accessed 2026-05-23} and custom instrumentation hooks in the renderer.
+The benchmark harness itself is a Puppeteer\footnote{\url{https://pptr.dev/}, last accessed 2026-05-23}-driven headless browser that programmatically loads the MapLibre GL~JS renderer, applies a camera animation scenario, collects performance counters via the \texttt{Performance} \ac{API}\footnote{\url{https://developer.mozilla.org/en-US/docs/Web/API/Performance_API}, last accessed 2026-05-23} and adding custom instrumentation hooks into the renderer.
 
 \begin{chaptersummary}
 The optimizer is a \textbf{three-level pipeline} (\cref{sub:pipeline}) operating on the $(S, T) \to (S', T')$ problem of \cref{sec:problem_statement}.
 Eight expression-level passes run to a fixpoint, six structural passes act on a typed style document, and data-level passes re-encode shaved tiles into \ac{MLT} via per-stream strategy competition.
 The \textbf{pruning advisory} derived from the optimized style ties the levels together as a projection-pushdown plan over the tile data.
-We measure the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
+We measured the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
 
 The following chapter applies this methodology to evaluate each optimization category in isolation, tests generalization beyond the benchmarking corpus, and analyses the full pipeline's combined effect.
 \end{chaptersummary}

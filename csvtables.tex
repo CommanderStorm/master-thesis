@@ -1,7 +1,5 @@
 \usepackage{csvsimple-l3}
 
-% Formatting helpers
-
 % Signed delta with explicit +/- (for percentage columns)
 \ExplSyntaxOn
 \NewDocumentCommand{\fmtdelta}{m}{
@@ -18,7 +16,6 @@
 }
 \ExplSyntaxOff
 
-% Auto-scale raw bytes → KB/MB/GB
 \ExplSyntaxOn
 \NewDocumentCommand{\fmtbytes}{m}{
   \fp_compare:nTF { #1 >= 1000000000 }
@@ -33,16 +30,13 @@
 }
 \ExplSyntaxOff
 
-% Noise-table percentage cell
 \newcommand{\fmtnoisepct}[1]{\ifblank{#1}{-}{#1\,\%}}
 
-% Axis name in monospace (handles underscores via \detokenize)
+% Handles underscores in axis names via \detokenize
 \NewDocumentCommand{\fmtaxis}{m}{\texttt{\detokenize{#1}}}
 
-% Optional value or dash
 \newcommand{\fmtopt}[1]{\ifblank{#1}{-}{#1}}
 
-% - Per-style ablation table macro -
 % #1 = style_id (for filename), #2 = display name
 \NewDocumentCommand{\perstyleablation}{mm}{%
   \needspace{15\baselineskip}%

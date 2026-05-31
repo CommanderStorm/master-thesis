@@ -11,15 +11,15 @@ A user interacts with an input device (mouse, touch, keyboard) to control the ma
 The map view is rendered using one of the following approaches:
 
 \begin{description}
-\item[\textbf{\ac{SVG}}] \begin{sloppypar} is a vector graphics format that can be used to render maps as shown by the ID Editor\footnote{\url{https://github.com/openstreetmap/iD}, last accessed 2026-03-16} or Leaflet\footnote{\url{https://leafletjs.com/}, last accessed 2026-03-16}.
+\item[\ac{SVG}] \begin{sloppypar} is a vector graphics format that can be used to render maps as shown by the ID Editor\footnote{\url{https://github.com/openstreetmap/iD}, last accessed 2026-03-16} or Leaflet\footnote{\url{https://leafletjs.com/}, last accessed 2026-03-16}.
 Using \acp{SVG} means one is limited to a 2D rendering approach due to not having a camera.\end{sloppypar}
 
-\item[\textbf{Canvas 2D}] is the HTML5 \texttt{<canvas>} immediate-mode drawing \ac{API}.
+\item[Canvas 2D] is the HTML5 \texttt{<canvas>} immediate-mode drawing \ac{API}.
 OpenLayers\footnote{\url{https://openlayers.org/}, last accessed 2026-04-21} uses Canvas~2D as its primary renderer, rasterising vector features on the \ac{CPU} rather than submitting them to the \ac{GPU}.
 This avoids the complexity of \ac{GPU} pipeline management and shader compilation, but rendering throughput is \ac{CPU}-bound and does not benefit from hardware-accelerated geometry processing.
 Like \ac{SVG}, Canvas~2D is limited to 2D views without pitch or rotation.
 
-\item[\textbf{Low-level 3D Graphics \acp{API}}] \begin{sloppypar} like \ac{WebGL}\footnote{\url{https://get.webgl.org/}, last accessed 2026-03-16}, \ac{WebGPU}~\cite{WebGPU}, OpenGL\footnote{\url{https://registry.khronos.org/OpenGL-Refpages/gl4/}, last accessed 2026-03-16}, Metal\footnote{\url{https://developer.apple.com/metal/}, last accessed 2026-03-16}, Vulkan\footnote{\url{https://www.vulkan.org/}, last accessed 2026-03-16}, DirectX\footnote{\url{https://microsoft.github.io/DirectX-Specs/}, last accessed 2026-03-16}, etc.\ for rendering 3D graphics as shown by mapbox\footnote{\url{https://www.mapbox.com/}, last accessed 2026-03-16}, maplibre\footnote{\url{https://maplibre.org/}, last accessed 2026-03-16}, deck.gl\footnote{\url{https://deck.gl/}, last accessed 2026-03-16}, here\footnote{\url{https://www.here.com}, last accessed 2026-03-16} and many more.
+\item[Low-level 3D Graphics \acp{API}] \begin{sloppypar} like \ac{WebGL}\footnote{\url{https://get.webgl.org/}, last accessed 2026-03-16}, \ac{WebGPU}~\cite{WebGPU}, OpenGL\footnote{\url{https://registry.khronos.org/OpenGL-Refpages/gl4/}, last accessed 2026-03-16}, Metal\footnote{\url{https://developer.apple.com/metal/}, last accessed 2026-03-16}, Vulkan\footnote{\url{https://www.vulkan.org/}, last accessed 2026-03-16}, DirectX\footnote{\url{https://microsoft.github.io/DirectX-Specs/}, last accessed 2026-03-16}, etc.\ for rendering 3D graphics as shown by mapbox\footnote{\url{https://www.mapbox.com/}, last accessed 2026-03-16}, maplibre\footnote{\url{https://maplibre.org/}, last accessed 2026-03-16}, deck.gl\footnote{\url{https://deck.gl/}, last accessed 2026-03-16}, here\footnote{\url{https://www.here.com}, last accessed 2026-03-16} and many more.
 This allows a more complex 3D-based rendering with pitch, yaw, and roll.
 Due to having better hardware access, these \acp{API} can render more complex scenes with better performance.\end{sloppypar}
 \end{description}
@@ -43,13 +43,10 @@ These low-level graphics building blocks are linked to map data through sprites,
 		arrow/.style={-Stealth, thick},
 		label/.style={font=\scriptsize\itshape, fill=white},
 		]
-		% Map Renderer (top)
 		\node[renderer] (renderer) {Map Renderer};
-		
-		% Tile Server
+
 		\node[server, below=1cm of renderer] (server) {Tile Server};
-		
-		% Arrows from server to renderer with resource labels
+
 		\coordinate (s1) at ($(server.north)!0.25!(server.north east)$);
 		\coordinate (s2) at ($(server.north)!0.75!(server.north east)$);
 		\coordinate (s3) at ($(server.north)!0.25!(server.north west)$);
@@ -60,13 +57,11 @@ These low-level graphics building blocks are linked to map data through sprites,
 		\draw[arrow] (s1) -- node[label] {sprites} (s1 |- renderer.south);
 		\draw[arrow] (s2) -- node[label] {fonts}   (s2 |- renderer.south);
 		
-		% "over the network" brace
 		\draw[decorate, decoration={brace, amplitude=6pt}, thick]
 		([xshift=4pt]renderer.south east) -- ([xshift=4pt]server.north east)
 		node[midway, right=10pt, font=\scriptsize\itshape, align=left]
 		{over the network};
 		
-		% Data Source (bottom)
 		\node[datasource, below=1cm of server] (datasource) {Data Source};
 		
 		\draw[arrow] (datasource.north) -- node[label] {convert to serving-friendly representation} (server.south);
@@ -94,12 +89,12 @@ This processing is currently usually handled ahead of time on the server-side.
 Tiles, by contrast, can be stored and accessed using three major approaches:
 
 \begin{description}
-\item[\textbf{Dynamic}]
+\item[Dynamic]
     Store geospatial data in a database (for example, PostGIS\footnote{\url{https://postgis.net/}, last accessed 2026-05-23}) and use a tile server to generate and serve tiles on demand.
-\item[\textbf{Client-driven}]
+\item[Client-driven]
     Store encoded tiles as a single file in a blob store using a format that includes an internal tile index (for example, PMTiles or VersaTiles).
     Clients retrieve tiles using multiple \ac{HTTP} requests with appropriate Range headers to locate the required data.
-\item[\textbf{Semi-static}]
+\item[Semi-static]
     Store encoded tiles in a database file on disk (for example, SQLite) and use a tile server to extract and serve tiles to clients.
 \end{description}
 
@@ -169,17 +164,17 @@ A feature consists of geometry (point, linestring, or polygon encoded as integer
 The following formats are used for encoding and transferring data to the client:
 
 \begin{description}
-    \item[\textbf{Raster tiles}] deliver pre-rendered images (\ac{PNG}, JPEG, WebP, Avif, JPEGXL) rather than vector geometry.
+    \item[Raster tiles] deliver pre-rendered images (\ac{PNG}, JPEG, WebP, Avif, JPEGXL) rather than vector geometry.
     They require no client-side rendering logic but cannot be restyled, rotated at arbitrary angles (beyond the affine transform imposed by globe mode), or queried interactively, as the visual representation is fixed at generation time.
 
-    \item[\textbf{Analysis-focused formats}] such as FlatGeobuf\footnote{\url{http://flatgeobuf.org/}, last accessed 2026-05-11}, GeoParquet\footnote{\url{https://geoparquet.org/}, last accessed 2026-05-11}, and GeoArrow are optimized for analytical queries (filtering, aggregation, joins) rather than tile-based rendering.
+    \item[Analysis-focused formats] such as FlatGeobuf\footnote{\url{http://flatgeobuf.org/}, last accessed 2026-05-11}, GeoParquet\footnote{\url{https://geoparquet.org/}, last accessed 2026-05-11}, and GeoArrow are optimized for analytical queries (filtering, aggregation, joins) rather than tile-based rendering.
     GeoParquet's row-group predicate pushdown and column pruning are analogous to the tile shaving we apply to \ac{MLT}, but they operate at per-file granularity.
     Parquet's row-group and column-chunk metadata would dominate at typical tile sizes (\qtyrange{1}{10}{\kilo\byte}), so we do not consider these formats further.
 
-    \item[\textbf{\ac{GeoJSON}}]~\cite{butlerGeoJSONFormat2016} is a \ac{JSON}-based geospatial interchange format.
+    \item[\ac{GeoJSON}]~\cite{butlerGeoJSONFormat2016} is a \ac{JSON}-based geospatial interchange format.
     Its human-readable structure makes it useful for debugging and small overlays, but its verbosity (text-encoded coordinates and repeated property keys per feature) makes it impractical for the continuous tile streaming required by interactive map renderers.
 
-    \item[\textbf{\acf{MVT}}]\footnote{\url{https://github.com/mapbox/vector-tile-spec/tree/master/2.1}, last accessed 2026-04-21} is the dominant vector tile format, adopted as a \emph{de~facto} standard across open-source map renderers including MapLibre.
+    \item[\acf{MVT}]\footnote{\url{https://github.com/mapbox/vector-tile-spec/tree/master/2.1}, last accessed 2026-04-21} is the dominant vector tile format, adopted as a \emph{de~facto} standard across open-source map renderers including MapLibre.
     It uses the \ac{PBF}\footnote{\url{https://protobuf.dev/}, last accessed 2026-04-21} as its wire format and stores features in a \emph{row-oriented} layout:
 \begin{itemize}
     \item Each \texttt{Feature} carries its own list of property tags encoded as alternating key and value indices into per-layer string and value tables.
@@ -189,7 +184,7 @@ The following formats are used for encoding and transferring data to the client:
 \end{itemize}
 
 
-    \item[\textbf{\acf{MLT}}] \begin{sloppypar} is a columnar vector tile format proposed by Tremmel et~al.~\cite{tremmelMapLibreTileNext2025b}.
+    \item[\acf{MLT}] \begin{sloppypar} is a columnar vector tile format proposed by Tremmel et~al.~\cite{tremmelMapLibreTileNext2025b}.
     Instead of the row-major key-value-pair layout of \ac{MVT}, \ac{MLT} stores each property as an independent column with type-specific encoding.
     This columnar layout enables per-column compression strategies (for example, dictionary encoding for low-cardinality string columns, delta encoding for monotonically increasing integers, or run-length encoding for repeated values) and eliminates the per-feature tag overhead of the protobuf encoding.
     Tremmel et~al.\ report up to $3\times$ tile size reduction on encoded tilesets and up to $6\times$ on certain large tiles, with the realised ratio depending on data characteristics.\end{sloppypar}
@@ -206,15 +201,15 @@ A map style defines the complete visual appearance of a map, including which dat
 Three architectural approaches to map styling have been established:
 
 \begin{description}
-    \item[\textbf{Server-side declarative}] styles, such as MapCSS, define rendering rules on the server.
+    \item[Server-side declarative] styles, such as MapCSS, define rendering rules on the server.
     The server evaluates the style against the data and produces pre-rendered raster tiles that the client displays without further interpretation.
     This simplifies the clients rendering logic, but prevents client-side restyling and thus limits interactivity.
 
-    \item[\textbf{Client-side declarative}] \begin{sloppypar} styles, as used by MapLibre\footnote{\url{https://maplibre.org/}, last accessed 2026-03-16} and Mapbox\footnote{\url{https://www.mapbox.com/}, last accessed 2026-03-16}, transmit a machine-readable style document to the client, which interprets the style at render time.
+    \item[Client-side declarative] \begin{sloppypar} styles, as used by MapLibre\footnote{\url{https://maplibre.org/}, last accessed 2026-03-16} and Mapbox\footnote{\url{https://www.mapbox.com/}, last accessed 2026-03-16}, transmit a machine-readable style document to the client, which interprets the style at render time.
     This style can also be shipped with the code of the rendering engine to the client or partially constructed (e.g., road shields) there.
     This enables dynamic restyling, data-driven visualization, and interactive features such as hover effects and click queries without regenerating tiles.\end{sloppypar}
 
-    \item[\textbf{Callback-based}] styling, as proposed by Gleo\footnote{\url{https://ivansanchez.gitlab.io/gleo/}, last accessed 2026-03-16} or Navara\footnote{\url{https://navara-docs.netlify.app/}, last accessed 2026-04-21}, replace declarative rules with imperative callbacks that the application registers with the renderer.
+    \item[Callback-based] styling, as proposed by Gleo\footnote{\url{https://ivansanchez.gitlab.io/gleo/}, last accessed 2026-03-16} or Navara\footnote{\url{https://navara-docs.netlify.app/}, last accessed 2026-04-21}, replace declarative rules with imperative callbacks that the application registers with the renderer.
     This offers maximum flexibility but makes static analysis and automatic optimizations impossible, since the styling logic is opaque to the rendering engine.
 \end{description}
 
@@ -224,21 +219,21 @@ It is widely adopted in the open-source map rendering ecosystem, and its declara
 The MapLibre style specification\footnote{\url{https://www.maplibre.org/maplibre-style-spec/}, last accessed 2025-10-24} defines a map's appearance as a \ac{JSON} document with the following key components:
 
 \begin{description}
-    \item[\textbf{Sources}] declare where tile data comes from (tile server URL, or inline \ac{GeoJSON}) and at which zoom levels tiles are available (\mlprop{minzoom}, \mlprop{maxzoom}).
+    \item[Sources] declare where tile data comes from (tile server URL, or inline \ac{GeoJSON}) and at which zoom levels tiles are available (\mlprop{minzoom}, \mlprop{maxzoom}).
 
-    \item[\textbf{Layers}] are the central rendering unit.
+    \item[Layers] are the central rendering unit.
     Each layer references a source and a \emph{source-layer} within that source, specifies a \emph{type} (\mlval{fill}, \mlval{line}, \mlval{circle}, \mlval{symbol}, \mlval{fill-extrusion}, \mlval{raster}, \mlval{background} or \mlval{hillshade}) and carries a set of paint and layout properties that control its appearance.
     Layers are drawn in declaration order from bottom to top.
     \begin{description}
 
-    \item[\textbf{Filters}] are boolean expressions attached to layers that select which features from the source-layer are rendered.
+    \item[Filters] are boolean expressions attached to layers that select which features from the source-layer are rendered.
     A feature is drawn by a layer only if the layer's filter evaluates \mlval{true} for that feature's properties and geometry type.
 
-    \item[\textbf{Paint and layout properties}] control the visual appearance and placement of rendered features.
+    \item[Paint and layout properties] control the visual appearance and placement of rendered features.
     Paint properties (colors, opacities, widths) can be changed without triggering a re-layout.
     Layout properties (text anchoring, icon rotation, symbol spacing) affect feature placement and require re-evaluation when modified.
 
-    \item[\textbf{Metadata bounds}] (\mlprop{minzoom}, \mlprop{maxzoom}) restrict the zoom range in which a layer is active.
+    \item[Metadata bounds] (\mlprop{minzoom}, \mlprop{maxzoom}) restrict the zoom range in which a layer is active.
     This allows the renderer to skip layers outside that range before filter evaluation or geometry decoding.
     \Cref{lst:ishidden} shows the corresponding \texttt{isHidden} guard.
     The worker invokes \texttt{layer.isHidden(this.zoom, true)} to skip bucket creation during tile parsing, while the renderer returns early from \texttt{renderLayer} on \texttt{layer.isHidden(this.transform.zoom)} before dispatching draw calls.
@@ -472,15 +467,15 @@ Logical-level techniques rewrite the value sequence so that a downstream physica
 Several such techniques exploit structural properties of integer sequences:
 
 \begin{description}
-    \item[\textbf{Zigzag encoding}] maps signed integers to unsigned ones ($n \mapsto 2n$ for $n \geq 0$, $n \mapsto -2n-1$ for $n < 0$) so that small-magnitude negative values also produce small unsigned codes.
+    \item[Zigzag encoding] maps signed integers to unsigned ones ($n \mapsto 2n$ for $n \geq 0$, $n \mapsto -2n-1$ for $n < 0$) so that small-magnitude negative values also produce small unsigned codes.
     The byte count is unchanged on its own and the saving comes from the downstream physical technique.
 
-    \item[\textbf{Delta encoding}] replaces each value with the difference from its predecessor.
+    \item[Delta encoding] replaces each value with the difference from its predecessor.
     Given a sequence $v_0, v_1, \ldots, v_n$, the encoded sequence is $v_0,\, v_1 - v_0,\, v_2 - v_1,\, \ldots,\, v_n - v_{n-1}$.
     Like zigzag, delta does not shrink the column by itself.
     It produces the same number of values at (often) smaller magnitude, which then pack well under VarInt or FastPFOR.
 
-    \item[\textbf{\acf{RLE}}] replaces consecutive runs of identical values with (value, count) pairs.
+    \item[\acf{RLE}] replaces consecutive runs of identical values with (value, count) pairs.
     Unlike zigzag and delta, RLE reduces the symbol count on its own.
     MLT still classifies it as logical because it composes with other logical steps before a physical technique.
     It is most effective for low-cardinality, clustered columns, for example a road-class column sorted by class.
@@ -495,10 +490,10 @@ A physical-level technique packs a value sequence (possibly the output of a logi
 Our encoder uses two:
 
 \begin{description}
-    \item[\textbf{\acf{VarInt}}] represents each integer with a variable number of bytes, using 7~bits per byte for data and 1~bit as a continuation flag, so values in $[0, 127]$ take 1~byte, $[128, 16383]$ take 2~bytes, and so on\footnote{\url{https://protobuf.dev/}, last accessed 2026-04-21}.
+    \item[\acf{VarInt}] represents each integer with a variable number of bytes, using 7~bits per byte for data and 1~bit as a continuation flag, so values in $[0, 127]$ take 1~byte, $[128, 16383]$ take 2~bytes, and so on\footnote{\url{https://protobuf.dev/}, last accessed 2026-04-21}.
     VarInt expects unsigned values, which is why a signed integer column is normally preceded by a zigzag remap.
 
-    \item[\textbf{\acf{FastPFOR}}] partitions the input into fixed-size blocks (typically 128 or 256 values), computes the minimum bit width that fits most values in each block, and packs at that width, with outliers in a separate patch list~\cite{lemireDecodingBillionsIntegers2015}.
+    \item[\acf{FastPFOR}] partitions the input into fixed-size blocks (typically 128 or 256 values), computes the minimum bit width that fits most values in each block, and packs at that width, with outliers in a separate patch list~\cite{lemireDecodingBillionsIntegers2015}.
     This achieves near-optimal bit packing when most values share a similar magnitude.
 \end{description}
 
@@ -587,12 +582,12 @@ Our evaluation in \cref{ch:experiments} follows their guidelines by reporting pe
 In the context of web maps, the candidate metrics span a range from deployment-critical on battery-constrained targets to directly user-visible ones on the desktop:
 
 \begin{description}
-    \item[\textbf{Resource utilisation,}] such as \ac{CPU} load, \ac{GPU} utilisation, and memory consumption to have pointers where further optimizations is possible.
-    \item[\textbf{Latency and responsiveness,}] measuring the time between initiating an operation (for example zooming) and the first visible result.
-    \item[\textbf{Throughput,}] typically measured in \acp{FPS} or frame time, describing how many frames can be rendered per second.
-    \item[\textbf{Frame stability,}] which captures variations in frame time and identifies dropped frames or rendering stutters.
-    \item[\textbf{Network utilisation,}] including transferred bytes, tile request rates, and bandwidth consumption.
-    \item[\textbf{Power consumption}] in Watts, which is relevant for mobile devices and battery-powered systems.
+    \item[Resource utilisation,] such as \ac{CPU} load, \ac{GPU} utilisation, and memory consumption to have pointers where further optimizations is possible.
+    \item[Latency and responsiveness,] measuring the time between initiating an operation (for example zooming) and the first visible result.
+    \item[Throughput,] typically measured in \acp{FPS} or frame time, describing how many frames can be rendered per second.
+    \item[Frame stability,] which captures variations in frame time and identifies dropped frames or rendering stutters.
+    \item[Network utilisation,] including transferred bytes, tile request rates, and bandwidth consumption.
+    \item[Power consumption] in Watts, which is relevant for mobile devices and battery-powered systems.
 We do not measure power consumption directly, since our benchmark host is a desktop workstation rather than a battery-constrained mobile device.
 We instead rely on transfer-size reductions and reduced draw-call counts as established proxies for energy savings on mobile targets, given that cellular radio energy is proportional to data volume and \ac{GPU} active time scales with draw-call count.
 \end{description}
@@ -600,11 +595,11 @@ We instead rely on transfer-size reductions and reduced draw-call counts as esta
 These can be benchmarked at different workload levels~\cite{jainArtComputerSystems1991}:
 
 \begin{description}
-    \item[\textbf{Micro-benchmarks}] isolate a single operation (e.g.,\ decoding a single tile, evaluating a single filter expression) and measure its cost in isolation.
+    \item[Micro-benchmarks] isolate a single operation (e.g.,\ decoding a single tile, evaluating a single filter expression) and measure its cost in isolation.
 They are useful for identifying bottlenecks but may not reflect real-world performance due to caching and concurrency effects.
-    \item[\textbf{Macro-benchmarks}] measure the performance of a complete subsystem (e.g.,\ loading a full style and rendering a fixed camera path) under controlled conditions.
+    \item[Macro-benchmarks] measure the performance of a complete subsystem (e.g.,\ loading a full style and rendering a fixed camera path) under controlled conditions.
 They capture interactions between components but require careful setup to ensure reproducibility.
-    \item[\textbf{Application-level benchmarks}] measure end-to-end user-perceived performance (e.g.,\ time from page load to interactive map) in a realistic deployment.
+    \item[Application-level benchmarks] measure end-to-end user-perceived performance (e.g.,\ time from page load to interactive map) in a realistic deployment.
 They are the most representative but also the noisiest due to network variability, browser behavior, and hardware differences.
 \end{description}
 
