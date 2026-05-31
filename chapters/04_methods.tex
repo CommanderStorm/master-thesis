@@ -1141,7 +1141,7 @@ We considered property-based sort strategies but did not include them in the cur
         \node[decision, below=1.0cm of coll] (more) {more strategies?};
         \draw[arrow] (coll) -- (more);
 
-        \node[stage, below=1.0cm of more] (sort)
+        \node[stage, below=of more] (sort)
         {Sort + columnarize\\%
             {\scriptsize\texttt{from\_tile(clone, sort, groups)}}};
         \draw[arrow] (more) -- node[right, label] {yes} (sort);
