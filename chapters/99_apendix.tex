@@ -758,6 +758,36 @@ The separate visual-check harness is used offline for \texttt{pixelmatch}-based 
 	\label{tab:bench_browser}
 \end{table}
 
+
+
+\begin{table}[htbp]
+	\centering
+	\small
+	\csvreader[
+	tabular=r l r r r r r,
+	table head={\toprule
+		\textbf{Step} & \textbf{Pass} & \textbf{$\Delta$ Raw} &
+		\textbf{$\Delta$ Gzip} & \textbf{$\Delta$ brotli} &
+		\textbf{$\Delta$ Load} & \textbf{$\Delta$ Layers} \\
+		& & \textbf{(\%)} & \textbf{(\%)} & \textbf{(\%)} & \textbf{(\%)} & \\
+		\midrule},
+	table foot={\midrule
+		\multicolumn{7}{l}{\footnotesize $\dagger$ end-to-end styles only (see corpus-exclusions note).\quad $\ast$ requires tile data.} \\
+		\bottomrule},
+	head to column names,
+	]{scripts/data/marginal_contribution.csv}{}%
+	{\step & \pass\ifnum\daggerflag=1\textsuperscript{$\dagger$}\fi\ifnum\starflag=1\textsuperscript{$\ast$}\fi &
+		\fmtdelta{\deltaRaw} & \fmtdelta{\deltaGzip} & \fmtdelta{\deltaBrotli} &
+		\fmtdelta{\deltaLoad} & \fmtdeltaint{\deltaLayers}}%
+	\caption{
+		Marginal contribution of each ablation step to style size (raw, gzip, brotli), load time, and layer count.
+		Values are percentage of baseline, medians across the 13 benchmarked styles and 18 scenarios.
+		Data-level tile shaving dominates transfer-size and load-time metrics.
+		Style-level passes contribute primarily to parse-time and style-size reductions and serve as enablers for the data-level pipeline.
+		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+	\label{tab:marginal_contribution}
+\end{table}
+
 \clearpage
 
 \subsection{Key Library Versions}\label{app:bench_libs}
