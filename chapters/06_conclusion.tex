@@ -59,8 +59,8 @@ At the style level, structural optimizations reduce the gzip-compressed style si
 The pipeline is not uniformly effective.
 Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview-dominated scenarios benefit more than street-level panning (\cref{sub:combined_marginal}).
 All styles in the deep corpus whose referenced tile data is fully available to us (the 10 end-to-end styles plus Americana) were measured for tile-shaving effectiveness on the Germany tileset (\qtyrange{19.8}{46.3}{\percent}, \cref{fig:tile_shave_per_style}).
+
 Americana, ICGC~Fosc, and ICGC~Gris are excluded from end-to-end rendering checks by an upstream bug in MapLibre's \texttt{gl-style-migrate} that miscompiles their legacy \mlprop{text-field} syntax (\cref{sub:deep_corpus}).
-Of these three, only Americana is part of the shaving sweep.
 The ICGC pair is additionally absent because their Catalonia accessory tile data is not available to us, even though their primary \texttt{openmaptiles} source uses the OMT schema.
 The thirteen-style Maputnik generalization corpus was evaluated under static style passes alone.
 
