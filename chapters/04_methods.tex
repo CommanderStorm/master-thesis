@@ -242,7 +242,7 @@ We further classify rules by their \emph{type}:
 A post-order visitor walks every expression node in the style.
 At each node, it tests all applicable peephole rules and the first matching rule fires.
 Stats-driven rules run as separate tree folds after the peephole pass, because they require recursive context threading that the node-local peephole architecture does not provide.
-We modeled this architecture on peephole optimizers in production compilers.
+We model this architecture on peephole optimizers in production compilers.
 Individual rules are simple and local, but their composition through fixpoint iteration (\cref{sub:fixpoint}) achieves global simplifications.
 
 \paragraph{Constant Folding}
@@ -318,7 +318,7 @@ When the property is present in all features, it absorbs stops below $\mathrm{mi
 \noindent A cardinality threshold of \texttt{200} governs the granularity of value tracking.
 When the number of distinct values exceeds this threshold, the statistics switch from full value counts to cardinality-only mode.
 This bounds the cost on high-cardinality properties (names, identifiers) while retaining full information for the low-cardinality properties (class, subclass, administrative level) that benefit most from data-driven folding.
-We motivated the choice of 200 with the \ac{OMT} schema.
+We motivate the choice of 200 with the \ac{OMT} schema.
 Every categorical property used as a \mlop{match}/ \mlop{case} discriminator in the benchmark styles (\mlval{class}, \mlval{subclass}, \mlval{admin\_level}, \mlval{kind}, land-use codes) has fewer than 200 distinct values across the Germany tileset, whereas high-cardinality string columns (feature names, identifiers) exceed it by one or more orders of magnitude.
 The threshold therefore separates the \enquote{folding-useful} properties from the \enquote{folding-useless} ones without tuning for any specific style.
 
@@ -1421,12 +1421,12 @@ These styles are evaluated using static analysis only (style size, complexity me
 We sourced tile data from \ac{OSM} via Planetiler or the German government.
 We consumed both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
 We accessed BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
-Only for \ac{OSM} is the underlying data was fully available, so only for this source we could collect tile statistics at a sample rate of~1.0.
+Only for \ac{OSM} is the underlying data fully available, so only for this source can we collect tile statistics at a sample rate of~1.0.
 To ensure reproducibility across benchmark runs, we routed all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
 This eliminates network variability and guarantees that every ablation step operates on identical tile data (after an initial, discarded run).
 The model does not simulate packet loss, HTTP/2 multiplexing, TCP slow-start, or HTTP/3 (QUIC) with its 0-RTT connection resumption and absence of head-of-line blocking.
-All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving were a conservative lower bound on what a real deployment would observe.
-This ensures that we measured tile-fetch improvements (e.g.,\ smaller tiles due to shaving) under conditions representative of a \ac{CDN}-served deployment while remaining deterministic across runs.
+All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving are a conservative lower bound on what a real deployment would observe.
+This ensures that we measure tile-fetch improvements (e.g.,\ smaller tiles due to shaving) under conditions representative of a \ac{CDN}-served deployment while remaining deterministic across runs.
 The same network model also feeds the per-style \ac{CDN} break-even analysis in \cref{sub:mlt_discussion}, which extends this single-client setup to a multi-style cache.
 
 \subsection{Geographic and Use-Case Scenarios}\label{sub:scenarios}

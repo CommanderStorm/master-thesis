@@ -72,7 +72,7 @@ This is the mechanism behind the parse-time leg of the time breakdown shown late
     \caption{
 Cumulative ablation waterfall for load time.
 Each bar shows the median change introduced by adding one expression pass on top of all previous passes, aggregated across all 18 scenarios and the 13 benchmarked styles (the two BasemapDE styles in the deep corpus were not benchmarked, see the corpus-exclusions box at the top of this chapter).
-We can see that in the extremes, unary simplifcation has the largest effect.
+We can see that in the extremes, unary simplification has the largest effect.
 The aggregate load-time improvement across all expression passes is modest (\qty{-2.0}{\percent} per-style median), with expression passes serving primarily as enablers for downstream structural and data-level passes.
 For caveats, please see \cref{sub:expr_discussion}}
     \label{fig:waterfall_loadMs}
@@ -91,7 +91,8 @@ Marginal contribution of each expression pass to load time reduction shows the e
     \includegraphics[width=\linewidth]{figures/marginal_styleParseMs.pdf}
     \caption{
 Marginal contribution of each expression pass to parse the style in miliseconds.
-The size-reducing passes (default stripping in particular) shorten the parse step monotonically, even where their end-to-end load-time effect is within noise.
+\ac{CI} is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
+The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
 This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.}
     \label{fig:marginal_styleParseMs}
 \end{figure}
@@ -120,7 +121,8 @@ We note the distinction between raw, gzip, and Brotli reductions: some rewrites 
 \paragraph{Empirical Coverage of Selectivity Reordering}
 Selectivity reordering (step~16) is a theoretically motivated heuristic whose isolated rendering impact we did not measure in this evaluation.
 Because it appears late in the cumulative ablation, its marginal contribution is confounded with the preceding passes.
-We acknowledge the independence assumption underlying the selectivity estimates as inaccurate for correlated map predicates (\cref{sec:query_optimizations}), and the empirical benefit may be negligible for styles whose filters are already short.
+We acknowledge the independence assumption underlying the selectivity estimates as inaccurate for correlated map predicates (\cref{sec:query_optimizations}).
+The empirical benefit may be negligible for styles whose filters are already short.
 
 \paragraph{Downstream Interaction with the Data Pipeline}
 Beyond their direct rendering benefit, expression-level simplifications feed into the data-level pipeline evaluated in \cref{sec:exp_mlt}.
@@ -157,14 +159,14 @@ Beyond the rendering metrics from Experiment~1, we add layer count, filter count
 \subsection{Results}\label{sub:structural_results}
 
 \cref{fig:complexity_metrics} tracks the three structural complexity metrics introduced in \cref{sub:structural_evaluation}, namely layer count, filter count, and total expression-tree node count, across the cumulative ablation steps on the Fiord and Liberty styles.
-Values are normalised to each style's baseline so the three metrics share a single axis despite their differing absolute scales (layer counts in the tens, filter counts in the hundreds, expression-tree node counts in the thousands).
+Values are normalized to each style's baseline so the three metrics share a single axis despite their differing absolute scales (layer counts in the tens, filter counts in the hundreds, expression-tree node counts in the thousands).
 \cref{fig:style_size_ablation} complements these with the raw, gzip, and Brotli style sizes, confirming that the structural reductions also translate into smaller transfer size rather than just reshuffling the serialized form.
 
 
 \begin{figure}[htbp]
 	\centering
 	\includegraphics[width=\linewidth]{figures/complexity_metrics.pdf}
-	\caption{Structural complexity metrics across cumulative ablation steps on the Fiord and Liberty styles, normalised to each style's baseline.
+	\caption{Structural complexity metrics across cumulative ablation steps on the Fiord and Liberty styles, normalized to each style's baseline.
 Layer count drops only when layer merging fires.
 Dead elimination rarely removes whole layers because styles are designed to expose parts of the map rather than leave layers unreferenced.
 Total expression-tree node count is driven mostly by the expression passes (steps~1--7), where Fiord falls by \qty{36.8}{\percent} (\num{1610}$\to$\num{1018}) and Liberty by \qty{10.5}{\percent} (\num{3537}$\to$\num{3167}).

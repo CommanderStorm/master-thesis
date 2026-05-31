@@ -1,30 +1,30 @@
 ## Experiment 1: Expression-Level Optimizations
 
-- **Expression passes reduce per-style median load time by -2.0%**
+- **Expression passes reduced per-style median load time by -2.0%**
   - source: `05_experiments.tex:32`
   - type: `number`
 
-- **Per-style load reduction from expression passes spans -58.8% to +12.3%**
+- **Per-style load reduction from expression passes spanned -58.8% to +12.3%**
   - source: `05_experiments.tex:52`
   - type: `number`
 
-- **Default stripping accounts for -4.3% raw style size reduction**
+- **Default stripping accounted for -4.3% raw style size reduction**
   - source: `05_experiments.tex:57`
   - type: `number`
 
-- **Default stripping accounts for -2.9% gzip style size reduction**
+- **Default stripping accounted for -2.9% gzip style size reduction**
   - source: `05_experiments.tex:57`
   - type: `number`
 
-- **Stats-driven folding delivers -1.6% raw-size reduction**
+- **Stats-driven folding delivered -1.6% raw-size reduction**
   - source: `05_experiments.tex:58`
   - type: `number`
 
-- **Expression simplification delivers -1.4% raw-size reduction**
+- **Expression simplification delivered -1.4% raw-size reduction**
   - source: `05_experiments.tex:58`
   - type: `number`
 
-- **Fiord raw style shrinks by 20.3%**
+- **Fiord raw style shrank by 20.3%**
   - source: `05_experiments.tex:59`
   - type: `number`
 
@@ -32,7 +32,7 @@
   - source: `05_experiments.tex:59`
   - type: `number`
 
-- **Liberty shrinks by 7.0%**
+- **Liberty shrank by 7.0%**
   - source: `05_experiments.tex:59`
   - type: `number`
 
@@ -48,7 +48,7 @@
   - source: `05_experiments.tex:60`
   - type: `number`
 
-- **Aggregate load-time improvement across all expression passes is -2.0% per-style median**
+- **Aggregate load-time improvement across all expression passes was -2.0% per-style median**
   - source: `05_experiments.tex:72`
   - type: `number`
 
@@ -56,7 +56,7 @@
   - source: `05_experiments.tex:70`
   - type: `scope`
 
-- **Fiord falls by 36.8% in expression-tree node count**
+- **Fiord fell by 36.8% in expression-tree node count**
   - source: `05_experiments.tex:166`
   - type: `number`
 
@@ -64,7 +64,7 @@
   - source: `05_experiments.tex:166`
   - type: `number`
 
-- **Liberty falls by 10.5% in expression-tree node count**
+- **Liberty fell by 10.5% in expression-tree node count**
   - source: `05_experiments.tex:166`
   - type: `number`
 
@@ -74,11 +74,11 @@
 
 ## Experiment 2: Structural Optimizations
 
-- **Fiord's 48-layer style sheds two layers**
+- **Fiord's 48-layer style shed two layers**
   - source: `05_experiments.tex:182`
   - type: `number`
 
-- **Fiord sheds 4.2% of layers**
+- **Fiord shed 4.2% of layers**
   - source: `05_experiments.tex:182`
   - type: `number`
 
@@ -94,19 +94,19 @@
   - source: `05_experiments.tex:184`
   - type: `number`
 
-- **Liberty sheds 3.6% of layers**
+- **Liberty shed 3.6% of layers**
   - source: `05_experiments.tex:184`
   - type: `number`
 
-- **Layer-merge step combines four pairs of adjacent layers**
+- **Layer-merge step combined four pairs of adjacent layers**
   - source: `05_experiments.tex:184`
   - type: `number`
 
-- **Layer-merge produces 4.9% gzip reduction**
+- **Layer-merge produced 4.9% gzip reduction**
   - source: `05_experiments.tex:184`
   - type: `number`
 
-- **Layer merging produces 10.5% node reduction**
+- **Layer merging produced 10.5% node reduction**
   - source: `05_experiments.tex:184`
   - type: `number`
 
@@ -114,7 +114,7 @@
   - source: `05_experiments.tex:184`
   - type: `number`
 
-- **Layer merging adds 36 bytes of gzip**
+- **Layer merging added 36 bytes of gzip**
   - source: `05_experiments.tex:185`
   - type: `number`
 
@@ -122,37 +122,37 @@
   - source: `05_experiments.tex:198`
   - type: `number`
 
-- **Bright layer count drops by one (119 to 118)**
+- **Bright layer count dropped by one (119 to 118)**
   - source: `05_experiments.tex:198`
   - type: `number`
 
 ## Experiment 3: Data-Level Optimizations
 
-- **Tile shaving dominates with -66.1% pooled median load reduction (fiord+liberty)**
+- **Tile shaving dominated with -66.1% pooled median load reduction (fiord+liberty)**
   - source: `05_experiments.tex:230`
   - type: `number`
 
-- **Style-only contributes a modest -2.5%**
+- **Style-only contributed a modest -2.5%**
   - source: `05_experiments.tex:294`
   - type: `number`
 
-- **Shaving-only drops pooled median load time from 396 ms to 134 ms**
+- **Shaving-only dropped pooled median load time from 396 ms to 134 ms**
   - source: `05_experiments.tex:293`
   - type: `number`
 
-- **Shaving-only achieves -66.1% pooled median load time reduction**
+- **Shaving-only achieved -66.1% pooled median load time reduction**
   - source: `05_experiments.tex:293`
   - type: `number`
 
-- **Style+shaving reaches -67.2% pooled median load time reduction**
+- **Style+shaving reached -67.2% pooled median load time reduction**
   - source: `05_experiments.tex:294`
   - type: `number`
 
-- **MLT re-encoding matches plain-shaving load time within measurement noise (130 ms vs 130 ms)**
+- **MLT re-encoding matched plain-shaving load time within measurement noise (130 ms vs 130 ms)**
   - source: `05_experiments.tex:295`
   - type: `number`
 
-- **Shaving-only lifts pooled median FPS from 837 to 1688**
+- **Shaving-only lifted pooled median FPS from 837 to 1688**
   - source: `05_experiments.tex:297`
   - type: `number`
 
@@ -160,7 +160,7 @@
   - source: `05_experiments.tex:297`
   - type: `number`
 
-- **Style+shaving reaches 1781 FPS**
+- **Style+shaving reached 1781 FPS**
   - source: `05_experiments.tex:297`
   - type: `number`
 
@@ -184,7 +184,7 @@
   - source: `05_experiments.tex:306`
   - type: `number`
 
-- **Native Rust micro-benchmarks show 4.6x to 8.3x decode throughput for MLT over MVT+gzip**
+- **Native Rust micro-benchmarks showed 4.6x to 8.3x decode throughput for MLT over MVT+gzip**
   - source: `05_experiments.tex:309`
   - type: `number`
 
@@ -208,27 +208,27 @@
   - source: `05_experiments.tex:317`
   - type: `number`
 
-- **Fiord combined reduction 14.7% sits 0.2% above style-only 14.5%**
+- **Fiord combined reduction 14.7% sat 0.2% above style-only 14.5%**
   - source: `05_experiments.tex:291`
   - type: `number`
 
-- **Liberty combined reduction 4.8% matches style-only 4.8%**
+- **Liberty combined reduction 4.8% matched style-only 4.8%**
   - source: `05_experiments.tex:291`
   - type: `number`
 
-- **Per-scenario load-time synergy appears in 17 of 36 style-scenario pairs**
+- **Per-scenario load-time synergy appeared in 17 of 36 style-scenario pairs**
   - source: `05_experiments.tex:296`
   - type: `number`
 
-- **Our encoder achieves 28.3% smaller total size than reference baseline**
+- **Our encoder achieved 28.3% smaller total size than reference baseline**
   - source: `05_experiments.tex:426`
   - type: `number`
 
-- **Our encoder curves remain at 0.6-0.8x MVT throughout zoom range**
+- **Our encoder curves remained at 0.6-0.8x MVT throughout zoom range**
   - source: `05_experiments.tex:362`
   - type: `number`
 
-- **Reference-encoder curves drift above 1.0x at several zoom levels under Brotli/zstd**
+- **Reference-encoder curves drifted above 1.0x at several zoom levels under Brotli/zstd**
   - source: `05_experiments.tex:362`
   - type: `number`
 
@@ -312,7 +312,7 @@
   - source: `05_experiments.tex:411`
   - type: `number`
 
-- **MLT (reference) incorporation includes correct delta-zigzag sequencing, RLE viability checks, FSST thresholds**
+- **MLT (reference) incorporation included correct delta-zigzag sequencing, RLE viability checks, FSST thresholds**
   - source: `05_experiments.tex:416`
   - type: `qualitative`
 
@@ -328,11 +328,11 @@
   - source: `05_experiments.tex:435`
   - type: `number`
 
-- **MVT under zstd-22 yields 3.16 GB**
+- **MVT under zstd-22 yielded 3.16 GB**
   - source: `05_experiments.tex:440`
   - type: `number`
 
-- **Our encoder under zstd-22 yields 2.75 GB**
+- **Our encoder under zstd-22 yielded 2.75 GB**
   - source: `05_experiments.tex:440`
   - type: `number`
 
@@ -340,15 +340,15 @@
   - source: `05_experiments.tex:440`
   - type: `number`
 
-- **MLT decoder achieves 5.73 milliseconds at Zoom 4**
+- **MLT decoder achieved 5.73 milliseconds at Zoom 4**
   - source: `05_experiments.tex:464`
   - type: `number`
 
-- **MLT decoder achieves 19.4 milliseconds at Zoom 7**
+- **MLT decoder achieved 19.4 milliseconds at Zoom 7**
   - source: `05_experiments.tex:464`
   - type: `number`
 
-- **MLT decoder achieves 4.09 milliseconds at Zoom 13**
+- **MLT decoder achieved 4.09 milliseconds at Zoom 13**
   - source: `05_experiments.tex:464`
   - type: `number`
 
@@ -388,11 +388,11 @@
   - source: `05_experiments.tex:468`
   - type: `number`
 
-- **MLT decoder achieves 96-134 MiB/s decode throughput**
+- **MLT decoder achieved 96-134 MiB/s decode throughput**
   - source: `05_experiments.tex:473`
   - type: `number`
 
-- **MVT+gzip achieves 15-23 MiB/s decode throughput**
+- **MVT+gzip achieved 15-23 MiB/s decode throughput**
   - source: `05_experiments.tex:473`
   - type: `number`
 
@@ -408,7 +408,7 @@
   - source: `05_experiments.tex:496`
   - type: `number`
 
-- **Tile-data reductions range from 19.8% (Bright) to 46.3% (Toner)**
+- **Tile-data reductions ranged from 19.8% (Bright) to 46.3% (Toner)**
   - source: `05_experiments.tex:498`
   - type: `number`
 
@@ -420,7 +420,7 @@
   - source: `05_experiments.tex:496`
   - type: `scope`
 
-- **Rendering-time saving from shaving r defined per tile**
+- **Rendering-time saving from shaving r is defined per tile**
   - source: `05_experiments.tex:522`
   - type: `qualitative`
 
@@ -486,7 +486,7 @@
   - source: `05_experiments.tex:562`
   - type: `scope`
 
-- **Raw reductions range from 3.2% (Stadia Outdoors) to 67.7% (LocationIQ Streets)**
+- **Raw reductions ranged from 3.2% (Stadia Outdoors) to 67.7% (LocationIQ Streets)**
   - source: `05_experiments.tex:577`
   - type: `number`
 
@@ -494,7 +494,7 @@
   - source: `05_experiments.tex:577`
   - type: `qualitative`
 
-- **Under gzip compression range narrows to 3.9-22.4%**
+- **Under gzip compression range narrowed to 3.9-22.4%**
   - source: `05_experiments.tex:578`
   - type: `number`
 
@@ -530,7 +530,7 @@
   - source: `05_experiments.tex:582`
   - type: `number`
 
-- **Dropping Americana flips correlation sign to r = -0.54**
+- **Dropping Americana flipped correlation sign to r = -0.54**
   - source: `05_experiments.tex:584`
   - type: `number`
 
@@ -550,17 +550,17 @@
   - source: `05_experiments.tex:634`
   - type: `number`
 
-- **Stats-driven passes add 10-20% additional reduction on top of static passes**
+- **Stats-driven passes added 10-20% additional reduction on top of static passes**
   - source: `05_experiments.tex:649`
   - type: `number`
 
 ## Combined Results
 
-- **Three optimization channels compose additively, not synergistically**
+- **Three optimization channels composed additively, not synergistically**
   - source: `05_experiments.tex:662`
   - type: `qualitative`
 
-- **Data-level passes do almost nothing for sustained frame rate**
+- **Data-level passes did almost nothing for sustained frame rate**
   - source: `05_experiments.tex:663`
   - type: `qualitative`
 
@@ -568,23 +568,23 @@
   - source: `05_experiments.tex:669`
   - type: `scope`
 
-- **Urban tile-dense scenarios show larger absolute improvements than sparse scenarios**
+- **Urban tile-dense scenarios showed larger absolute improvements than sparse scenarios**
   - source: `05_experiments.tex:676`
   - type: `qualitative`
 
-- **Expression passes produce diffuse moderate improvement across scenarios**
+- **Expression passes produced diffuse moderate improvement across scenarios**
   - source: `05_experiments.tex:677`
   - type: `qualitative`
 
-- **Structural passes improvement concentrated where dead elimination or layer merging applies**
+- **Structural passes improvement concentrated where dead elimination or layer merging applied**
   - source: `05_experiments.tex:677`
   - type: `qualitative`
 
-- **Sustained frame rates above 2000 FPS expose small GC-pauses**
+- **Sustained frame rates above 2000 FPS exposed small GC-pauses**
   - source: `05_experiments.tex:707`
   - type: `number`
 
-- **Style-parse component shrinks monotonically with each expression pass**
+- **Style-parse component shrank monotonically with each expression pass**
   - source: `05_experiments.tex:742`
   - type: `qualitative`
 
@@ -600,15 +600,15 @@
   - source: `05_experiments.tex:745`
   - type: `number`
 
-- **Style-level passes reduce heap -3.6%**
+- **Style-level passes reduced heap -3.6%**
   - source: `05_experiments.tex:745`
   - type: `number`
 
-- **Tile shaving step 17 drops heap to 63.7 MB**
+- **Tile shaving step 17 dropped heap to 63.7 MB**
   - source: `05_experiments.tex:746`
   - type: `number`
 
-- **Full pipeline reaches 55.3 MB at step 19**
+- **Full pipeline reached 55.3 MB at step 19**
   - source: `05_experiments.tex:746`
   - type: `number`
 
@@ -616,7 +616,7 @@
   - source: `05_experiments.tex:746`
   - type: `number`
 
-- **Style-level passes reduce heap by 3.1 MB**
+- **Style-level passes reduced heap by 3.1 MB**
   - source: `05_experiments.tex:763`
   - type: `number`
 
@@ -624,7 +624,7 @@
   - source: `05_experiments.tex:829`
   - type: `scope`
 
-- **Liberty's 111-layer style completes all passes in 7.5 milliseconds**
+- **Liberty's 111-layer style completed all passes in 7.5 milliseconds**
   - source: `05_experiments.tex:866`
   - type: `number`
 
@@ -668,15 +668,15 @@
   - source: `05_experiments.tex:901`
   - type: `number`
 
-- **Expression passes drive largest reductions in AST node count**
+- **Expression passes drove largest reductions in AST node count**
   - source: `05_experiments.tex:907`
   - type: `qualitative`
 
-- **Full pipeline cuts per-style median load time by 71%**
+- **Full pipeline cut per-style median load time by 71%**
   - source: `05_experiments.tex:915`
   - type: `number`
 
-- **Full pipeline lifts FPS by 152%**
+- **Full pipeline lifted FPS by 152%**
   - source: `05_experiments.tex:915`
   - type: `number`
 
@@ -812,7 +812,7 @@
   - source: `05_experiments.tex:989`
   - type: `number`
 
-- **Wilcoxon signed-rank tests confirm load-time reductions**
+- **Wilcoxon signed-rank tests confirmed load-time reductions**
   - source: `05_experiments.tex:991`
   - type: `qualitative`
 
