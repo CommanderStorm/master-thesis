@@ -16,6 +16,7 @@ We then test generalization on 13 unseen styles (\cref{sec:exp_cross_style}) and
   before skip=12pt,
   after skip=14pt
 ]
+\phantomsection\label{box:corpus_exclusions}%
 \textbf{Corpus exclusions}\par\vspace{2pt}
 A handful of styles from the pre-screening set do not appear fully in the numbers below.
 
@@ -27,6 +28,11 @@ Americana's tile data is fully available to us and stays in the sweep.
 
 \emph{OSM-Liberty} triggered an \ac{MLT} rendering fault at certain viewports during the cross-style run.
 These four viewports are thus excluded from the reported tile rewrite results.
+
+\vspace{4pt}
+\textbf{Step markers used throughout this chapter.}
+$\dagger$ flags ablation steps whose aggregation drops to the 10 end-to-end styles, because the three styles capped at step~14 above are excluded from later steps.
+$\ast$ flags steps that require tile data (statistics or tile bytes) at preprocessing time.
 \end{tcolorbox}
 
 \section{Experiment 1: Expression-Level Optimizations}\label{sec:exp_expressions}
@@ -486,7 +492,7 @@ The encoding stage that follows benefits from this enabling effect, because shav
 
 \paragraph{Style-Dependent Tile Sizes}
 A consequence of style-driven shaving is that different styles produce different tile sizes from the same source data.
-To quantify this variation, we ran the full shaving pipeline (optimize with all passes, generate pruning advisory, apply advisory as \ac{MVT}) on the same Germany tileset (\qty{3.07}{\giga\byte}, \ac{OMT} schema, zoom levels 0-14) for each of the 11 \ac{OMT} styles in the benchmark corpus whose referenced tile data is fully available to us.
+To quantify this variation, we ran the full shaving pipeline (optimize with all passes, generate pruning advisory, apply advisory as \ac{MVT}) on the same Germany tileset (\qty{3.07}{\giga\byte}, \ac{OMT} schema, zoom levels 0-14) for each of the 11 styles in the benchmark corpus whose referenced tile data is fully available to us.
 \cref{fig:tile_shave_per_style} shows the results.
 Tile-data reductions ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner), with a median of \qty{29.0}{\percent}.
 Styles that reference fewer source-layers and property columns (such as Toner with monochrome road/water/boundary only and Americana focused on shield and label rendering) leave more tile data unused, enabling the advisory to strip more columns and features.
@@ -498,7 +504,7 @@ The optimal encoding depends on the rendering style, which is a design choice.
     \centering
     \includegraphics[width=\linewidth]{figures/tile_shave_per_style}
     \caption{
-On-Wire data reduction from style-driven \ac{MVT} shaving across 11 \ac{OMT} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.  Styles that reference fewer source-layers and properties achieve larger reductions}
+On-Wire data reduction from style-driven \ac{MVT} shaving across 11 styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.  Styles that reference fewer source-layers and properties achieve larger reductions}
     \label{fig:tile_shave_per_style}
 \end{figure}
 
@@ -552,7 +558,7 @@ Stats-driven and data-level passes were not applied here.
 \noindent In the preceding experiments we evaluated optimizations effectiveness on the curated benchmarking corpus of 13 styles described in \cref{sub:deep_corpus}.
 To assess whether the observed gains generalize, we apply the optimizer to the 13~styles of the Maputnik generalization corpus introduced in \cref{sub:generalization_corpus}.
 We use three tiers of breadth because end-to-end rendering benchmarks require tile data and browser automation infrastructure that does not scale to all styles.
-We benchmark ten deep-corpus styles end-to-end with tile data, eleven \ac{OMT} styles with fully available tile data at the tile-shaving size level, and evaluate thirteen additional styles with static analysis only.
+We benchmark ten deep-corpus styles end-to-end with tile data, eleven styles with fully available tile data at the tile-shaving size level, and evaluate thirteen additional styles with static analysis only.
 
 \subsection{Methodology}\label{sub:cross_methodology}
 
@@ -640,7 +646,7 @@ The scatter plot (\cref{fig:cross_style_complexity_scatter}) visualizes the per-
 Because the generalization corpus does not include tile data, we cannot apply stats-driven passes (dead elimination with geometry-type matching, stats-driven constant folding, selectivity reordering) and data-level optimizations (tile shaving, re-encoding) to the Maputnik styles.
 We therefore present the reported reductions as a \emph{lower bound} on the full optimizations potential.
 Extrapolating from the deep corpus, where stats-driven passes added \qtyrange{10}{20}{\percent} additional reduction on top of static passes, the true optimizations potential for these styles is likely higher.
-For the 11 \ac{OMT} styles in the deep corpus whose referenced tile data is fully available to us, we evaluated tile shaving separately against the Germany tileset (\cref{fig:tile_shave_per_style}), confirming that data-level reductions generalize across styles.
+For the 11 styles in the deep corpus whose referenced tile data is fully available to us, we evaluated tile shaving separately against the Germany tileset (\cref{fig:tile_shave_per_style}), confirming that data-level reductions generalize across styles.
 
 \paragraph{Edge Cases}
 A small number of styles in the corpus showed small reductions ($< 5\%$), the lowest being Stadia Outdoors at \qty{3.2}{\percent}.
@@ -675,34 +681,34 @@ On real consumer hardware capped well below that rate the same pauses would not 
 
 \begin{figure}[b]
 	\centering
-	\includegraphics[height=0.95\textheight]{figures/heatmap_loadMs.pdf}
+	\includegraphics[height=0.91\textheight]{figures/heatmap_loadMs.pdf}
 	\caption{
 Heatmap of load time across scenarios (rows) and ablation steps (columns), where darker cells indicate greater improvement relative to baseline.
 Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
 Structural passes produce concentrated gains where dead elimination or layer merging applies.
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
 }
 	\label{fig:heatmap_loadMs}
 \end{figure}
 
 \begin{figure}[b]
 	\centering
-	\includegraphics[height=0.95\textheight]{figures/heatmap_fps.pdf}
+	\includegraphics[height=0.91\textheight]{figures/heatmap_fps.pdf}
 	\caption{
 Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
 Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmap_fps}
 \end{figure}
 
 \begin{figure}[b]
 	\centering
-	\includegraphics[height=0.95\textheight]{figures/heatmap_jankCount}
+	\includegraphics[height=0.91\textheight]{figures/heatmap_jankCount}
 	\caption{
 Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
 Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
 Real consumer hardware caps well below this rate, so the same pauses would not cross the jank threshold there.
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmapjankcount}
 \end{figure}
 
@@ -732,7 +738,7 @@ Per-run distribution of load time and \ac{FPS} across all scenarios and styles, 
 Each box aggregates the same measurement pool as the corresponding heatmap row, exposing the spread that the heatmap median hides.
 Load-time variance compresses sharply at \texttt{tile\_shave}.
 The \ac{FPS} spread instead widens past the same step, exposing per-style headroom.
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:box_load_fps}
 \end{figure}
 
@@ -750,7 +756,7 @@ Data-level passes drove the bulk of the reduction: tile shaving (step~17) alone 
 Time breakdown across ablation steps: style parse, first tile, first frame, and remaining load time.
 Style-parse time shrinks monotonically with each expression pass.
 First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied (steps~17-19).
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:time_breakdown}
 \end{figure}
 
@@ -761,7 +767,7 @@ Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
 Mean heap used in MB across all scenarios and benchmark styles across ablation steps.
 Style-level passes (steps 1-15) reduce the heap by \qty{3.1}{\mega\byte}.
 The bulk of the heap savings comes from data-level passes (steps 17-19) where the in-memory tile payload itself shrinks, yielding a cumulative reduction of \qty{-35.7}{\percent} from baseline to step~19.
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:memory_ablation}
 \end{figure}
 
@@ -777,7 +783,7 @@ Cumulative ablation of mean style gzip bytes across all 19 steps.
 The orange line is the mean across scenarios, and thin gray lines bound the per-scenario distribution.
 Most of the wire-size win lands by \texttt{strip\_metadata}.
 The \texttt{tile\_shave\_only} spike is the unoptimized-style baseline of Configuration~3, which \texttt{tile\_shave} and \texttt{tile\_rewrite} recover and surpass.
-Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
+Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:waterfall_gzip_bytes}
 \end{figure}
 
@@ -965,7 +971,7 @@ The 13 benchmark styles, while diverse, may not represent all style authoring pa
 We benchmarked the full rendering pipeline (style optimizations through tile shaving to \ac{MLT} re-encoding) end-to-end on 10 of the 13 deep-corpus styles (bright, dark-matter, fiord, klokan-basic, liberty, osm-bright, osm-liberty, positron, stadia-outdoors, toner).
 ICGC Fosc, ICGC Gris, and Americana were excluded from the end-to-end pipeline because of an upstream bug in MapLibre's \texttt{gl-style-migrate} that miscompiles their legacy \mlprop{text-field} syntax (\cref{sub:deep_corpus}).
 Once layer merging (step~15) builds on that intermediate, the cumulative ablation would no longer be comparing like with like across the corpus.
-For the 11 \ac{OMT} styles in the deep corpus whose referenced tile data is fully available to us (the 10 end-to-end styles plus Americana), we verified the tile-shaving step alone (advisory generation and \ac{MVT} pruning, without rendering) on the same Germany tileset (\cref{fig:tile_shave_per_style}), confirming that shaving effectiveness generalizes across styles with reductions of \qtyrange{19.8}{46.3}{\percent}.
+For the 11 styles in the deep corpus whose referenced tile data is fully available to us (the 10 end-to-end styles plus Americana), we verified the tile-shaving step alone (advisory generation and \ac{MVT} pruning, without rendering) on the same Germany tileset (\cref{fig:tile_shave_per_style}), confirming that shaving effectiveness generalizes across styles with reductions of \qtyrange{19.8}{46.3}{\percent}.
 The ICGC pair is excluded from this sweep because their Catalonia accessory tile data is not available to us (see the corpus-exclusions note at the top of this chapter), even though their \texttt{openmaptiles} source uses the same OMT schema as the 11.
 The remaining limitation is that tile statistics at a sample rate of~1.0 require access to the underlying tile data, which is available only for \ac{OSM}-based tilesets accessed via a local \texttt{.mbtiles} file.
 The style-only results (Experiments~1-2) cover the 13 styles of the deep corpus and are not affected by this limitation.
