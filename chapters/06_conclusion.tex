@@ -16,17 +16,17 @@ This thesis makes four main contributions, mirroring the structure of \cref{sec:
     The three levels turn out to be complementary rather than redundant (\cref{sub:combined_marginal}).
     Style-level optimizations contribute along two distinct axes (expression simplification and structural restructuring), ranked precisely in R2.
     Style-driven tile shaving (\cref{sub:tile_shaving}) is the dominant contributor to load-time and transfer-size improvements.
-    Adaptive multi-strategy encoding in our \ac{MLT} encoder (\cref{sub:data_optimizations}) reduces tile volume by \qty{28}{\percent} over the fixed-plan reference baseline.
+    Adaptive multi-strategy encoding in our \ac{MLT} encoder (\cref{sub:data_optimizations}) reduces uncompressed tile volume by \qty{28}{\percent} over the fixed-plan reference baseline.
     The advantage persists under every wire compressor tested (\cref{tab:mvt_mlt_comparison}).
 
-    \item The \textbf{end-to-end implementation}, whose preprocessing cost we characterize on the Germany OpenMapTiles tileset (\cref{tab:preprocessing_cost}).
+    \item The \textbf{end-to-end implementation}, whose preprocessing cost we characterize on the Germany \ac{OMT} tileset (\cref{tab:preprocessing_cost}).
     The full single-threaded pipeline completes in under \qty{7}{\minute}.
     With 16-thread parallelism the wall-clock time drops to approximately \qty{2}{\minute}, paid once per tileset build and amortised over every subsequent tile request.
     The multi-strategy encoder competition increases single-threaded re-encoding cost by a factor of $1.95\times$ over a fixed-plan encoder.
     This is well below the naïve $4\times$ expectation, thanks to bounding-box pruning, data profiling, and warm-start caching.
 
-    \item The \textbf{empirical evaluation} (\cref{ch:experiments}), conducted across 15 styles, 18 scenarios, and 19 cumulative ablation steps.
-    The full pipeline reduces total tile volume on the Germany OpenMapTiles tileset by \qty{36}{\percent} relative to gzip-compressed \ac{MVT} (\cref{tab:tile_sizes_per_zoom}).
+    \item The \textbf{empirical evaluation} (\cref{ch:experiments}), conducted across a 15-style deep corpus (13 benchmarked; the BasemapDE pair was excluded for data-access reasons), 18 scenarios, and 19 cumulative ablation steps.
+    The full pipeline reduces total tile volume on the Germany \ac{OMT} tileset by \qty{36}{\percent} relative to gzip-compressed \ac{MVT} (\cref{tab:tile_sizes_per_zoom}).
     Our encoder alone accounts for \qty{12}{\percent}, with style-driven tile shaving providing the remainder.
     It also improves end-to-end load times by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) across the ten deep-corpus styles benchmarked with tile data.
 \end{enumerate}
@@ -46,7 +46,7 @@ Sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as propor
 The metric is doing what it should but reading a regime the renderer was never expected to enter.
 
 Beyond these surprises, the compiler-optimization framing of \cref{ch:theoretical_background} applies directly to the map-style domain through its rewrite-rule algebra.
-Our rewrite rules (\cref{tab:all_rewrite_rules}) are individually simple, yet their composition through fixpoint iteration achieves globally significant simplification across styles of widely varying complexity (raw reductions of \qtyrange{3}{68}{\percent} across the Maputnik generalization corpus).
+Our rewrite rules (\cref{tab:all_rewrite_rules}) are individually simple, yet their composition through fixpoint iteration achieves globally significant simplification across styles of widely varying complexity (raw reductions of \qtyrange{3.2}{67.7}{\percent} across the 13-style Maputnik generalization corpus).
 Expressions are compositional and the rules are individually semantics-preserving, so iterating until no rule fires is sound for any order, even though the system is not confluent and different orders may reach different but visually equivalent normal forms (\cref{sub:fixpoint}).
 
 \section{Research Questions Revisited}\label{sec:rq_revisited}
@@ -57,7 +57,8 @@ The headline tile-size and load-time numbers are summarised under C4 and tabulat
 At the style level, structural optimizations reduce the gzip-compressed style by \qty{14.1}{\percent} for Fiord and \qty{4.9}{\percent} for Liberty at step~15 (\cref{sub:structural_results}).
 The pipeline is not uniformly effective.
 Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview-dominated scenarios benefit more than street-level panning (\cref{sub:combined_marginal}).
-The remaining \ac{OMT}-compatible styles in the deep corpus were measured for tile-shaving effectiveness only (\qtyrange{19.8}{46.3}{\percent}, \cref{fig:tile_shave_per_style}).
+All 11 \ac{OMT}-compatible styles in the deep corpus (the 10 end-to-end styles plus Americana) were measured for tile-shaving effectiveness on the Germany tileset (\qtyrange{19.8}{46.3}{\percent}, \cref{fig:tile_shave_per_style}).
+Americana, ICGC~Fosc, and ICGC~Gris are excluded from end-to-end rendering checks by an upstream bug in MapLibre's \texttt{gl-style-migrate} that miscompiles their legacy \mlprop{text-field} syntax (\cref{sub:deep_corpus}); of these three, only Americana is part of the 11-style shaving sweep.
 The thirteen-style Maputnik generalization corpus was evaluated under static style passes alone.
 
 \paragraph{R2: Technique Effectiveness and Interactions}
@@ -87,7 +88,7 @@ We group them by how much they would change the deployment model rather than by 
 
 \paragraph{Online and Incremental Deployment}
 The biggest open question is how much of the pipeline can leave the offline batch stage.
-The current pipeline assumes a one-shot tile rebuild, which is acceptable for static OpenMapTiles deliveries but impractical for PostGIS-backed servers whose data changes frequently.
+The current pipeline assumes a one-shot tile rebuild, which is acceptable for static \ac{OMT} deliveries but impractical for PostGIS-backed servers whose data changes frequently.
 The style optimizer already depends only on the style and can run at deployment time.
 The pruning advisory could plausibly run as a lightweight serving-time filter built on column selection and predicate evaluation, in the spirit of adaptive query processing~\cite{deshpandeAdaptiveQueryProcessing2006}.
 Encoding strategy competition is the inherently batch part because it has to profile whole columns, but its decisions could be cached per schema, and on-the-fly \ac{MVT}-to-\ac{MLT} re-encoding at the tile server or \ac{CDN} edge would expose the encoding gains without a full tile rebuild.
@@ -115,6 +116,6 @@ A model trained on layer-level statistics (cardinality, spatial spread, value di
 Finally, the coverage gaps we would have closed, given more time.
 Symbol layers are currently excluded from merging because the pass cannot reason about glyph-level collision.
 Even a restricted variant that merges symbol layers sharing identical text-field expressions would recover most of the unmerged headroom, and label-heavy styles (where this restriction bites the hardest) have the most layers left on the table after the structural pass.
-The MinHash similarity threshold ($\tau = 7.5\%$) was tuned on the Germany OpenMapTiles tileset (\cref{fig:minhash_sweep}).
+The MinHash similarity threshold ($\tau = 7.5\%$) was tuned on the Germany \ac{OMT} tileset (\cref{fig:minhash_sweep}).
 We have not characterized sensitivity across tilesets with different vocabulary distributions, because the legal and data-availability constraints around non-\ac{OSM} schemas made this hard to attempt in the time available.
 Proprietary styles such as Mapbox Streets and Esri's vector basemaps are similarly closed off by their terms of service, so the per-pass marginal contributions we report should be read as confirmed on open-source styles rather than universally claimed.

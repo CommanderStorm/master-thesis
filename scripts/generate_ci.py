@@ -22,10 +22,10 @@ from scipy import stats
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
 ROOT = THESIS_DIR.parent
-INPUT_DIR = ROOT.parent / "maplibre-optimizer" / "tests" / "bench" / "results"
+INPUT_DIR = ROOT / "maplibre-optimiser" / "tests" / "bench" / "results"
 OUTPUT_DIR = SCRIPT_DIR / "data"
 
-EXCLUDED_STYLES = {"americana"}
+EXCLUDED_STYLES: set[str] = set()
 
 _STEP_RE = re.compile(r"^step-(\d+)-(.+)$")
 

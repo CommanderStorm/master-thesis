@@ -13,10 +13,10 @@ from statistics import median
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
 ROOT = THESIS_DIR.parent
-INPUT_DIR = ROOT.parent / "maplibre-optimizer" / "tests" / "bench" / "results"
+INPUT_DIR = ROOT / "maplibre-optimiser" / "tests" / "bench" / "results"
 OUTPUT_DIR = SCRIPT_DIR / "data"
 
-EXCLUDED_STYLES = {"americana"}
+EXCLUDED_STYLES: set[str] = set()
 FULL_PIPELINE_STYLES = {"fiord", "liberty"}
 
 _STEP_RE = re.compile(r"^step-(\d+)-(.+)$")
@@ -94,6 +94,7 @@ SUMMARY_LABELS: dict[str, str] = {
     "toner": "toner",
     "osm-liberty": "osm-liberty",
     "stadia-outdoors": "stadia-outdoors",
+    "americana": "americana",
     "icgc-fosc": "ICGC fosc",
     "icgc-gris": "ICGC gris",
     "basemap-top": "BasemapDE topo",
@@ -104,14 +105,14 @@ APPENDIX_ORDER: list[str] = [
     "liberty", "bright", "positron", "fiord", "dark-matter",
     "osm-bright", "klokan-basic", "toner", "osm-liberty",
     "basemap-col", "basemap-top", "icgc-fosc", "icgc-gris",
-    "stadia-outdoors",
+    "stadia-outdoors", "americana",
 ]
 
 SUMMARY_ORDER: list[str] = [
     "bright", "positron", "dark-matter", "osm-bright",
     "klokan-basic", "toner", "osm-liberty", "stadia-outdoors",
-    "icgc-fosc", "icgc-gris", "basemap-top", "basemap-col",
-    "fiord", "liberty",
+    "americana", "icgc-fosc", "icgc-gris", "basemap-top",
+    "basemap-col", "fiord", "liberty",
 ]
 
 

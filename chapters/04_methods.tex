@@ -320,7 +320,7 @@ When the property is present in all features, it absorbs stops below $\mathrm{mi
 \noindent A cardinality threshold of \texttt{200} governs the granularity of value tracking.
 When the number of distinct values exceeds this threshold, the statistics switch from full value counts to cardinality-only mode.
 This bounds the cost on high-cardinality properties (names, identifiers) while retaining full information for the low-cardinality properties (class, subclass, administrative level) that benefit most from data-driven folding.
-We motivated the choice of 200 with the OpenMapTiles schema.
+We motivated the choice of 200 with the \ac{OMT} schema.
 Every categorical property used as a \mlop{match}/ \mlop{case} discriminator in the benchmark styles (\mlval{class}, \mlval{subclass}, \mlval{admin\_level}, \mlval{kind}, land-use codes) has fewer than 200 distinct values across the Germany tileset, whereas high-cardinality string columns (feature names, identifiers) exceed it by one or more orders of magnitude.
 The threshold therefore separates the \enquote{folding-useful} properties from the \enquote{folding-useless} ones without tuning for any specific style.
 
@@ -376,7 +376,7 @@ We estimate compound predicates under the standard independence assumption from 
 
 \noindent The independence assumption is known to be imprecise for correlated predicates~\cite{selingerAccessPathSelection1979}, but as discussed in \cref{sec:query_optimizations} only a reordering heuristic consumes the selectivity signal here, not a cost-based plan chooser.
 What matters is the \emph{ordering} of predicates by selectivity, not their absolute values.
-Correlation between map-style predicates (e.g.\ \mlval{class} and \mlval{subclass} in OpenMapTiles) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
+Correlation between map-style predicates (e.g.\ \mlval{class} and \mlval{subclass} in \ac{OMT}) distorts the absolute selectivities but rarely inverts their relative ordering, so the cheap estimator suffices.
 Because the rendering benefit of predicate reordering depends on the proportion of evaluation cost attributable to predicate ordering (expected to be small for styles with short filters) we include this pass as an exploratory extension and do not separately benchmark its isolated impact.
 
 \paragraph{Termination and Confluence of the Fixpoint}
@@ -668,7 +668,7 @@ After removing dead layers, the pass prunes sources that no surviving layer refe
 This mirrors dead code elimination followed by unreachable function removal in a compiler (\cref{sec:compiler_optimizations}).
 Its downstream effect on the tile pruning advisory (\cref{sub:tile_shaving}) is the entry point for the data-level cascade evaluated in \cref{sub:mlt_results}.
 
-Geometry-type mismatch is particularly effective on schemas such as OpenMapTiles, where a single source layer (e.g.\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and so are never killed by this rule.
+Geometry-type mismatch is particularly effective on schemas such as \ac{OMT}, where a single source layer (e.g.\ \texttt{transportation}) carries mixed geometry. \mlval{fill} layers require polygons, \mlval{circle} requires points, \mlval{line} draws on polygons or lines but not points, and \mlval{symbol} layers draw on all three and so are never killed by this rule.
 The check requires tile statistics, so we provide both static and stats-driven variants of the pass.
 
 \paragraph{Metadata Refinement}
@@ -1228,7 +1228,7 @@ The columnar data is then encoded with per-stream integer competitions.
 To avoid wasting trials on unpromising strategies, a \emph{bounding-box heuristic} skips spatial sorting on large layers whose features are too spatially dispersed for locality clustering to help.
 Specifically, for layers with more than \texttt{512} features, the heuristic prunes spatial trials when the first-vertex bounding box covers more than \texttt{80\%} of the tile extent on \emph{both} axes.
 The encoder always tries small layers (below the threshold), since the absolute cost of an extra encoding pass is negligible for them.
-We derived the thresholds experimentally from Germany-wide OpenMapTiles.
+We derived the thresholds experimentally from Germany-wide \ac{OMT}.
 
 In an inner loop, a per-stream encoding competition tries every viable integer encoding for the data stream.
 Each candidate pairs a \emph{logical} encoding (Plain, Delta, \ac{RLE}, or DeltaRle) with a \emph{physical} encoding (\ac{VarInt} or \ac{FastPFOR}~\cite{lemireDecodingBillionsIntegers2015}).
@@ -1267,7 +1267,7 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 
 \paragraph{Shared dictionary grouping}\label{sub:cardinality}
 The \ac{MLT} format supports shared dictionaries where multiple string columns reference a common deduplicated corpus, amortising dictionary overhead across columns with overlapping vocabularies.
-The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlval{name:en}, \mlval{name:de}), which misses semantic overlaps (e.g., \mlval{class} and \mlval{subclass} in OpenMapTiles share many values).
+The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlval{name:en}, \mlval{name:de}), which misses semantic overlaps (e.g., \mlval{class} and \mlval{subclass} in \ac{OMT} share many values).
 
 \begin{sloppypar}
     Our encoder replaces prefix matching with MinHash-based similarity clustering (\cref{sub:lsh})~\cite{broderResemblanceContainmentDocuments1998}.
@@ -1279,7 +1279,7 @@ The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlva
     The encoder unifies columns whose similarity exceeds \texttt{7.5\%} via a Union-Find structure (union by size).
 The low threshold reflects that even small vocabulary overlap reduces the marginal cost of adding a column to an existing dictionary.
     The encoder discards groups with fewer than two members.
-    We selected the threshold and similarity mode via a sweep over $[2.5\%, 20\%]$ on the Germany OpenMapTiles tileset under three similarity modes (\emph{hybrid} taking $\max(\hat{J}_\text{exact}, \hat{J}_\text{trigram})$, \emph{only-trigram}, \emph{only-exact}), summarised in \cref{fig:minhash_sweep} in the appendix.
+    We selected the threshold and similarity mode via a sweep over $[2.5\%, 20\%]$ on the Germany \ac{OMT} tileset under three similarity modes (\emph{hybrid} taking $\max(\hat{J}_\text{exact}, \hat{J}_\text{trigram})$, \emph{only-trigram}, \emph{only-exact}), summarised in \cref{fig:minhash_sweep} in the appendix.
     Hybrid mode wins at every threshold at no significant performance cost, and the curve is nearly flat below \qty{7.5}{\percent}, where the empirical optimum at \qty{2.5}{\percent} saves only an additional \qty{1.6}{\mega\byte} on the \qty{3.14}{\giga\byte} tileset at the cost of false-positive union risk on tilesets with less correlated vocabularies.
     We therefore retain \qty{7.5}{\percent} as a conservative default that captures the majority of the grouping benefit.
 \end{sloppypar}
@@ -1435,7 +1435,7 @@ The total preprocessing cost decomposes into four additive terms covering style 
     C_\text{total}(S, T) \;=\; C_\text{style}(S) \;+\; C_\text{stats}(T) \;+\; C_\text{adv}(S) \;+\; C_\text{enc}(S, T).
 \end{equation}
 Bounding-box pruning, data profiling, \ac{FSST} warm-start caching, scratch-buffer recycling, and the \ac{RAII} alternatives guard together keep $C_\text{enc}$ bounded under the multi-strategy competition.
-We report wall-clock cost on the Germany OpenMapTiles tileset in \cref{sub:preprocessing_cost}.
+We report wall-clock cost on the Germany \ac{OMT} tileset in \cref{sub:preprocessing_cost}.
 The focus of this thesis is on the delivery and rendering improvements that this one-off cost buys.
 
 \section{Gathering a Representative Sample}\label{sec:gathering_sample}
@@ -1445,9 +1445,9 @@ A further 13 styles (\cref{sub:generalization_corpus}) carry static-only checks 
 
 \subsection{Benchmarking Corpus}\label{sub:deep_corpus}
 
-We curated a corpus of 15 publicly available styles that use the OpenMapTiles or BasemapDE schema:
+We curated a corpus of 15 publicly available styles that use the \ac{OMT} or BasemapDE schema:
 four \textbf{OpenFreeMap} styles (liberty, bright, positron, fiord);
-seven \textbf{OpenMapTiles community} styles (dark-matter, osm-bright, klokan-basic, toner, osm-liberty, americana, stadia-outdoors);
+seven \textbf{\ac{OMT} community} styles (dark-matter, osm-bright, klokan-basic, toner, osm-liberty, americana, stadia-outdoors);
 and four \textbf{government and institutional} styles (ICGC~fosc, ICGC~gris, Basemap\-DE\footnote{\url{https://basemap.de/}, last accessed 2026-05-23} topo\-graphic, Basemap\-DE color).
 
 These styles span a range of complexity, from minimal basemaps with fewer than 50~layers to verbose institutional styles with several hundred layers, and exercise different subsets of the expression language.
@@ -1463,7 +1463,7 @@ We source tile data from \ac{OSM} via Planetiler or the German government.
 We consume both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
 We access BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
 Only for \ac{OSM} is the underlying data fully available, so only for this source can we collect tile statistics at a sample rate of~1.0.
-To ensure reproducibility across benchmark runs, we route all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{MiB/s}} + 25ms$).
+To ensure reproducibility across benchmark runs, we route all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
 This eliminates network variability and guarantees that every ablation step operates on identical tile data (after an initial, discarded run).
 The model does not simulate packet loss, HTTP/2 multiplexing, TCP slow-start, or HTTP/3 (QUIC) with its 0-RTT connection resumption and absence of head-of-line blocking.
 All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving are a conservative lower bound on what a real deployment would observe.
@@ -1519,7 +1519,7 @@ Per run, the benchmark harness collects the following metrics:
     \item[\textbf{Time to first frame}] time until the first frame is composited and presented.
     \item[\textbf{\ac{FPS}}] average rendering throughput during the animation phase.
     \item[\textbf{Frame time percentiles}] distribution of per-frame render times, capturing both typical and worst-case latency.
-    \item[\textbf{Jank count}] number of frames exceeding \qty{16.67}{\milli\second} (the 60\,\ac{FPS} budget), indicating visible stuttering.
+    \item[\textbf{Jank count}] number of frames whose render time exceeds twice the median, indicating visible stuttering relative to typical frame pacing.
     \item[\textbf{Heap memory}] JavaScript heap usage during the benchmark, capturing the memory cost of style structures and tile data.
     \item[\textbf{Idle time}] time the renderer spends idle (waiting for tiles or \ac{GPU} sync), indicating headroom.
 \end{description}
@@ -1549,7 +1549,7 @@ The benchmark harness itself is a Puppeteer\footnote{\url{https://pptr.dev/}, la
 The optimizer is a \textbf{three-level pipeline} (\cref{sub:pipeline}) operating on the $(S, T) \to (S', T')$ problem of \cref{sec:problem_statement}.
 Eight expression-level passes run to a fixpoint, six structural passes act on a typed style document, and data-level passes re-encode shaved tiles into \ac{MLT} via per-stream strategy competition.
 The \textbf{pruning advisory} derived from the optimized style ties the levels together as a projection-pushdown plan over the tile data.
-We measure the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany OpenMapTiles tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
+We measure the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
 
 The following chapter applies this methodology to evaluate each optimization category in isolation, tests generalization beyond the benchmarking corpus, and analyses the full pipeline's combined effect.
 \end{chaptersummary}
