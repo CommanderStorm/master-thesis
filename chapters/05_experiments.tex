@@ -85,7 +85,8 @@ For caveats, please see \cref{sub:expr_discussion}}
     \centering
     \includegraphics[width=\linewidth]{figures/marginal_loadMs.pdf}
     \caption{
-Marginal contribution of each expression pass to load time reduction shows the effect of each of the passes cleanly. }
+Marginal contribution of each expression pass to load time reduction shows the effect of each of the passes cleanly.
+For caveats, please see \cref{sub:expr_discussion}}
     \label{fig:marginal_loadMs}
 \end{figure}
 
@@ -96,7 +97,8 @@ Marginal contribution of each expression pass to load time reduction shows the e
 Marginal contribution of each expression pass to parse the style in miliseconds.
 Variance is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
 The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
-This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.}
+This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.
+For caveats, please see \cref{sub:expr_discussion}}
     \label{fig:marginal_styleParseMs}
 \end{figure}
 
@@ -825,16 +827,16 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
      & & \textbf{(\%)} & \textbf{(\%)} & \textbf{(\%)} & \textbf{(\%)} & \\
     \midrule},
   table foot={\midrule
-    \multicolumn{7}{l}{\footnotesize $\dagger$ 10 end-to-end styles only (see corpus-exclusions note).\quad $\ast$ requires tile data.} \\
+    \multicolumn{7}{l}{\footnotesize $\dagger$ end-to-end styles only (see corpus-exclusions note).\quad $\ast$ requires tile data.} \\
     \bottomrule},
   head to column names,
 ]{scripts/data/marginal_contribution.csv}{}%
-{ & \pass\ifnum\daggerflag=1\textsuperscript{$\dagger$}\fi\ifnum\starflag=1\textsuperscript{$\ast$}\fi &
+{\step & \pass\ifnum\daggerflag=1\textsuperscript{$\dagger$}\fi\ifnum\starflag=1\textsuperscript{$\ast$}\fi &
  \fmtdelta{\deltaRaw} & \fmtdelta{\deltaGzip} & \fmtdelta{\deltaBrotli} &
  \fmtdelta{\deltaLoad} & \fmtdeltaint{\deltaLayers}}%
 \caption{
 Marginal contribution of each ablation step to style size (raw, gzip, brotli), load time, and layer count.
-Values are percentage of baseline, medians across the 13 benchmarked styles and 18 scenarios. The $\dagger$ flags steps where the aggregation drops to the 10 end-to-end styles (see the corpus-exclusions note). The $\ast$ flags steps that require tile data (statistics or tile bytes) at preprocessing time.
+Values are percentage of baseline, medians across the 13 benchmarked styles and 18 scenarios.
 Data-level tile shaving dominates transfer-size and load-time metrics.
 Style-level passes contribute primarily to parse-time and style-size reductions and serve as enablers for the data-level pipeline.}
 \label{tab:marginal_contribution}
