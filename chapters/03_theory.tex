@@ -68,14 +68,14 @@ These low-level graphics building blocks are linked to map data through sprites,
 	\end{tikzpicture}
 	\caption{
 Basic building blocks of a map rendering stack.
-Data is taken from a data source, converted into a simplified format (for example a spatial index), and served to a client.
+Data is taken from a data source, converted into a simplified format (e.g., a spatial index), and served to a client.
 The visual appearance is defined by a style and supported by fonts and sprites for text and icons.}
 	\label{fig:basic-arch}
 \end{figure}
 
 As shown in \cref{fig:basic-arch}, displaying map content at this lower level requires
     \emph{styles} that define the visual appearance and reference the other resources,
-    \emph{tiles} that provide the geometry (points, lines, polygons) and associated attributes (for example, building heights),
+    \emph{tiles} that provide the geometry (points, lines, polygons) and associated attributes (e.g., building heights),
     \emph{sprites} that supply the icons, and
     \emph{fonts} that provide the glyphs used to render text labels.
 Occasionally, additional assets such as 3D geometry models or terrain are used as well.
@@ -83,19 +83,19 @@ Occasionally, additional assets such as 3D geometry models or terrain are used a
 There are several approaches to deliver client-side rendered vector maps.
 
 Styles, sprites, and fonts are typically served from a file server or \ac{CDN} and require little processing.
-In some cases, parts of these resources may be generated dynamically, for example to support complex text shaping for Arabic, Hebrew, Indic, or Japanese scripts as described by Wipfli~\cite{wipfliComplexTextPlugin2025} for MapLibre or Lengyel~\cite{lengelDecadeSlug} for SLUG.
+In some cases, parts of these resources may be generated dynamically, e.g., to support complex text shaping for Arabic, Hebrew, Indic, or Japanese scripts as described by Wipfli~\cite{wipfliComplexTextPlugin2025} for MapLibre or Lengyel~\cite{lengelDecadeSlug} for SLUG.
 This processing is currently usually handled ahead of time on the server-side.
 
 Tiles, by contrast, can be stored and accessed using three major approaches:
 
 \begin{description}
 \item[Dynamic]
-    Store geospatial data in a database (for example, PostGIS\footnote{\url{https://postgis.net/}, last accessed 2026-05-23}) and use a tile server to generate and serve tiles on demand.
+    Store geospatial data in a database (e.g., PostGIS\footnote{\url{https://postgis.net/}, last accessed 2026-05-23}) and use a tile server to generate and serve tiles on demand.
 \item[Client-driven]
-    Store encoded tiles as a single file in a blob store using a format that includes an internal tile index (for example, PMTiles or VersaTiles).
+    Store encoded tiles as a single file in a blob store using a format that includes an internal tile index (e.g., PMTiles or VersaTiles).
     Clients retrieve tiles using multiple \ac{HTTP} requests with appropriate Range headers to locate the required data.
 \item[Semi-static]
-    Store encoded tiles in a database file on disk (for example, SQLite) and use a tile server to extract and serve tiles to clients.
+    Store encoded tiles in a database file on disk (e.g., SQLite) and use a tile server to extract and serve tiles to clients.
 \end{description}
 
 Dynamic data sources can be updated frequently by applying incremental diffs, whereas the other approaches typically require a full rebuild when the underlying data changes.
@@ -103,7 +103,7 @@ At larger scales, in-memory caching of tiles via regional or \ac{CDN}-style infr
 
 All of these resources can be optimized, but tiles are usually the most critical because they stream continuously as a user moves the map.
 This typically gives them a cumulatively higher data volume, even though their individual tiles may be much smaller.
-All other resources may depend on locale slightly (for example loading different Unicode ranges or fonts), but are only handled one time.
+All other resources may depend on locale slightly (e.g., loading different Unicode ranges or fonts), but are only handled one time.
 
 Real-world observations support this.
 The performance of highly optimized systems such as Microsoft Bing Maps differs significantly from less optimized deployments.
@@ -113,7 +113,7 @@ In the following sections we examine each resource in detail, focusing on the pe
 \subsection{Fonts}
 
 Fonts can be client rendered from a font file.
-This requires including a text shaping engine to the client, as neither native nor web targets have for example Harfbuzz\footnote{\url{https://github.com/harfbuzz/harfbuzz}, last accessed 2026-05-26} exposed as a feature.
+This requires including a text shaping engine to the client, as neither native nor web targets have e.g., Harfbuzz\footnote{\url{https://github.com/harfbuzz/harfbuzz}, last accessed 2026-05-26} exposed as a feature.
 This also means that for some fonts up to \qty{131}{\mega\byte}\cite{FontThatIncludes} of font data needs to be transferred.
 
 For interactive use cases, this is prohibitive as the time to download this would be longer than acceptable.
@@ -158,8 +158,8 @@ No symmetric \enquote{underzoom} behavior exists.
 If a source has no tile at a zoom lower than \mlprop{minzoom}, the layer is not rendered there.
 
 A \emph{vector tile} encodes map data in a compact binary format rather than in a pre-rendered image.
-Each tile is organized into \emph{source layers} (for example, roads, buildings, water), and each source layer contains a set of \emph{features}.
-A feature consists of geometry (point, linestring, or polygon encoded as integer coordinates relative to the tile's extent), optionally a set of key-value \emph{properties} (for example, \texttt{class=motorway} or \texttt{name=Main~Street}), optionally a set of IDs, and metadata such as the tile extent.
+Each tile is organized into \emph{source layers} (e.g., roads, buildings, water), and each source layer contains a set of \emph{features}.
+A feature consists of geometry (point, linestring, or polygon encoded as integer coordinates relative to the tile's extent), optionally a set of key-value \emph{properties} (e.g., \texttt{class=motorway} or \texttt{name=Main~Street}), optionally a set of IDs, and metadata such as the tile extent.
 
 The following formats are used for encoding and transferring data to the client:
 
@@ -186,7 +186,7 @@ The following formats are used for encoding and transferring data to the client:
 
     \item[\acf{MLT}] \begin{sloppypar} is a columnar vector tile format proposed by Tremmel et~al.~\cite{tremmelMapLibreTileNext2025b}.
     Instead of the row-major key-value-pair layout of \ac{MVT}, \ac{MLT} stores each property as an independent column with type-specific encoding.
-    This columnar layout enables per-column compression strategies (for example, dictionary encoding for low-cardinality string columns, delta encoding for monotonically increasing integers, or run-length encoding for repeated values) and eliminates the per-feature tag overhead of the protobuf encoding.
+    This columnar layout enables per-column compression strategies (e.g., dictionary encoding for low-cardinality string columns, delta encoding for monotonically increasing integers, or run-length encoding for repeated values) and eliminates the per-feature tag overhead of the protobuf encoding.
     Tremmel et~al.\ report up to $3\times$ tile size reduction on encoded tilesets and up to $6\times$ on certain large tiles, with the realized ratio depending on data characteristics.\end{sloppypar}
 \end{description}
 
@@ -444,7 +444,7 @@ Efficient encoding of tile data is essential for interactive map performance, as
 A column has to be both \emph{represented} as a value sequence and \emph{packed} into bytes, and some named schemes only address the first step while relying on the second to actually shrink the byte count.
 
 Following the MLT specification, we call the first kind a \emph{logical-level technique} and the second a \emph{physical-level technique}.
-A column applies zero or more logical techniques in chain and then exactly one physical technique, for example DeltaRLE~$\rightarrow$~FastPFOR.
+A column applies zero or more logical techniques in chain and then exactly one physical technique, e.g., DeltaRLE~$\rightarrow$~FastPFOR.
 
 \Cref{sub:logical_integer_encodings,sub:physical_integer_compressions} catalog the techniques we use in our data-level optimizations of \cref{ch:methods}.
 
@@ -479,7 +479,7 @@ Several such techniques exploit structural properties of integer sequences:
     \item[\acf{RLE}] replaces consecutive runs of identical values with (value, count) pairs.
     Unlike zigzag and delta, RLE reduces the symbol count on its own.
     MLT still classifies it as logical because it composes with other logical steps before a physical technique.
-    It is most effective for low-cardinality, clustered columns, for example a road-class column sorted by class.
+    It is most effective for low-cardinality, clustered columns, e.g., a road-class column sorted by class.
 \end{description}
 
 Logical techniques chain freely.
@@ -584,7 +584,7 @@ In the context of web maps, the candidate metrics span a range from deployment-c
 
 \begin{description}
     \item[Resource utilization,] such as \ac{CPU} load, \ac{GPU} utilization, and memory consumption to have pointers where further optimizations is possible.
-    \item[Latency and responsiveness,] measuring the time between initiating an operation (for example zooming) and the first visible result.
+    \item[Latency and responsiveness,] measuring the time between initiating an operation (e.g., zooming) and the first visible result.
     \item[Throughput,] typically measured in \acp{FPS} or frame time, describing how many frames can be rendered per second.
     \item[Frame stability,] which captures variations in frame time and identifies dropped frames or rendering stutters.
     \item[Network utilization,] including transferred bytes, tile request rates, and bandwidth consumption.
