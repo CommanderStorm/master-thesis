@@ -266,14 +266,14 @@ After shaving, the surviving data has fewer distinct values, longer runs, and sm
 In this experiment we isolate the interaction between style-level and data-level optimizations and identify which level contributes the dominant share of the end-to-end savings.
 We use a cumulative design with five configurations, each adding one optimization layer:
 
-\begin{description}
-    \item[\ac{MVT} baseline]: unoptimized protobuf-encoded tiles served with the original style.
-    \item[Style-only]: the optimized style from Experiments~1-2, served with unmodified \ac{MVT} tiles.
-    \item[Shaving-only]: the original style with tile shaving applied (advisory-driven pruning of unused columns, geometry types, and property values), but without style optimizations.
-    \item[Style + shaving]: The optimized style driving tile shaving.
+\begin{enumerate}
+    \item[\ac{MVT} baseline:] Unoptimized protobuf-encoded tiles served with the original style.
+    \item[Style-only:] The optimized style from Experiments~1-2, served with unmodified \ac{MVT} tiles.
+    \item[Shaving-only:] The original style with tile shaving applied (advisory-driven pruning of unused columns, geometry types, and property values), but without style optimizations.
+    \item[Style + shaving:] The optimized style driving tile shaving.
     Dead layer elimination and metadata refinement may narrow the advisory relative to the unoptimized style.
-    \item[Style + shaving + \ac{MLT} encoding]: encoding stage that delivers the shaved data to the wire via automatic encoding strategy selection (sort competition, per-stream profiling, string compression).
-\end{description}
+    \item[Style + shaving + \ac{MLT} encoding:] encoding stage that delivers the shaved data to the wire via automatic encoding strategy selection (sort competition, per-stream profiling, string compression).
+\end{enumerate}
 
 \noindent Configurations~2-4 isolate the interaction effect.
 If the combined reduction of style+shaving exceeds the sum of style-only and shaving-only, the two optimization categories are synergistic.
