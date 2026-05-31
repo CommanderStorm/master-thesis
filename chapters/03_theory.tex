@@ -167,7 +167,7 @@ The following formats are used for encoding and transferring data to the client:
     \item[Raster tiles] deliver pre-rendered images (\ac{PNG}, JPEG, WebP, Avif, JPEGXL) rather than vector geometry.
     They require no client-side rendering logic but cannot be restyled, rotated at arbitrary angles (beyond the affine transform imposed by globe mode), or queried interactively, as the visual representation is fixed at generation time.
 
-    \item[Analysis-focused formats] such as FlatGeobuf\footnote{\url{http://flatgeobuf.org/}, last accessed 2026-05-11}, GeoParquet\footnote{\url{https://geoparquet.org/}, last accessed 2026-05-11}, and GeoArrow are optimized for analytical queries (filtering, aggregation, joins) rather than tile-based rendering.
+    \item[Analysis-focused formats] such as FlatGeobuf\footnote{\url{http://flatgeobuf.org/}, last accessed 2026-05-11}, GeoParquet\footnote{\url{https://geoparquet.org/}, last accessed 2026-05-11}, and GeoArrow\footnote{\url{https://geoarrow.org/}, last accessed 2026-05-11} are optimized for analytical queries (filtering, aggregation, joins) rather than tile-based rendering.
     GeoParquet's row-group predicate pushdown and column pruning are analogous to the tile shaving we apply to \ac{MLT}, but they operate at per-file granularity.
     Parquet's row-group and column-chunk metadata would dominate at typical tile sizes (\qtyrange{1}{10}{\kilo\byte}), so we do not consider these formats further.
 
