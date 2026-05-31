@@ -655,8 +655,6 @@ All measurements in \cref{ch:experiments} were collected on a single workstation
 Preprocessing (\ac{MVT} pruning, \ac{MLT} encoding) and browser-based rendering used the same host.
 Tables list hardware, operating system, toolchains, libraries, and the browser harness.
 
-\subsection{Hardware}\label{app:bench_hw}
-
 \begin{table}[htbp]
 \centering
 % Right-hand column uses p{} so long descriptive cells wrap cleanly.
@@ -676,8 +674,6 @@ Workstation hardware specifications}
 \label{tab:bench_hardware}
 \end{table}
 
-\subsection{Operating System and Graphics Stack}\label{app:bench_os}
-
 \begin{table}[htbp]
 \centering
 \begin{tabular}{@{}l p{0.72\textwidth}@{}}
@@ -689,7 +685,7 @@ Kernel          & Linux \texttt{6.6.126-1-MANJARO} (SMP PREEMPT\_DYNAMIC, built 
 glibc           & GNU libc \texttt{2.43} \\
 GPU driver      & NVIDIA proprietary \texttt{590.48.01} \\
 Vulkan loader   & \ac{API} \texttt{1.4.325}, conformance \texttt{1.4.3.0}, driver \texttt{NVIDIA 590.48.1.0} \\
-ANGLE backend   & Vulkan (see \cref{app:bench_browser}) \\
+ANGLE backend   & Vulkan (see \cref{tab:bench_browser}) \\
 \bottomrule
 \end{tabular}
 \caption{
@@ -718,10 +714,6 @@ Language toolchains used to build and run the encoder, optimizer, harness, and a
 \label{tab:bench_toolchains}
 \end{table}
 
-
-
-\subsection{Browser and Headless Render Harness}\label{app:bench_browser}
-
 The rendering scenarios (\cref{sub:scenarios}) drive a headless Chromium instance via Puppeteer.
 The visual-correctness check (\cref{sec:visual_correctness}) uses MapLibre~GL~JS's Node-side software rasterizer with \texttt{pixelmatch}.
 Used chrome launch flags are \texttt{--enable-gpu},\allowbreak\texttt{--ignore-gpu-blocklist},\allowbreak\
@@ -736,7 +728,7 @@ Used chrome launch flags are \texttt{--enable-gpu},\allowbreak\texttt{--ignore-g
 \texttt{--disable-backgrounding-occluded-windows}.
 \Cref{tab:bench_browser} shows the used versions.
 
-\begin{table}[htbp]
+\begin{table}[H]
 	\centering
 	\begin{tabular}{@{}l l@{}}
 		\toprule
@@ -785,10 +777,6 @@ The separate visual-check harness is used offline for \texttt{pixelmatch}-based 
 		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{tab:marginal_contribution}
 \end{table}
-
-\clearpage
-
-\subsection{Key Library Versions}\label{app:bench_libs}
 
 \Cref{tab:bench_libs} lists the key dependencies of each codebase exercised in the experiments.
 
