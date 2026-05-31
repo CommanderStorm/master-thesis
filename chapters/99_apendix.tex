@@ -558,7 +558,7 @@ Panel~\subref{fig:app_anim_dofs} tabulates the exercised \acp{DOF}.
 
 \section{Per-Style Ablation Results}\label{sec:app_per_style}
 
-Tables below list per-style, per-ablation-step results: size (raw bytes, gzip level~9, Brotli max), median load time, median \ac{FPS}, and layer count.
+Tables below list per-style, per-ablation-step results: size (raw bytes, gzip level~9, brotli max), median load time, median \ac{FPS}, and layer count.
 Performance metrics are medians across all combinations of scenarios and animations.
 For ICGC fosc, ICGC gris, and Americana, the cumulative ablation stops at step 14.
 Layer merging (step 15) and the cascaded passes 16, 18, and 19 are skipped because their legacy \mlprop{text-field} migration (\cref{sub:deep_corpus}) would render incorrectly under those passes.
@@ -627,7 +627,7 @@ We ran the optimizer with all static passes enabled (no tile statistics).
 \small
 \begin{tabular}{l r r r r r}
 \toprule
-\textbf{Style} & \textbf{Layers} & \textbf{Baseline (B)} & \textbf{Optimised (B)} & \textbf{$\Delta$ Raw (\%)} & \textbf{$\Delta$ Brotli (\%)} \\
+\textbf{Style} & \textbf{Layers} & \textbf{Baseline (B)} & \textbf{Optimized (B)} & \textbf{$\Delta$ Raw (\%)} & \textbf{$\Delta$ brotli (\%)} \\
 \midrule
 Empty Style          &   0 &           197 &           153 & \num{-22.3} & \num{-12.0} \\
 Americana            & 353 & \num{1103650} &    \num{450242} & \num{-59.2} &  \num{-2.2} \\

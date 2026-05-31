@@ -3,7 +3,7 @@
 The preceding chapters established that no existing tool jointly optimizes map styles and tile data.
 This chapter applies the compiler, database, and encoding analogues of \cref{ch:theoretical_background} in a concrete Rust optimizer that consumes a MapLibre style~\ac{JSON} document with optional tile statistics and emits a visually equivalent style with optimized tile data.
 
-\section{Formalised Problem Statement}\label{sec:problem_statement}
+\section{formalized Problem Statement}\label{sec:problem_statement}
 
 With the foundations of \cref{ch:theoretical_background} in place, we state the optimization problem formally.
 
@@ -18,7 +18,7 @@ Let MapLibre's deterministic rendering function be
 
 The optimizer is a function $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ with $(S', T') = \mathcal{O}(S, T)$.
 $\mathcal{O}$ pays a one-off preprocessing cost $C_\text{total}(S, T)$, analytically decomposed and bounded in \cref{sub:preprocessing_cost_model}, in order to improve the deployment metrics of \cref{sub:metrics} (load time, heap memory, FPS, with finer-grained diagnostics) for every subsequent rendering session served from $(S', T')$.
-The deployment cost is intentionally not formalised as a single closed-form function.
+The deployment cost is intentionally not formalized as a single closed-form function.
 It depends on hardware, camera scenario, and tile cache state, and is therefore measured empirically rather than declared analytically.
 $\mathcal{O}$ is correspondingly not posed as a single-objective minimisation.
 Several passes (e.g.,\ selectivity reordering, \cref{sub:expression_optimizations}) deliberately trade a small regression in load time for a larger improvement in FPS, and the encoder competition (\cref{sub:encoding_strategies}) locally minimises encoded byte size as a contributing quantity to load time without committing to any weighting between the deployment axes.
@@ -1457,7 +1457,7 @@ The rest of this section defines the methodology that chapter applies.
 Our evaluation reports the deployment metrics framed in \cref{sec:problem_statement} along several axes, namely data savings (which feed the load-time axis), rendering performance, optimization cost (the $C_\text{total}$ breakdown of \cref{sub:preprocessing_cost_model}), and qualitative efficiency.
 
 \begin{description}
-    \item[Data savings] reduction in style size (raw, gzip, and Brotli) and tile transfer volume.
+    \item[Data savings] reduction in style size (raw, gzip, and brotli) and tile transfer volume.
     \item[Rendering performance] client-side metrics including load time, frames per second, frame time percentiles (p50, p95, p99), jank count, style parse time, time to first tile, and time to first frame.
     \item[Optimization cost] preprocessing time introduced by each pass, measured as wall-clock time on the optimizer's host machine.
     This is an offline cost amortized over all subsequent tile deliveries.
@@ -1485,7 +1485,7 @@ Per run, the benchmark harness collects the following metrics:
 \end{description}
 
 \noindent Additionally, we compute static metrics for each optimized style without running the renderer.
-\textbf{Style size} covers raw byte count, gzip-compressed size, and Brotli-compressed size.
+\textbf{Style size} covers raw byte count, gzip-compressed size, and brotli-compressed size.
 \textbf{Complexity metrics} comprise total \ac{AST} node count, maximum expression depth, layer count, filter count, and expression operator histogram.
 
 \subsection{Ablation Methodology}\label{sub:ablation}

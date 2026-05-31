@@ -120,7 +120,7 @@ This corresponds to the default stripping pass we describe in \cref{ch:methods},
 This ecosystem tooling demonstrates that individual style optimizations are recognized as valuable by practitioners, but no existing tool encomposes multiple optimizations passes.
 
 The closest academic analogue lies outside the map domain entirely.
-Hague et al.~\cite{hagueCSSMinificationConstraint2019} formalise \ac{CSS} rule merging as a Max-SAT problem over a node-weighted bipartite graph of rules and properties with ordering constraints from the cascade, and their SatCSS tool beats six production \ac{CSS} minifiers on real benchmarks.
+Hague et al.~\cite{hagueCSSMinificationConstraint2019} formalize \ac{CSS} rule merging as a Max-SAT problem over a node-weighted bipartite graph of rules and properties with ordering constraints from the cascade, and their SatCSS tool beats six production \ac{CSS} minifiers on real benchmarks.
 Our layer-merging pass (\cref{sub:structural_optimizations}) attacks the same declarative-rule-merging-under-ordering-constraints problem, but uses heuristics instead.
 
 More broadly, rule-based optimization is a well-studied paradigm in databases and compilers, and a rule-based style rewriter sits between two architectural reference points.
@@ -162,5 +162,5 @@ The benchmarking literature is in better shape, and we adopt its statistical met
 
 \begin{chaptersummary}
 No prior work composes style and data optimizations into a single open pipeline (the data-side tools ignore the style, the only commercial precedent is closed-source, and the encoding format's strategy selection is style-blind).
-Our contribution is the joint $(S, T) \to (S', T')$ optimization formalised in \cref{sec:problem_statement}, together with a cumulative ablation that distinguishes additive from synergistic composition.
+Our contribution is the joint $(S, T) \to (S', T')$ optimization formalized in \cref{sec:problem_statement}, together with a cumulative ablation that distinguishes additive from synergistic composition.
 \end{chaptersummary}

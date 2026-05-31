@@ -646,7 +646,7 @@ def plot_interaction(df: pd.DataFrame) -> None:
     fig.add_trace(go.Bar(name="Shaving-only (baseline advisory)", x=styles, y=shave_pct,
                          marker_color=CONFIG_COLORS["3: Shaving-only"],
                          marker_pattern_shape=CONFIG_PATTERNS["3: Shaving-only"]))
-    fig.add_trace(go.Bar(name="Style+shaving (optimised advisory)", x=styles, y=combined_pct,
+    fig.add_trace(go.Bar(name="Style+shaving (optimized advisory)", x=styles, y=combined_pct,
                          marker_color=CONFIG_COLORS["4: Style+shaving"],
                          marker_pattern_shape=CONFIG_PATTERNS["4: Style+shaving"]))
 

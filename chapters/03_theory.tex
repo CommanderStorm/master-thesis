@@ -191,7 +191,7 @@ The following formats are used for encoding and transferring data to the client:
 \end{description}
 
 Beyond the choice of tile format, a number of transfer-layer optimizations can improve delivery performance:
-utilising the approximately \qty{14}{\kilo\byte} TCP slow-start window as discussed by Nathaniel~\cite{WhyYourWebsite}, edge caching\footnote{such as suggested by \url{https://docs.here.com/map-rendering/docs/cache-maps-raster-tile-api}, last accessed 2026-03-16}, HTTP/2 multiplexing~\cite{belsheHypertextTransferProtocol2015} (and its QUIC-based successor HTTP/3~\cite{bishopHTTP32022} for lossy mobile networks), and modern content-encoding algorithms such as Zstandard~\cite{colletZstandardCompressionApplication2021} and Brotli~\cite{alakuijalaBrotliCompressedData2016} that achieve higher compression ratios than gzip's LZ77 foundation~\cite{zivUniversalAlgorithmSequential1977}.
+utilising the approximately \qty{14}{\kilo\byte} TCP slow-start window as discussed by Nathaniel~\cite{WhyYourWebsite}, edge caching\footnote{such as suggested by \url{https://docs.here.com/map-rendering/docs/cache-maps-raster-tile-api}, last accessed 2026-03-16}, HTTP/2 multiplexing~\cite{belsheHypertextTransferProtocol2015} (and its QUIC-based successor HTTP/3~\cite{bishopHTTP32022} for lossy mobile networks), and modern content-encoding algorithms such as Zstandard~\cite{colletZstandardCompressionApplication2021} and brotli~\cite{alakuijalaBrotliCompressedData2016} that achieve higher compression ratios than gzip's LZ77 foundation~\cite{zivUniversalAlgorithmSequential1977}.
 Tile archive formats such as PMTiles~\cite{PMTilesConceptsProtomaps} and COMTiles~\cite{tremmelCOMTILESCASESTUDY2023} address the container layer by enabling serverless, cloud-native tile delivery from a single file in blob storage.
 Since \ac{MVT} is the established baseline and \ac{MLT} aims to improve upon it, we evaluate both formats and use the transition from \ac{MVT} to \ac{MLT} as one of our data-level optimization strategies.
 
@@ -576,7 +576,7 @@ Benchmarking is the systematic measurement of system performance under controlle
 According to Jain~\cite{jainArtComputerSystems1991}, a good evaluation must start with selecting relevant metrics.
 Georges et~al.~\cite{georgesStatisticallyRigorousJava2007} later demonstrated that naive averaging of execution times on managed runtimes (such as JavaScript engines) leads to unreliable conclusions, advocating instead for confidence intervals computed over multiple independent \ac{JVM}/engine invocations.
 That principle informs the bootstrap CI methodology we use.
-The bootstrap itself, a resampling method for constructing confidence intervals without distributional assumptions, was formalised by Efron and Tibshirani~\cite{efronIntroductionBootstrap1998} and is the specific statistical technique we apply throughout our evaluation (\cref{ch:experiments}).
+The bootstrap itself, a resampling method for constructing confidence intervals without distributional assumptions, was formalized by Efron and Tibshirani~\cite{efronIntroductionBootstrap1998} and is the specific statistical technique we apply throughout our evaluation (\cref{ch:experiments}).
 Hoefler and Belli~\cite{hoeflerScientificBenchmarkingParallel2015} codified twelve common pitfalls in reporting performance results.
 Our evaluation in \cref{ch:experiments} follows their guidelines by reporting per-metric confidence intervals and separating throughput from latency measurements.
 In the context of web maps, the candidate metrics span a range from deployment-critical on battery-constrained targets to directly user-visible ones on the desktop:
@@ -615,5 +615,5 @@ The \textbf{encoding techniques} surveyed last feed the data-level passes that r
 These cover columnar storage, the logical encodings (zigzag, delta, \ac{RLE}, dictionary) and physical techniques (VarInt, FastPFOR, \ac{FSST}) they hand off to, and space-filling curves.
 We adopt the benchmarking literature's statistical methodology (bootstrap confidence intervals, warm-up handling, metric separation) rather than extending it.
 
-The following chapter formalises the joint optimization problem (\cref{sec:problem_statement,sec:scope}) and turns these foundations into concrete passes (\cref{sec:approach,sec:building_optimizations}) and an evaluation methodology (\cref{sec:gathering_sample,sec:evaluation}).
+The following chapter formalizes the joint optimization problem (\cref{sec:problem_statement,sec:scope}) and turns these foundations into concrete passes (\cref{sec:approach,sec:building_optimizations}) and an evaluation methodology (\cref{sec:gathering_sample,sec:evaluation}).
 \end{chaptersummary}
