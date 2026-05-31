@@ -1112,7 +1112,7 @@ The encoder retains the strategy producing the smallest output and discards all 
 When only a single strategy is applicable, the encoder elides the competition and encodes the layer directly without cloning.
 We considered property-based sort strategies but did not include them in the current implementation, because the string interning pass (\cref{sub:string_property_interning}) already groups features of the same discriminator value into dense dictionary-index ranges, and Hilbert or ID ordering strictly dominated an explicit categorical sort on the benchmark tileset.
 
-\begin{figure}[H]
+\begin{figure}[htb]
     \centering
     \begin{tikzpicture}[
         node distance=0.5cm,
