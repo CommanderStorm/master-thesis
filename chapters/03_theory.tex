@@ -472,7 +472,7 @@ Several such techniques exploit structural properties of integer sequences:
     The byte count is unchanged on its own and the saving comes from the downstream physical technique.
 
     \item[Delta encoding] replaces each value with the difference from its predecessor.
-    Given a sequence $v_0, v_1, \ldots, v_n$, the encoded sequence is $v_0,\, v_1 - v_0,\, v_2 - v_1,\, \ldots,\, v_n - v_{n-1}$.
+    Given a sequence $v_0$, $v_1$, $\ldots$, $v_n$, the encoded sequence is $v_0,\, v_1 - v_0,\, v_2 - v_1,\, \ldots,\, v_n - v_{n-1}$.
     Like zigzag, delta does not shrink the column by itself.
     It produces the same number of values at (often) smaller magnitude, which then pack well under VarInt or FastPFOR.
 
