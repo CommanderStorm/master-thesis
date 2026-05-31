@@ -38,7 +38,7 @@ $\ast$ flags steps that require tile data (statistics or tile bytes) at preproce
 \begin{keytakeaways}
 \item Expression passes barely move load time on their own (\qty{-2.0}{\percent} per-style median, within per-style noise).
 \item Their real value is enabling downstream passes: narrowed pruning advisory, exposed dead layers.
-\item Within the family, constant folding dominates
+\item Within the family, unary simplification dominates
 \end{keytakeaways}
 
 \noindent In this experiment we evaluate the eight expression-level passes of \cref{sub:expression_optimizations}, the rewrites that act locally on each style's \ac{JSON} expressions and run to a fixpoint.
