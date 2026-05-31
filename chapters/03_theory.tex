@@ -406,7 +406,7 @@ Selinger et~al.~\cite{selingerAccessPathSelection1979} introduced the foundation
 
 For a single equality predicate $A = v$ on a column with $d$ distinct values, the estimated selectivity is $s = 1/d$ (uniform distribution assumption).
 When value-frequency histograms are available, the estimate improves to $s = \mathit{freq}(v) / N$, where $N$ is the total number of records.
-Compound predicates are estimated by combining individual selectivities:
+Compound predicates $p_i$ are estimated by combining individual selectivities:
 \begin{equation}\label{eq:selectivity_theory}
 \begin{aligned}
     s(p_1 \land p_2) &= s(p_1) \cdot s(p_2)\\
