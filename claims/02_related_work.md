@@ -274,7 +274,7 @@
   - source: `02_related_work.tex:98`
   - type: `qualitative`
 
-- **Parquet per-column-chunk metadata amortised over large row groups**
+- **Parquet per-column-chunk metadata amortized over large row groups**
   - source: `02_related_work.tex:100`
   - type: `qualitative`
 

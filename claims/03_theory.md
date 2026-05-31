@@ -948,7 +948,7 @@
   - source: `03_theory.tex:521`
   - type: `qualitative`
 
-- **FSST symbol table is stored once and amortised over all strings in the column**
+- **FSST symbol table is stored once and amortized over all strings in the column**
   - source: `03_theory.tex:522`
   - type: `scope`
 

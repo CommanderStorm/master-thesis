@@ -247,7 +247,7 @@ The data-level pipeline we apply here (\cref{sub:data_optimizations}) takes the 
 \textit{We carried out this experiment in collaboration with Rivian Automotive, Inc to optimize performance, correctness, and software architecture of the encoder-decoder pair.
 We implemented the encoder and its strategy-selection routine ourselves.
 Rivian contributed the runtime performance engineering, which brings transcoding of the Germany \ac{OMT} tileset down from roughly five hours under the prior Tremmel \& Zink reference encoder to about one minute.
-We credit that speedup to Rivian rather than ourselves, and therefore do not analyse encoder performance further in this chapter.}
+We credit that speedup to Rivian rather than to ourselves, and therefore do not analyse encoder performance further in this chapter.}
 
 \subsection{Motivation}\label{sub:mlt_problem}
 
@@ -263,12 +263,12 @@ In this experiment we isolate the interaction between style-level and data-level
 We use a cumulative design with five configurations, each adding one optimization layer:
 
 \begin{description}
-    \item \textbf{\ac{MVT} baseline}: unoptimized protobuf-encoded tiles served with the original style.
-    \item \textbf{Style-only}: the optimized style from Experiments~1-2, served with unmodified \ac{MVT} tiles.
-    \item \textbf{Shaving-only}: the original style with tile shaving applied (advisory-driven pruning of unused columns, geometry types, and property values), but without style optimizations.
-    \item \textbf{Style + shaving}: The optimized style driving tile shaving.
+    \item[\ac{MVT} baseline]: unoptimized protobuf-encoded tiles served with the original style.
+    \item[Style-only]: the optimized style from Experiments~1-2, served with unmodified \ac{MVT} tiles.
+    \item[Shaving-only]: the original style with tile shaving applied (advisory-driven pruning of unused columns, geometry types, and property values), but without style optimizations.
+    \item[Style + shaving]: The optimized style driving tile shaving.
     Dead layer elimination and metadata refinement may narrow the advisory relative to the unoptimized style.
-    \item \textbf{Style + shaving + \ac{MLT} encoding}: encoding stage that delivers the shaved data to the wire via automatic encoding strategy selection (sort competition, per-stream profiling, string compression).
+    \item[Style + shaving + \ac{MLT} encoding]: encoding stage that delivers the shaved data to the wire via automatic encoding strategy selection (sort competition, per-stream profiling, string compression).
 \end{description}
 
 \noindent Configurations~2-4 isolate the interaction effect.
@@ -308,7 +308,7 @@ Our native Rust micro-benchmarks show \numrange{4.6}{8.3}$\times$ higher decode 
 A Rust-to-\ac{WASM} deployment would face costs absent from the current setup: the \ac{WASM}-to-JavaScript boundary requires transferring each decoded column from \ac{WASM} linear memory into JavaScript-visible typed arrays, incurring per-column copying and \ac{GC} pressure that does not exist in a pure-native pipeline.
 Secondary overheads include the restriction to 128-bit \ac{WASM} \ac{SIMD} (whereas native \ac{FastPFOR} exploits AVX2/512) and baseline JIT compilation latency.
 Jangda et~al.~\cite{jangdaNotFastAnalyzing2019} measured a 45-55\% slowdown for \ac{WASM} relative to native on SPEC \ac{CPU} benchmarks, and although the computational gap has narrowed since 2019 the data-transfer boundary cost remains largely unchanged because the \ac{WASM}-JS interface still lacks zero-copy sharing of structured columnar buffers.
-We therefore expect a Rust-\ac{WASM} port to give the columnar decoder's full advantage only on larger, feature-dense tiles where the per-column setup and transfer cost is amortised. On smaller tiles the per-column dispatch overhead would narrow the gap to approximate parity with \ac{MVT}'s single-path protobuf parser, potentially introducing a small load-time regression at the boundary that the existing browser-side decoder does not pay.
+We therefore expect a Rust-\ac{WASM} port to give the columnar decoder's full advantage only on larger, feature-dense tiles where the per-column setup and transfer cost is amortized. On smaller tiles the per-column dispatch overhead would narrow the gap to approximate parity with \ac{MVT}'s single-path protobuf parser, potentially introducing a small load-time regression at the boundary that the existing browser-side decoder does not pay.
 Shifting more decoding and data consumption into \ac{WASM} to reduce boundary-crossing overhead is left for future work.
 Bootstrap \qty{95}{\percent} confidence intervals confirm that the full-pipeline load-time improvements are tight: Fiord's final load time is \qty{120.5}{\milli\second} (CI: [\num{119.3}, \num{121.5}]), Liberty's is \qty{133.7}{\milli\second} (CI: [\num{132.9}, \num{134.2}]), both with $p < 10^{-45}$ (Wilcoxon, $n = 270$ for Fiord across 18 scenarios and $n = 254$ for Liberty across 17 scenarios at the full-pipeline pool) against their respective baselines.
 
@@ -386,18 +386,17 @@ To separate the contribution of the multi-strategy competition (this work) from 
 	\begin{subfigure}[t]{0.95\linewidth}
 		\centering
 		\includegraphics[width=\linewidth]{figures/encoder_comparison_per_zoom}
-		\caption{
-			Per-zoom total tile size for the three encoders under four wire compressions}
+		\caption{Per-zoom total tile size for the three encoders under four wire compressions}
 		\label{fig:encoder_comparison_per_zoom}
 	\end{subfigure}
 	
 	\vspace{1em}
 	
-	\begin{subfigure}[t]{\linewidth}
+	\begin{subfigure}[b]{\linewidth}
 		\centering
 		\begin{tblr}{colspec={l r r r r}, rows={font=\small}, row{1}={font=\small\bfseries}}
 			\toprule
-			Encoder & Plain (GB) & gzip (GB) & Brotli (GB) & zstd (GB) \\
+			Encoder & Plain (GB) & Gzip (GB) & Brotli (GB) & zstd (GB) \\
 			\midrule
 			\ac{MVT}              & 4.24 & 3.08 & 3.13 & 3.16 \\
 			\ac{MLT} (reference) & 4.26 & 3.54 & 3.57 & 3.60 \\
@@ -415,7 +414,7 @@ To separate the contribution of the multi-strategy competition (this work) from 
 	\end{subfigure}
 	\caption{Encoder comparison for the Germany \ac{OMT} tileset (zoom~0-14, \qty{256588}{\kilo tiles}).
 		Our \ac{MLT} encoder achieves \qty{28.3}{\percent} smaller total size than the reference baseline under no wire compression.
-		The reference encoder drifts above \ac{MVT} size at several zoom levels under Brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
+		The reference encoder drifts above \ac{MVT} size at several zoom levels under brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
 	\label{fig:encoder_comparison}
 \end{figure}
 
@@ -431,7 +430,7 @@ This stability is consistent with the profiler capturing genuine redundancy that
 The cleaner evidence for the profiler's value is the absolute comparison: our encoder, uncompressed (\qty{3.06}{\giga\byte}), is already smaller than \ac{MVT}+gzip (\qty{3.08}{\giga\byte}), confirming that per-stream encoding captures type-specific redundancy that LZ77-family compressors miss on the interleaved protobuf byte stream.
 This directly answers the question we posed at the start of \cref{sec:exp_mlt}: our encoder's contribution lives in the joint strategy-selection layer that sits on top of the columnar format, not in the format alone.
 
-\paragraph{zstd-on-\acs{MVT} Comparison}
+\paragraph{Zstd-on-\acs{MVT} Comparison}
 A natural objection is that general-purpose compressors such as zstd-22 or Brotli-11 should be sufficient. If compression is the goal, simply applying the strongest available compressor to the existing \ac{MVT} wire format would avoid the complexity of a columnar encoder entirely.
 \ac{MVT} under zstd-22 yields \qty{3.16}{\giga\byte} for the Germany tileset, whereas our encoder under the same compressor yields \qty{2.75}{\giga\byte}, a \qty{12.9}{\percent} reduction (\cref{tab:mvt_mlt_comparison}).
 We attribute this to a structural difference: a general-purpose compressor sees the interleaved, heterogeneous protobuf byte stream and must discover redundancy across mixed data types.
@@ -441,7 +440,7 @@ This finding is consistent with the columnar-database literature, where per-colu
 
 \paragraph{Decoder Cost}
 A legitimate concern for any multi-encoding scheme is that the client must pay the decoder cost, which can erode the transfer savings on mobile or battery-constrained targets.
-We engineered the decoder to amortise its per-column dispatch over per-feature work (\cref{sub:encoding_strategies}).
+We engineered the decoder to amortize its per-column dispatch over per-feature work (\cref{sub:encoding_strategies}).
 Empirically, our benchmarks on the full Germany tileset show end-to-end rendering metrics comparable to or better than \ac{MVT} at matched workloads, and we see no negative effect in the sustained frame-time metrics of \cref{sub:combined_marginal}.
 
 
@@ -895,7 +894,7 @@ Style optimization ($C_\text{style}$, \qty{7.5}{\milli\second}) and advisory com
 \paragraph{Amortisation and Headline Numbers}
 Taken together, the cost-control mechanisms formalised in \cref{sub:preprocessing_cost_model} (bounding-box pruning, data profiling, warm-start caching, scratch-buffer recycling, and the \ac{RAII} alternatives guard) reduce the measured overhead of the full sort-strategy competition to $1.95\times$ compared to a fixed-plan (single-strategy) encoder (\cref{tab:preprocessing_cost}), well below the naive $4\times$ expectation from four candidate sort orders.
 We empirically confirm that the trial-and-retain loop costs $k$ encode passes plus $\mathcal{O}(1)$ bookkeeping rather than $k$ encode passes plus $k$ full buffer clones.
-We pay this cost once per tileset build and amortise it over every subsequent tile request.
+We pay this cost once per tileset build and amortize it over every subsequent tile request.
 The total single-threaded pipeline time (statistics collection through \ac{MLT} encoding with full competition) is under \qty{7}{\minute} on the Germany tileset.
 With 16-thread parallelism the end-to-end wall-clock time drops to approximately \qty{2}{\minute}, perfectly acceptable for an offline build stage.
 The effect of this on client side performance is not as big as it could currently be, because internally we transform data to \acsp{MVT} instead of a more efficient in-memory-structure.

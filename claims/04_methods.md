@@ -32,7 +32,7 @@
   - source: `04_methods.tex:18`
   - type: `scope`
 
-- **Preprocessing cost C_total(S, T) paid once, amortised across rendering sessions**
+- **Preprocessing cost C_total(S, T) paid once, amortized across rendering sessions**
   - source: `04_methods.tex:19`
   - type: `scope`
 
@@ -368,11 +368,11 @@
   - source: `04_methods.tex:685-688`
   - type: `scope`
 
-- **all node intersection: z* = [max(l1,l2), min(u1,u2)]**
+- **all node intersection: z\* = [max(l1,l2), min(u1,u2)]**
   - source: `04_methods.tex:693`
   - type: `scope`
 
-- **any node union: z* = [min(l1,l2), max(u1,u2)]**
+- **any node union: z\* = [min(l1,l2), max(u1,u2)]**
   - source: `04_methods.tex:697`
   - type: `scope`
 
@@ -626,7 +626,7 @@
   - source: `04_methods.tex:1229`
   - type: `number`
 
-- **Thresholds derived experimentally from Germany-wide \ac{OMT}
+- \*\*Thresholds derived experimentally from Germany-wide \ac{OMT}
   - source: `04_methods.tex:1231`
   - type: `scope`
 
@@ -734,7 +734,7 @@
   - source: `04_methods.tex:1281`
   - type: `scope`
 
-- **Threshold selected via sweep over [2.5%, 20%] on Germany \ac{OMT}
+- \*\*Threshold selected via sweep over [2.5%, 20%] on Germany \ac{OMT}
   - source: `04_methods.tex:1282`
   - type: `scope`
 
@@ -982,7 +982,7 @@
   - source: `04_methods.tex:1502`
   - type: `scope`
 
-- **Optimization cost: preprocessing wall-clock time, offline amortised cost**
+- **Optimization cost: preprocessing wall-clock time, offline amortized cost**
   - source: `04_methods.tex:1503-1504`
   - type: `scope`
 

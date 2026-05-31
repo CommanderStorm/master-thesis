@@ -21,7 +21,7 @@ This thesis makes four main contributions, mirroring the structure of \cref{sec:
 
     \item The \textbf{end-to-end implementation}, whose preprocessing cost we characterize on the Germany \ac{OMT} tileset (\cref{tab:preprocessing_cost}).
     The full single-threaded pipeline completes in under \qty{7}{\minute}.
-    With 16-thread parallelism the wall-clock time drops to approximately \qty{2}{\minute}, paid once per tileset build and amortised over every subsequent tile request.
+    With 16-thread parallelism the wall-clock time drops to approximately \qty{2}{\minute}, paid once per tileset build and amortized over every subsequent tile request.
     The multi-strategy encoder competition increases single-threaded re-encoding cost by a factor of $1.95\times$ over a fixed-plan encoder.
     This is well below the naïve $4\times$ expectation, thanks to bounding-box pruning, data profiling, and warm-start caching.
 

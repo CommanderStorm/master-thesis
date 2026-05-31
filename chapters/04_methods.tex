@@ -80,8 +80,8 @@ It is not a target of optimization in this thesis.
 
 \section{Approach and Basic Building Blocks}\label{sec:approach}
 
-To evaluate the effectiveness of the optimizations strategies developed in this work, we adopted a benchmarking-driven approach.
-We first established a reliable performance baseline and then ran cumulative ablation experiments that isolate the contribution of each optimizations pass.
+To evaluate the effectiveness of the optimizations strategies developed in this work, we adopt a benchmarking-driven approach.
+We first establish a reliable performance baseline and then run cumulative ablation experiments that isolate the contribution of each optimizations pass.
 Under the soundness contract of \cref{sec:scope}, the passes from~\cref{sub:pipeline} aim to improve the deployment metrics of \cref{sub:metrics} in exchange for the preprocessing cost $C_\text{total}$ of \cref{sub:preprocessing_cost_model}.
 The load-time / FPS trade-off underlying these metrics is discussed in \cref{sec:problem_statement}.
 
@@ -882,10 +882,10 @@ Tile shaving eliminates unreferenced data, re-encoding transforms the wire forma
 The pipeline operates in three stages that mirror a database query optimizer's \emph{logical} rewriting, \emph{physical} strategy selection, and \emph{cost-based} competition.
 
 \begin{description}
-    \item \textbf{Style-driven tile shaving} (\cref{sub:tile_shaving}): the pipeline analyses the optimized style to produce a \emph{tile pruning advisory} that specifies, per source-layer and zoom level, which properties, geometry types, and property values to retain.
+    \item[Style-driven tile shaving] (\cref{sub:tile_shaving}): the pipeline analyses the optimized style to produce a \emph{tile pruning advisory} that specifies, per source-layer and zoom level, which properties, geometry types, and property values to retain.
     It then prunes tiles according to this advisory before encoding.
-    \item \textbf{Data transformations} (\cref{sub:string_property_interning,sub:feature_reordering}): the pipeline transforms remaining data to improve compressibility, replacing categorical string properties by frequency-ordered integers (\emph{string interning}) and reordering features to exploit spatial or categorical locality.
-    \item \textbf{Encoding strategy selection} (\cref{sub:encoding_strategies}): the pipeline re-encodes the pruned, transformed data into \ac{MLT} using a multi-strategy competition that automatically profiles each data stream and selects the most compact encoding.
+    \item[Data transformations] (\cref{sub:string_property_interning,sub:feature_reordering}): the pipeline transforms remaining data to improve compressibility, replacing categorical string properties by frequency-ordered integers (\emph{string interning}) and reordering features to exploit spatial or categorical locality.
+    \item[Encoding strategy selection] (\cref{sub:encoding_strategies}): the pipeline re-encodes the pruned, transformed data into \ac{MLT} using a multi-strategy competition that automatically profiles each data stream and selects the most compact encoding.
 \end{description}
 
 \noindent The three stages compose:
@@ -1381,7 +1381,7 @@ Passes that permanently remove data check that the sample rate is~1.0 before app
 
 \subsection{Preprocessing Cost Model}\label{sub:preprocessing_cost_model}
 
-All optimizations described above run \emph{offline}, paid once per (style, tileset) build and amortised across every subsequent tile request and rendering session.
+All optimizations described above run \emph{offline}, paid once per (style, tileset) build and amortized across every subsequent tile request and rendering session.
 The total preprocessing cost decomposes into four additive terms covering style passes (\cref{sub:expression_optimizations,sub:structural_optimizations}), tile statistics (\cref{sub:tile_statistics}), advisory computation (\cref{sub:tile_shaving}), and \ac{MLT} re-encoding (\cref{sub:encoding_strategies}).
 \begin{equation}\label{eq:cost_model}
     C_\text{total}(S, T) \;=\; C_\text{style}(S) \;+\; C_\text{stats}(T) \;+\; C_\text{adv}(S) \;+\; C_\text{enc}(S, T).
@@ -1419,10 +1419,10 @@ These styles are evaluated using static analysis only (style size, complexity me
 \subsection{Tile Data and Caching}\label{sub:tile_data}
 
 We sourced tile data from \ac{OSM} via Planetiler or the German government.
-We consumed both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
-We accessed BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
+We consume both sources through the standard Web Mercator XYZ tiling scheme used by MapLibre, so all zoom-level reasoning in the thesis assumes this grid.
+We access BasemapDE through its XYZ-compatible endpoint rather than its native \acs{WMTS}~\cite{masoOpenGISWebMap2010} grid, ensuring that the optimizer's tile indexing is uniform across the corpus.
 Only for \ac{OSM} is the underlying data fully available, so only for this source can we collect tile statistics at a sample rate of~1.0.
-To ensure reproducibility across benchmark runs, we routed all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
+To ensure reproducibility across benchmark runs, we route all tile requests through a local caching proxy that stores tiles on first access and replays them on subsequent runs with the latency and download speed of a 4G internet connection according to Rusan et al.~\cite{rusanAssessmentPacketLatency2015} ($\frac{\text{size}}{30\,\mathrm{Mbit/s}} + 25\,\mathrm{ms}$).
 This eliminates network variability and guarantees that every ablation step operates on identical tile data (after an initial, discarded run).
 The model does not simulate packet loss, HTTP/2 multiplexing, TCP slow-start, or HTTP/3 (QUIC) with its 0-RTT connection resumption and absence of head-of-line blocking.
 All of these would amplify the benefit of smaller tiles, so the measured load-time improvements from tile shaving are a conservative lower bound on what a real deployment would observe.
@@ -1460,7 +1460,7 @@ Our evaluation reports the deployment metrics framed in \cref{sec:problem_statem
     \item[Data savings] reduction in style size (raw, gzip, and Brotli) and tile transfer volume.
     \item[Rendering performance] client-side metrics including load time, frames per second, frame time percentiles (p50, p95, p99), jank count, style parse time, time to first tile, and time to first frame.
     \item[Optimization cost] preprocessing time introduced by each pass, measured as wall-clock time on the optimizer's host machine.
-    This is an offline cost amortised over all subsequent tile deliveries.
+    This is an offline cost amortized over all subsequent tile deliveries.
     \item[Efficiency] \emph{qualitative} discussion of the energy implications of reduced data transfer and fewer rendering operations. 
     We perform no direct power or energy measurement (\ac{RAPL}, battery delta), because the benchmark harness runs on a desktop workstation rather than a thermally- and battery-constrained mobile device.
     Any quantitative energy claim would require a different hardware platform and we defer it to future work.
@@ -1509,7 +1509,7 @@ The benchmark harness itself is a Puppeteer\footnote{\url{https://pptr.dev/}, la
 The optimizer is a \textbf{three-level pipeline} (\cref{sub:pipeline}) operating on the $(S, T) \to (S', T')$ problem of \cref{sec:problem_statement}.
 Eight expression-level passes run to a fixpoint, six structural passes act on a typed style document, and data-level passes re-encode shaved tiles into \ac{MLT} via per-stream strategy competition.
 The \textbf{pruning advisory} derived from the optimized style ties the levels together as a projection-pushdown plan over the tile data.
-We measured the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
+We measure the pipeline with a \textbf{19-step cumulative ablation} (plus one plain-tile-shaving comparison configuration) across \textbf{15~styles, 18~stratified scenarios}, and 15~repeat runs per cell on the Germany \ac{OMT} tileset, plus a 13-style generalization corpus and a preprocessing-cost model that decomposes the offline cost into four additive stages.
 
 The following chapter applies this methodology to evaluate each optimization category in isolation, tests generalization beyond the benchmarking corpus, and analyses the full pipeline's combined effect.
 \end{chaptersummary}
