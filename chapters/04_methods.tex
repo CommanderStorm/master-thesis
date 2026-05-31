@@ -8,7 +8,7 @@ This chapter applies the compiler, database, and encoding analogues of \cref{ch:
 With the foundations of \cref{ch:theoretical_background} in place, we state the optimization problem formally.
 
 Let $\mathcal{S}$ be the set of syntactically valid MapLibre style~\ac{JSON} documents.\newline
-Let $\mathcal{T}$ be the set of tile sets, each a finite family of tiles indexed by source and $(x, y, z) \elem \mathcal{R}^3$.\newline
+Let $\mathcal{T}$ be the set of tile sets, each a finite family of tiles indexed by source and $(x, y, z) \elem \mathcal{N}^3$.\newline
 Let $\mathcal{V}$ be the set of \emph{viewing states}: tuples $(\text{lat}_\text{center}, \text{lat}_\text{center}, z, \text{roll}, \text{pitch}, \text{bearing}, \text{viewport size})$, the six degrees of freedom plus the viewport.\newline
 Let $\mathcal{I}$ be the set of rasterized images and let $\bot \notin \mathcal{I}$ denote a runtime evaluation error that aborts rendering, as introduced for ill-formed feature-state and global-state references in \cref{sub:feature_state}.
 Let MapLibre's deterministic rendering function be
