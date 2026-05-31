@@ -171,7 +171,7 @@ The following formats are used for encoding and transferring data to the client:
     GeoParquet's row-group predicate pushdown and column pruning are analogous to the tile shaving we apply to \ac{MLT}, but they operate at per-file granularity.
     Parquet's row-group and column-chunk metadata would dominate at typical tile sizes (\qtyrange{1}{10}{\kilo\byte}), so we do not consider these formats further.
 
-    \item[\ac{GeoJSON}]~\cite{butlerGeoJSONFormat2016} is a \ac{JSON}-based geospatial interchange format.
+    \item[\ac{GeoJSON}~\cite{butlerGeoJSONFormat2016}] is a \ac{JSON}-based geospatial interchange format.
     Its human-readable structure makes it useful for debugging and small overlays, but its verbosity (text-encoded coordinates and repeated property keys per feature) makes it impractical for the continuous tile streaming required by interactive map renderers.
 
     \item[\acf{MVT}]\footnote{\url{https://github.com/mapbox/vector-tile-spec/tree/master/2.1}, last accessed 2026-04-21} is the dominant vector tile format, adopted as a \emph{de~facto} standard across open-source map renderers including MapLibre.
