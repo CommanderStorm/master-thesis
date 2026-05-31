@@ -839,9 +839,9 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
         \draw[arrow] (p3.east) -- (out.west |- p3.east);
     \end{tikzpicture}}
     \caption{
-Layer merging example.  Three adjacent line layers differing only in filter literal, color, and width are merged via the \mlop{match} pattern (Phase~\stepcirc{2}).
+Layer merging example.  Three adjacent line layers differing only in filter literal, color, and width are merged via the \mlop{match} pattern (Phase \stepcirc{2}).
     The merged layer uses \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], \ldots]} for the filter, each differing paint property, and a synthesized sort key that preserves the original draw order.
-    Phase~\stepcirc{1} validates that all differing properties support feature-driven expressions, and Phase~\stepcirc{3} confirms identical zoom ranges, so no zoom guards are needed}
+    Phase \stepcirc{1} validates that all differing properties support feature-driven expressions, and Phase \stepcirc{3} confirms identical zoom ranges, so no zoom guards are needed}
     \label{fig:layer_merge_example}
 \end{figure}
 
