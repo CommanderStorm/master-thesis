@@ -221,7 +221,7 @@ Pass & Data & Description [compiler analogy] \\
 Unary simplification         & none     & Unwrap single-argument \mlop{any}/ \mlop{all} wrappers [identity elimination] \\
 Expression kind normalization & none     & Rewrite negated comparisons to their direct form, e.g.,\ \texttt{[\mlop{"!"}, [\mlop{"=="},a,b]]} $\to$ \texttt{[\mlop{"!="},a,b]} [operator strength reduction] \\
 Constant folding              & none     & Evaluate statically determinable expressions: boolean algebra, dead branch elimination, redundant coercion removal [constant folding, \acs{SCCP}] \\
-Stats-driven constant folding & sampling & Fold \mlop{has}/ \mlop{get}/ \mlop{geometry-type} expressions using tile statistics; prune unreachable \mlop{match}/ \mlop{in} arms; fold comparisons against known value ranges [sparse conditional constant propagation] \\
+Stats-driven constant folding & scan & Fold \mlop{has}/ \mlop{get}/ \mlop{geometry-type} expressions using tile statistics; prune unreachable \mlop{match}/ \mlop{in} arms; fold comparisons against known value ranges [sparse conditional constant propagation] \\
 Expression simplification     & none     & De~Morgan's laws, boolean flattening, coalesce flattening, \mlop{case}$\to$\mlop{match} rewriting, \mlop{let}/ \mlop{var} inlining, \mlop{any}$\to$\mlop{in} merging, interpolate/step collapsing [algebraic simplification] \\
 Default stripping             & none     & Remove paint/layout properties whose value equals the specification default [dead store elimination] \\
 Color minification           & none     & Compress color literals to their shortest representation [literal compression] \\
@@ -229,7 +229,7 @@ Selectivity reordering        & sampling & Reorder filter predicates by selectiv
 \bottomrule
 \end{tblr}
 \caption{
-Expression-level optimization passes, each annotated with its data dependency (\emph{none} = static only; \emph{sampling} = requires a tile-statistics scan) and its compiler-optimization analogue.  Passes requiring no statistics run unconditionally.
+Expression-level optimization passes, each annotated with its data dependency (\emph{none} does not have a requmrent; \emph{sampling} requires a partial tile-statistics scan; \emph{scan} requires a tile-statistics scan) and its compiler-optimization analogue.  Passes requiring no statistics run unconditionally.
 Sampling passes additionally fold expressions using observed value distributions.}
 \label{tab:expression_passes}
 \end{table}
