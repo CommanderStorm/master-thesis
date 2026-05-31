@@ -917,7 +917,7 @@ The three optimization channels (expression, structural, data) compose additivel
 The full pipeline ablation points to three plausible channels, which we infer from proxy metrics (\ac{AST} node count, layer count, tile size) and the time breakdown (\cref{fig:time_breakdown}) since no renderer instrumentation separates them directly.
 The expression passes (\cref{sub:expression_optimizations}) plausibly reduce per-feature evaluation cost.
 Fewer \ac{AST} nodes mean fewer interpreter steps per feature per frame.
-Dead elimination and layer merging (\cref{sub:structural_optimizations}) operate one level up, cutting draw calls, \ac{GPU} state changes, and per-layer filter evaluations.
+Dead elimination and layer merging (\cref{sub:structural_optimizations}) operate one level up, cutting draw calls, \ac{GPU} state changes and per-layer filter evaluations.
 Tile shaving and re-encoding (\cref{sub:data_optimizations}) act on transfer and decode cost so load time and time-to-first-tile drop, with a secondary effect on average frame time via lower \ac{GC}-spend.
 
 \paragraph{Load Time vs.\ Frame Rate}
@@ -937,13 +937,13 @@ No single pass dominates across all styles, which is the empirical justification
 
 \paragraph{Measurement Noise}
 The 15-run median smooths out most measurement noise, but tail metrics (p99 frame time, jank count) carry higher variance than central-tendency metrics, with \ac{GPU} thermals, browser garbage collection, and OS scheduling all contributing.
-We partly self-inflict this, because using real \ac{GPU} hardware (ANGLE/Vulkan) rather than a software rasteriser captures realistic rendering costs (\ac{GPU} buffer management, shader compilation) at the expense of slightly higher noise compared to deterministic software rendering.
+We partly self-inflict this, because using real \ac{GPU} hardware (ANGLE/Vulkan) rather than a software rasterizer captures realistic rendering costs (\ac{GPU} buffer management, shader compilation) at the expense of slightly higher noise compared to deterministic software rendering.
 
 
 \section{Visual Correctness Validation}\label{sec:visual_correctness}
 
 We ran the visual-equivalence check defined alongside \cref{eq:visual_equivalence} (with the per-pass soundness arguments collected in \cref{sec:building_optimizations}) across the 13 benchmarked styles of the deep corpus (the BasemapDE pair was not benchmarked), all 18 scenarios from \cref{sub:scenarios}, and zoom levels~0-14 in both axis-aligned and pitched views.
-Across every comparison, the fraction of differing pixels stayed below the configured per-test tolerance, confirming that every optimizations pass preserves visual identity on the software rasteriser within the perceptual-difference budget used by the upstream MapLibre render harness.
+Across every comparison, the fraction of differing pixels stayed below the configured per-test tolerance, confirming that every optimizations pass preserves visual identity on the software rasterizer within the perceptual-difference budget used by the upstream MapLibre render harness.
 
 \section{Threats to Validity}\label{sec:threats}
 
