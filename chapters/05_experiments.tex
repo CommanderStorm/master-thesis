@@ -684,39 +684,6 @@ Expression passes (steps~1-7) produced a diffuse, moderate improvement across mo
 The frame-time consistency metric in \cref{fig:heatmapjankcount} worsened across the ablation as sustained frame rates pushed past 2000\,\ac{FPS}, where small \ac{GC}-pauses register as proportionally large outliers.
 On real consumer hardware capped well below that rate the same pauses would not cross the jank threshold (see caption).
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[height=0.91\textheight]{figures/heatmap_loadMs.pdf}
-	\caption{
-Heatmap of load time across scenarios (rows) and ablation steps (columns), where darker cells indicate greater improvement relative to baseline.
-Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
-Structural passes produce concentrated gains where dead elimination or layer merging applies.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
-}
-	\label{fig:heatmap_loadMs}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[height=0.91\textheight]{figures/heatmap_fps.pdf}
-	\caption{
-Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
-Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
-	\label{fig:heatmap_fps}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[height=0.91\textheight]{figures/heatmap_jankCount}
-	\caption{
-Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
-Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
-Real consumer hardware caps well below this rate, so the same pauses would not cross the jank threshold there.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
-	\label{fig:heatmapjankcount}
-\end{figure}
-
 \cref{fig:box_load_fps} preserves the per-run distribution that the heatmaps collapse to a median.
 The load-time interquartile range tightened incrementally across the style-only passes and contracted sharply at \texttt{tile\_shave}, where the multi-second outliers visible across the style-only stack effectively disappeared.
 The \ac{FPS} view mirrored this from the other direction: median \ac{FPS} roughly doubled at \texttt{tile\_shave\_only} and approximately tripled by \texttt{tile\_rewrite}, with the spread widening as some styles realized more headroom than others.
@@ -856,6 +823,40 @@ Layer merging produced a large marginal improvement in draw-call-heavy styles (m
 Passes that primarily reduce serialized style size (default stripping, metadata stripping, color minification) show smaller rendering improvements but contribute meaningfully to transfer size, particularly under compression (gzip, brotli).
 A smaller style reduces the time to first render because the \ac{JSON} must be fetched, decompressed, and parsed before the renderer can initialize.
 Data-level tile shaving dominates the transfer-size metric, as tiles are fetched continuously during map interaction whereas the style is loaded only once.
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=0.91\textheight]{figures/heatmap_loadMs.pdf}
+	\caption{
+		Heatmap of load time across scenarios (rows) and ablation steps (columns), where darker cells indicate greater improvement relative to baseline.
+		Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
+		Structural passes produce concentrated gains where dead elimination or layer merging applies.
+		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
+	}
+	\label{fig:heatmap_loadMs}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=0.91\textheight]{figures/heatmap_fps.pdf}
+	\caption{
+		Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
+		Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
+		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+	\label{fig:heatmap_fps}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[height=0.91\textheight]{figures/heatmap_jankCount}
+	\caption{
+		Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
+		Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
+		Real consumer hardware caps well below this rate, so the same pauses would not cross the jank threshold there.
+		Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+	\label{fig:heatmapjankcount}
+\end{figure}
 
 \paragraph{Load Time Metrics}
 Both style size (initial fetch and parse) and tile size (first tile fetch) influence load time.
