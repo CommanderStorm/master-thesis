@@ -412,7 +412,7 @@ To separate the contribution of the multi-strategy competition (this work) from 
 			\ac{MLT} (this work) & \textbf{3.06} &  \textbf{2.70} &  \textbf{2.72} &  \textbf{2.75} \\
 			\midrule
 			$\Delta$ ours vs.\ reference & $-28.4\%$ & $-23.8\%$ & $-23.7\%$ & $-23.6\%$ \\
-			$\Delta$ ours vs.\ \ac{MVT}  & $-28.2\%$ & $-12.3\%$ & $-13.1\%$ & $-12.9\%$ \\
+			$\Delta$ ours vs.\ \ac{MVT}  & $-28.2\%$ & $-12.3\%$ & $-13.1\%$ & $-13.0\%$ \\
 			\bottomrule
 		\end{tblr}
 		\caption{
@@ -422,17 +422,17 @@ To separate the contribution of the multi-strategy competition (this work) from 
 		\label{tab:mvt_mlt_comparison}
 	\end{subfigure}
 	\caption{Encoder comparison for the Germany \ac{OMT} tileset (zoom~0-14, \qty{256.5}{\kilo tiles}).
-		Our \ac{MLT} encoder achieves \qty{28.3}{\percent} smaller total size than the reference baseline under no wire compression.
+		Our \ac{MLT} encoder achieves \qty{28.4}{\percent} smaller total size than the reference baseline under no wire compression.
 		The reference encoder drifts above \ac{MVT} size at several zoom levels under brotli/zstd, whereas our encoder remains below \ac{MVT} throughout.}
 	\label{fig:encoder_comparison}
 \end{figure}
 
-The headline is the \qty{28.3}{\percent} reduction our encoder achieved over the reference baseline under no wire compression.
+The headline is the \qty{28.4}{\percent} reduction our encoder achieved over the reference baseline under no wire compression.
 The reference baseline already incorporates encoding fixes backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds), so the \qty{28}{\percent} isolates the contribution of automatic strategy selection over a correctly-implemented fixed-plan encoder rather than conflating bug fixes with the innovation we contribute.
 
 The finding in \cref{tab:mvt_mlt_comparison} that is easiest to overlook is that the reference baseline \ac{MLT} under gzip was \emph{worse} than the commonly gzip-compressed \ac{MVT} (\qty{2.70}{\giga\byte} vs.\ \qty{3.08}{\giga\byte}).
 General-purpose LZ77-family compressors already exploit most of the row-level redundancy in the protobuf wire format, and a columnar encoder that uses fixed per-column schemes cannot keep up.
-The data-driven strategy selection in our encoder reclaimed this gap and went past it: our encoder under gzip was \qty{12.3}{\percent} smaller than \ac{MVT} under gzip, and the advantage held (\qty{12.9}{\percent}) even against zstd-22, the strongest general-purpose compressor in the comparison.
+The data-driven strategy selection in our encoder reclaimed this gap and went past it: our encoder under gzip was \qty{12.3}{\percent} smaller than \ac{MVT} under gzip, and the advantage held (\qty{13.0}{\percent}) even against zstd-22, the strongest general-purpose compressor in the comparison.
 
 The relative gap between our encoder and the reference was roughly constant across all four compressors (\qty{-23}{\percent} to \qty{-28}{\percent}).
 This stability is consistent with the profiler capturing genuine redundancy that general-purpose compressors miss, but it could equally reflect that the profiler removes the same redundancy the compressors would have.
@@ -441,7 +441,7 @@ This directly answers the question we posed at the start of \cref{sec:exp_mlt}: 
 
 \paragraph{Zstd-on-\acs{MVT} Comparison}
 A natural objection is that general-purpose compressors such as zstd-22 or brotli-11 should be sufficient. If compression is the goal, simply applying the strongest available compressor to the existing \ac{MVT} wire format would avoid the complexity of a columnar encoder entirely.
-\ac{MVT} under zstd-22 yielded \qty{3.16}{\giga\byte} for the Germany tileset, whereas our encoder under the same compressor yielded \qty{2.75}{\giga\byte}, a \qty{12.9}{\percent} reduction (\cref{tab:mvt_mlt_comparison}).
+\ac{MVT} under zstd-22 yielded \qty{3.16}{\giga\byte} for the Germany tileset, whereas our encoder under the same compressor yielded \qty{2.75}{\giga\byte}, a \qty{13.0}{\percent} reduction (\cref{tab:mvt_mlt_comparison}).
 We attribute this to a structural difference: a general-purpose compressor sees the interleaved, heterogeneous protobuf byte stream and must discover redundancy across mixed data types.
 A columnar encoder, by contrast, groups homogeneous values (all road classes in one stream, all vertex deltas in another) and each stream compresses more effectively under lightweight per-type codecs (delta-\acs{RLE} for monotonic integers, dictionary encoding for low-cardinality strings, \ac{FSST} for high-cardinality strings) than a monolithic LZ77-family compressor can achieve on the interleaved byte stream.
 The columnar advantage is preserved \emph{after} applying the same general-purpose compressor on top: the per-column codecs have already removed most of the type-specific redundancy, so the post-hoc compressor has less work to do but starts from a lower baseline.
