@@ -459,7 +459,7 @@ This layout offers three advantages for read-heavy workloads. \emph{Reduced I/O}
 
 In the context of vector tiles, the row-oriented \ac{MVT} format stores all properties of a feature together, whereas the columnar \ac{MLT} format stores each property as an independent column.
 The columnar layout allows per-column encoding strategies.
-A column of \texttt{road} classes can use dictionary encoding, while a column of building heights can use a DeltaRLE logical chain handed to a physical technique such as FastPFOR, each chosen independently.
+A column of \texttt{road} classes can use dictionary encoding, while a column of \texttt{building\_height} can use a DeltaRLE logical chain handed to a physical technique such as FastPFOR, each chosen independently.
 
 \subsection{Logical Integer Encodings}\label{sub:logical_integer_encodings}
 
