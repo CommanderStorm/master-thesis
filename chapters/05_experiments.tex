@@ -710,7 +710,7 @@ Per-run distribution of load time and \ac{FPS} across all scenarios and styles, 
 Each box aggregates the same measurement pool as the corresponding heatmap row, exposing the spread that the heatmap median hides.
 Load-time variance compresses sharply at \texttt{tile\_shave}.
 The \ac{FPS} spread instead widens past the same step, exposing per-style headroom.
-Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:box_load_fps}
 \end{figure}
 
@@ -914,10 +914,9 @@ The exception is tile shaving at overview zoom levels, where removing entire sou
 The 15-run median smooths out most measurement noise, but tail metrics (p99 frame time, jank count) carry higher variance than central-tendency metrics, with \ac{GPU} thermals, browser garbage collection, and OS scheduling all contributing.
 We partly self-inflict this, because using real \ac{GPU} hardware (ANGLE/Vulkan) rather than a software rasterizer captures realistic rendering costs (\ac{GPU} buffer management, shader compilation) at the expense of slightly higher noise compared to deterministic software rendering.
 
-
 \section{Visual Correctness Validation}\label{sec:visual_correctness}
 
-We ran the visual-equivalence check defined alongside \cref{eq:visual_equivalence} (with the per-pass soundness arguments collected in \cref{sec:building_optimizations}) across the 13 styles of the deep corpus, all 18 scenarios from \cref{sub:scenarios}, and zoom levels~0-14 in both axis-aligned and pitched views.
+We ran the visual-equivalence check defined alongside \cref{eq:visual_equivalence} (with the per-pass soundness arguments collected in \cref{sec:building_optimizations}) across the styles of the deep corpus, all 18 scenarios from \cref{sub:scenarios}, and zoom levels~0-14 in both axis-aligned and pitched views.
 Across every comparison, the fraction of differing pixels stayed below the configured per-test tolerance, confirming that every optimizations pass preserves visual identity on the software rasterizer within the perceptual-difference budget used by the upstream MapLibre render harness.
 
 \section{Threats to Validity}\label{sec:threats}
