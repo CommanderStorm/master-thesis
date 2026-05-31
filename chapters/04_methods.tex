@@ -418,16 +418,15 @@ To illustrate how expression passes compose, \cref{fig:expr_before_after} shows 
 				belowskip=0pt
 				]
 ["any",
-	["all",
-		["has", "name"],
-		["==", ["get", "class"], "road"]
-	],
-	["all",
-		["has", "name"],
-		["==", ["get", "class"], "rail"]
-	]
-]
-			\end{lstlisting}
+  ["all",
+    ["has", "name"],
+    ["==", ["get", "class"], "road"]
+  ],
+  ["all",
+    ["has", "name"],
+    ["==", ["get", "class"], "rail"]
+  ]
+]\end{lstlisting}
 		\end{minipage}
 		\hfill
 		\begin{minipage}[c]{0.08\linewidth}
@@ -447,13 +446,12 @@ To illustrate how expression passes compose, \cref{fig:expr_before_after} shows 
 				belowskip=0pt
 				]
 ["all",
-	["has", "name"],
-	["in",
-		["get", "class"],
-		["literal", ["road", "rail"]]
-	]
-]
-			\end{lstlisting}
+  ["has", "name"],
+  ["in",
+    ["get", "class"],
+    ["literal", ["road", "rail"]]
+  ]
+]\end{lstlisting}
 		\end{minipage}
 
 		\caption{
@@ -477,13 +475,12 @@ Expression rewriting via distributive factoring and \mlop{any}$\to$\mlop{in} pro
 				]
 filter: ["==", ["get", "class"], "road"]
 paint:
-	fill-color: ["match",
-		["get", "class"],
-			"road", "#333",
-			"rail", "#666",
-			"#999"
-		]
-			\end{lstlisting}
+  fill-color: ["match",
+    ["get", "class"],
+      "road", "#333",
+      "rail", "#666",
+      "#999"
+    ]\end{lstlisting}
 		\end{minipage}
 		\hfill
 		\begin{minipage}[c]{0.08\linewidth}
@@ -504,8 +501,7 @@ paint:
 				]
 filter: ["==", ["get", "class"], "road"]
 paint:
-	fill-color: "#333"
-			\end{lstlisting}
+  fill-color: "#333"\end{lstlisting}
 		\end{minipage}
 
 		\caption{
@@ -528,10 +524,9 @@ Filter to Property Constant Propagation simplifying data-driven to constant.}
 				belowskip=0pt
 				]
 ["all",
-	["==", ["get", "class"], "road"],
-	["==", ["get", "class"], "road"]
-]
-			\end{lstlisting}
+  ["==", ["get", "class"], "road"],
+  ["==", ["get", "class"], "road"]
+]\end{lstlisting}
 		\end{minipage}
 		\hfill
 		\begin{minipage}[c]{0.08\linewidth}
@@ -550,8 +545,7 @@ Filter to Property Constant Propagation simplifying data-driven to constant.}
 				aboveskip=0pt,
 				belowskip=0pt
 				]
-["==", ["get", "class"], "road"]
-			\end{lstlisting}
+["==", ["get", "class"], "road"]\end{lstlisting}
 		\end{minipage}
 
 		\caption{
@@ -574,10 +568,9 @@ Duplicate predicate elimination via subsumption.}
 				belowskip=0pt
 				]
 ["all",
-	["!", ["==", ["get", "class"], "road"]],
-	["!", ["==", ["get", "class"], "rail"]]
-]
-			\end{lstlisting}
+  ["!", ["==", ["get", "class"], "road"]],
+  ["!", ["==", ["get", "class"], "rail"]]
+]\end{lstlisting}
 		\end{minipage}
 		\hfill
 		\begin{minipage}[c]{0.08\linewidth}
@@ -597,10 +590,9 @@ Duplicate predicate elimination via subsumption.}
 				belowskip=0pt
 				]
 ["all",
-	["!=", ["get", "class"], "road"],
-	["!=", ["get", "class"], "rail"]
-]
-			\end{lstlisting}
+  ["!=", ["get", "class"], "road"],
+  ["!=", ["get", "class"], "rail"]
+]\end{lstlisting}
 		\end{minipage}
 
 		\caption{
