@@ -549,7 +549,7 @@ We therefore quantify the size reductions achievable \emph{without} touching geo
 Stats-driven and data-level passes were not applied here.
 \end{keytakeaways}
 
-\noindent In the preceding experiments we evaluated optimizations effectiveness on the curated benchmarking corpus of 15 styles described in \cref{sub:deep_corpus}.
+\noindent In the preceding experiments we evaluated optimizations effectiveness on the curated benchmarking corpus of 13 styles described in \cref{sub:deep_corpus}.
 To assess whether the observed gains generalize, we apply the optimizer to the 13~styles of the Maputnik generalization corpus introduced in \cref{sub:generalization_corpus}.
 We use three tiers of breadth because end-to-end rendering benchmarks require tile data and browser automation infrastructure that does not scale to all styles.
 We benchmark ten deep-corpus styles end-to-end with tile data, eleven \ac{OMT} styles with fully available tile data at the tile-shaving size level, and evaluate thirteen additional styles with static analysis only.
@@ -675,7 +675,7 @@ On real consumer hardware capped well below that rate the same pauses would not 
 
 \begin{figure}[b]
 	\centering
-	\includegraphics[height=0.92\textheight]{figures/heatmap_loadMs.pdf}
+	\includegraphics[height=0.95\textheight]{figures/heatmap_loadMs.pdf}
 	\caption{
 Heatmap of load time across scenarios (rows) and ablation steps (columns), where darker cells indicate greater improvement relative to baseline.
 Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
@@ -687,7 +687,7 @@ Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.
 
 \begin{figure}[b]
 	\centering
-	\includegraphics[height=0.92\textheight]{figures/heatmap_fps.pdf}
+	\includegraphics[height=0.95\textheight]{figures/heatmap_fps.pdf}
 	\caption{
 Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
 Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
@@ -697,7 +697,7 @@ Step markers $\dagger$ and $\ast$: see \cref{tab:marginal_contribution}.}
 
 \begin{figure}[b]
 	\centering
-	\includegraphics[height=0.92\textheight]{figures/heatmap_jankCount}
+	\includegraphics[height=0.95\textheight]{figures/heatmap_jankCount}
 	\caption{
 Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
 Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
