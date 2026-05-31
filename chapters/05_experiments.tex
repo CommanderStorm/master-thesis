@@ -172,7 +172,7 @@ Values are normalized to each style's baseline so the three metrics share a sing
 	\caption{Structural complexity metrics across cumulative ablation steps on the Fiord and Liberty styles, normalized to each style's baseline.
 Layer count drops for Liberty only when layer merging fires, while Fiord benefits from previous passes.
 Dead elimination rarely removes whole layers because styles are designed to expose parts of the map rather than leave layers unreferenced.
-Total expression-tree node count is driven mostly by the expression passes (steps~1--7), where Fiord falls by \qty{36.8}{\percent} (\num{1610}$\to$\num{1018}) and Liberty by \qty{10.5}{\percent} (\num{3537}$\to$\num{3167}).
+Total expression-tree node count is driven mostly by the expression passes (steps~1--7).
 Structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.
 Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{true} filters that refinement leaves behind.}
 	\label{fig:complexity_metrics}
