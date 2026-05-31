@@ -106,7 +106,7 @@ This typically gives them a cumulatively higher data volume, even though their i
 All other resources may depend on locale slightly (for example loading different Unicode ranges or fonts), but are only handled one time.
 
 Real-world observations support this.
-The performance of highly optimized systems such as Microsoft Bing Maps differs significantly from less optimized deployments, such as basemap.de.
+The performance of highly optimized systems such as Microsoft Bing Maps differs significantly from less optimized deployments.
 
 In the following sections we examine each resource in detail, focusing on the performance characteristics and optimization strategies relevant to our work.
 
@@ -248,7 +248,8 @@ isHidden(zoom: number = this.minzoom, roundMinZoom: boolean = false) {
 \end{lstlisting}
 \end{minipage}
 
-The worker calls \texttt{layer.isHidden(this.zoom, true)} and \texttt{continue}s before bucket creation, and the painter's \texttt{renderLayer} returns immediately on \texttt{layer.isHidden(this.transform.zoom)} before dispatching any \texttt{draw.fill}/ \texttt{draw.line}/ \texttt{draw.symbol} call.
+The worker calls \texttt{layer.isHidden(this.zoom, true)} and \texttt{continue}s before bucket creation, and the painter's \texttt{renderLayer} returns immediately on\newline
+\texttt{layer.isHidden(this.transform.zoom)} before dispatching any \texttt{draw.fill}/ \texttt{draw.line}/ \texttt{draw.symbol} call.
 \end{description}
 \end{description}
 
