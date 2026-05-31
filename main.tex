@@ -163,14 +163,14 @@
 \renewcommand{\lstlistlistingname}{List of Algorithms}
 \crefname{listing}{Algorithm}{Algorithms}
 \Crefname{listing}{Algorithm}{Algorithms}
-\newcommand{\stepcirc}[1]{
-	\tikz[baseline=(char.base)]{
+\DeclareRobustCommand{\stepcirc}[1]{%
+	\tikz[baseline=(char.base)]{%
 		\node[
 		draw,
 		circle,
 		inner sep=0.5pt,
 		minimum size=1.1em
-		] (char) {\scriptsize \textbf{#1}};
+		] (char) {\scriptsize \textbf{#1}};%
 }}
 \input{csvtables.tex}
 

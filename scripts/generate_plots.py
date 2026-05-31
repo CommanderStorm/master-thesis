@@ -23,8 +23,8 @@ DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR.parent / "figures"
 FORMATS = ["png", "pdf"]
 
-FIG_WIDTH = 700
-FIG_HEIGHT = 450
+FIG_WIDTH = 1400
+FIG_HEIGHT = 700
 
 # Okabe-Ito palette (CVD-safe)
 SOURCE_COLORS = {
@@ -68,7 +68,7 @@ COMPRESSION_DASHES = {
 
 LAYOUT_DEFAULTS = dict(
     template="plotly_white",
-    font=dict(family="Helvetica, Arial, sans-serif", size=14),
+    font=dict(family="Helvetica, Arial, sans-serif", size=20),
     margin=dict(l=70, r=30, t=40, b=60),
 )
 
@@ -95,6 +95,36 @@ STEP_LABELS: dict[int, str] = {
     18: "Shave",
     19: "MLT rewrite",
 }
+
+# Markers mirror masters-thesis tab:marginal_contribution; see generate_tables.py.
+_DAGGER_STEPS: set[int] = {15, 16, 17, 18, 19}
+_STAR_STEPS: set[int] = {4, 10, 13, 16, 17, 18, 19}
+
+
+def _step_label_marked(step: int) -> str:
+    label = STEP_LABELS.get(int(step), f"Step {step}")
+    if step in _DAGGER_STEPS:
+        label += " †"
+    if step in _STAR_STEPS:
+        label += " ★"
+    return label
+
+
+def _add_marker_annotation(fig: go.Figure) -> None:
+    """Footnote explaining the † / ★ pass markers."""
+    fig.update_layout(margin=dict(b=170))
+    fig.add_annotation(
+        text="† = 10 end-to-end styles only   ★ = requires tile statistics",
+        xref="paper",
+        yref="paper",
+        x=1.0,
+        y=0,
+        xanchor="right",
+        yanchor="top",
+        yshift=-110,
+        showarrow=False,
+        font=dict(size=14, color="#666"),
+    )
 
 def _bootstrap_ci(
     values: np.ndarray, n_boot: int = 10_000, seed: int = 42,
@@ -220,13 +250,12 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
             y=-0.08,
             bgcolor="rgba(255,255,255,0.8)",
         ),
-        height=720,
+        height=1440,
     )
     for r in (1, 2, 3, 4):
         fig.update_xaxes(
             title_text="Zoom level",
             title_standoff=5,
-            title_font_size=13,
             dtick=2,
             row=r,
         )
@@ -234,8 +263,9 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
     fig.update_yaxes(row=2, col=1, title_text="Total size (bytes)")
     fig.update_yaxes(row=3, col=1, title_text="% of MVT")
     fig.update_yaxes(row=4, col=1, title_text="% of MVT")
+    fig.update_annotations(font_size=22)
 
-    export_figure(fig, "encoder_comparison_per_zoom", height=720)
+    export_figure(fig, "encoder_comparison_per_zoom", height=1440)
 
 
 def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
@@ -283,11 +313,11 @@ def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
             y=-0.12,
             bgcolor="rgba(255,255,255,0.8)",
         ),
-        height=600,
     )
     fig.update_xaxes(title_text="Zoom level", dtick=2, row=2)
     fig.update_yaxes(row=1, col=1, title_text="Total size (bytes)")
     fig.update_yaxes(row=2, col=1, title_text="Total size (bytes)")
+    fig.update_annotations(font_size=22)
 
     export_figure(fig, "shaving_effectiveness_per_zoom")
 
@@ -420,7 +450,7 @@ def plot_waterfall_loadMs() -> None:
     pct = (pivot.subtract(baseline)) / baseline * 100
 
     steps = sorted(pct.index)
-    labels = [STEP_LABELS.get(int(s), f"Step {s}") for s in steps]
+    labels = [_step_label_marked(int(s)) for s in steps]
 
     cum_med = []
     for s in steps:
@@ -484,6 +514,7 @@ def plot_waterfall_loadMs() -> None:
         xaxis=dict(tickangle=45),
         yaxis=dict(title="Cumulative load-time change (%)"),
     )
+    _add_marker_annotation(fig)
     export_figure(fig, "waterfall_loadMs")
 
 
@@ -515,7 +546,7 @@ def plot_marginal_loadMs() -> None:
             continue
 
         plot_steps.append(s)
-        plot_labels.append(STEP_LABELS.get(int(s), f"Step {s}"))
+        plot_labels.append(_step_label_marked(int(s)))
         deltas.append(m)
         err_lo.append(m - lo)
         err_hi.append(hi - m)
@@ -538,6 +569,7 @@ def plot_marginal_loadMs() -> None:
         xaxis=dict(tickangle=45),
         yaxis=dict(title="Marginal load-time change (%)"),
     )
+    _add_marker_annotation(fig)
     export_figure(fig, "marginal_loadMs")
 
 
@@ -710,7 +742,7 @@ def plot_rendering_metrics_mlt() -> None:
 
             export_figure(
                 fig, f"rendering_metrics_mlt_{style}_{metric}",
-                width=560, height=420,
+                width=700, height=525,
             )
 
 

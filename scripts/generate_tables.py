@@ -76,8 +76,6 @@ STYLE_NAMES: dict[str, str] = {
     "klokan-basic": "Klokan Basic",
     "toner": "Toner",
     "osm-liberty": "OSM Liberty",
-    "basemap-col": "BasemapDE Colour",
-    "basemap-top": "BasemapDE Topo",
     "icgc-fosc": "ICGC Fosc",
     "icgc-gris": "ICGC Gris",
     "stadia-outdoors": "Stadia Outdoors",
@@ -97,22 +95,20 @@ SUMMARY_LABELS: dict[str, str] = {
     "americana": "americana",
     "icgc-fosc": "ICGC fosc",
     "icgc-gris": "ICGC gris",
-    "basemap-top": "BasemapDE topo",
-    "basemap-col": "BasemapDE colour",
 }
 
 APPENDIX_ORDER: list[str] = [
     "liberty", "bright", "positron", "fiord", "dark-matter",
     "osm-bright", "klokan-basic", "toner", "osm-liberty",
-    "basemap-col", "basemap-top", "icgc-fosc", "icgc-gris",
+    "icgc-fosc", "icgc-gris",
     "stadia-outdoors", "americana",
 ]
 
 SUMMARY_ORDER: list[str] = [
     "bright", "positron", "dark-matter", "osm-bright",
     "klokan-basic", "toner", "osm-liberty", "stadia-outdoors",
-    "americana", "icgc-fosc", "icgc-gris", "basemap-top",
-    "basemap-col", "fiord", "liberty",
+    "americana", "icgc-fosc", "icgc-gris",
+    "fiord", "liberty",
 ]
 
 
