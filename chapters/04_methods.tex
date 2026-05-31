@@ -623,15 +623,15 @@ Structural passes consume the typed style model of \cref{sub:pipeline} to perfor
 Pass & Data & Description [compiler analogy] \\
 \midrule
 Metadata stripping           & none      & Remove \texttt{metadata} fields at the style root and layer level [debug info stripping] \\
-Dead layer/source elimination & none / sampling & Remove layers with always-false filters, geometry-type mismatches (with stats), or empty source-layers; prune unreferenced sources [dead code elimination] \\
-Metadata refinement          & none / sampling & Extract \mlprop{minzoom}/ \mlprop{maxzoom} bounds from filter predicates and paint ramps; tighten bounds using tile coverage statistics; remove consumed zoom predicates from filters [range analysis] \\
+Dead layer/source elimination & none / sampling / scan & Remove layers with always-false filters, geometry-type mismatches (with stats), or empty source-layers; prune unreferenced sources [dead code elimination] \\
+Metadata refinement          & none / sampling / scan & Extract \mlprop{minzoom}/ \mlprop{maxzoom} bounds from filter predicates and paint ramps; tighten bounds using tile coverage statistics; remove consumed zoom predicates from filters [range analysis] \\
 Cleanup                      & none      & Remove empty \mlprop{paint}/\mlprop{layout} sections, invisible layers (\texttt{\mlprop{visibility}:~\mlval{none}}, zero opacity), trivially \mlval{true} filters, and root-level properties at specification defaults [dead code elimination] \\
 Layer merging                & none      & Merge identical adjacent layers by synthesizing \mlop{case}/ \mlop{match} expressions, with zoom-tolerant matching and sort-key preservation [basic block merging] \\
 Source zoom tightening       & none      & Tighten source \mlprop{minzoom}/ \mlprop{maxzoom} based on the zoom ranges of layers that reference them [liveness analysis] \\
 \bottomrule
 \end{tblr}
 \caption{
-Structural optimization passes operating on the typed style representation, each annotated with its data dependency and compiler-optimization analogue.  Passes marked \emph{none/sampling} run unconditionally but gain additional precision when tile statistics are available.}
+Structural optimization passes operating on the typed style representation, each annotated with its data dependency and compiler-optimization analogue.  Passes marked \emph{none/ sampling/ scan} run unconditionally but gain additional precision when tile statistics are available.}
 \label{tab:structural_passes}
 \end{table}
 
