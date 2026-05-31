@@ -24,7 +24,6 @@ A handful of styles from the pre-screening set do not appear fully in the number
 Layer merging (step~15) then builds on the wrong intermediate, so any later step would compare apples vs.\ oranges against the rest of the corpus.
 We therefore cap these three at step~14.
 The bulk tile-shave sweep of \cref{fig:tile_shave_per_style} additionally excludes the ICGC pair because their styles reference Catalonia-specific tile sources (\texttt{contour}, \texttt{divisionsadministratives}, \texttt{contextmapsadmpt}) whose tile data we do not have, so a complete shave reduction cannot be computed even though their primary \texttt{openmaptiles} source uses the OMT schema.
-Americana's tile data is fully available to us and stays in the sweep.
 
 \emph{OSM-Liberty} triggered an \ac{MLT} rendering fault at certain viewports during the cross-style run.
 These four viewports are thus excluded from the reported tile rewrite results.
