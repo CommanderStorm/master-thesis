@@ -425,7 +425,7 @@ To separate the contribution of the multi-strategy competition (this work) from 
 \end{figure}
 
 The headline is the \qty{28.3}{\percent} reduction our encoder achieved over the reference baseline under no wire compression.
-The reference baseline already incorporates encoding fixes backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds), so the \qty{28}{\percent} isolates the contribution of automatic strategy selection over a correctly-implemented fixed-plan encoder rather than conflating bug fixes with the innovation we want to attribute to.
+The reference baseline already incorporates encoding fixes backported from our encoder's development (correct delta-zigzag sequencing, \ac{RLE} viability checks, \ac{FSST} thresholds), so the \qty{28}{\percent} isolates the contribution of automatic strategy selection over a correctly-implemented fixed-plan encoder rather than conflating bug fixes with the innovation we contribute.
 
 The finding in the table that is easiest to overlook is that the reference baseline was \emph{worse} than gzip-compressed \ac{MVT} (\qty{3.54}{\giga\byte} vs.\ \qty{3.08}{\giga\byte}).
 General-purpose LZ77-family compressors already exploit most of the row-level redundancy in the protobuf wire format, and a columnar encoder that uses fixed per-column schemes cannot keep up.
