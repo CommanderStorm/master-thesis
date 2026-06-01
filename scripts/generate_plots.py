@@ -73,63 +73,6 @@ LAYOUT_DEFAULTS = dict(
 )
 
 
-STEP_LABELS: dict[int, str] = {
-    0: "Baseline",
-    1: "Unary simpl.",
-    2: "Kind norm.",
-    3: "Const. fold",
-    4: "Stats fold",
-    5: "Expr. simpl.",
-    6: "Strip defaults",
-    7: "Minify colours",
-    8: "Strip metadata",
-    9: "Dead elim.",
-    10: "DE stats",
-    11: "Meta. refine.",
-    12: "MR paint",
-    13: "MR stats",
-    14: "Cleanup",
-    15: "Layer merge",
-    16: "Selectivity",
-    17: "Shave only",
-    18: "Shave",
-    19: "MLT rewrite",
-}
-
-# Markers mirror masters-thesis tab:marginal_contribution; see generate_tables.py.
-_DAGGER_STEPS: set[int] = {15, 16, 17, 18, 19}
-_STAR_STEPS: set[int] = {4, 10, 13, 16, 17, 18, 19}
-
-
-def _step_label_marked(step: int) -> str:
-    label = STEP_LABELS.get(int(step), f"Step {step}")
-    if step in _DAGGER_STEPS:
-        label += " †"
-    if step in _STAR_STEPS:
-        label += " ★"
-    return label
-
-
-def _bootstrap_ci(
-    values: np.ndarray, n_boot: int = 10_000, seed: int = 42,
-) -> tuple[float, float, float]:
-    arr = np.asarray(values, dtype=np.float64)
-    arr = arr[~np.isnan(arr)]
-    n = len(arr)
-    if n < 2:
-        m = float(np.median(arr)) if n == 1 else 0.0
-        return m, m, m
-    rng = np.random.default_rng(seed)
-    meds = np.empty(n_boot)
-    for i in range(n_boot):
-        meds[i] = np.median(rng.choice(arr, n, replace=True))
-    return (
-        float(np.median(arr)),
-        float(np.percentile(meds, 2.5)),
-        float(np.percentile(meds, 97.5)),
-    )
-
-
 def export_figure(
     fig: go.Figure, name: str,
     width: int = FIG_WIDTH, height: int = FIG_HEIGHT,
@@ -389,19 +332,6 @@ def plot_minhash_sweep(df: pd.DataFrame) -> None:
     export_figure(fig, "minhash_sweep")
 
 
-def _load_ci_levels() -> pd.DataFrame | None:
-    ci_csv = DATA_DIR / "confidence_intervals.csv"
-    if not ci_csv.exists():
-        return None
-    ci = pd.read_csv(ci_csv)
-    load = ci[ci["metric"] == "loadMs"][["style", "step", "median"]].copy()
-    pivot = load.pivot_table(index="step", columns="style", values="median")
-    all_steps = range(int(pivot.index.min()), int(pivot.index.max()) + 1)
-    # forward-fill deduped (missing) steps so every step 0..max has a value
-    pivot = pivot.reindex(all_steps).ffill()
-    return pivot
-
-
 _MLT_CONFIG_MAP = {
     "step-00-baseline": "1: MVT baseline",
     "step-16-selectivity_reorder": "2: Style-only",
@@ -421,138 +351,6 @@ def _load_mlt_config_ci() -> pd.DataFrame | None:
         return None
     ci["config"] = ci["variant"].map(_MLT_CONFIG_MAP)
     return ci[["style", "config", "metric", "median", "ci_lo", "ci_hi"]].copy()
-
-
-def plot_waterfall_loadMs() -> None:
-    print("Generating waterfall_loadMs…")
-    pivot = _load_ci_levels()
-    if pivot is None:
-        print("  Skipped (run generate_ci.py first)")
-        return
-
-    baseline = pivot.loc[0]
-    pct = (pivot.subtract(baseline)) / baseline * 100
-
-    steps = sorted(pct.index)
-    labels = [_step_label_marked(int(s)) for s in steps]
-
-    cum_med = []
-    for s in steps:
-        vals = pct.loc[s].dropna().values
-        m, _, _ = _bootstrap_ci(vals)
-        cum_med.append(m)
-
-    deltas, delta_err_lo, delta_err_hi = [], [], []
-    for i, s in enumerate(steps):
-        if i == 0:
-            deltas.append(0.0)
-            delta_err_lo.append(0.0)
-            delta_err_hi.append(0.0)
-            continue
-        prev = steps[i - 1]
-        per_style_delta = (pct.loc[s] - pct.loc[prev]).dropna().values
-        m, lo, hi = _bootstrap_ci(per_style_delta)
-        deltas.append(m)
-        delta_err_lo.append(m - lo)
-        delta_err_hi.append(hi - m)
-
-    running = 0.0
-    bases, heights = [], []
-    colors = []
-    for i, d in enumerate(deltas):
-        if i == 0:
-            bases.append(0.0)
-            heights.append(0.0)
-            colors.append("#BBBBBB")
-        elif d <= 0:
-            bases.append(running + d)
-            heights.append(abs(d))
-            colors.append("#009E73")
-        else:
-            bases.append(running)
-            heights.append(d)
-            colors.append("#D55E00")
-        running += d
-
-    fig = go.Figure()
-    # invisble base bars to offset the visible deltas to the running total
-    fig.add_trace(go.Bar(
-        x=labels, y=bases,
-        marker_color="rgba(0,0,0,0)", showlegend=False,
-        hoverinfo="skip",
-    ))
-    fig.add_trace(go.Bar(
-        x=labels, y=heights,
-        marker_color=colors, showlegend=False,
-        error_y=dict(
-            type="data", symmetric=False,
-            array=delta_err_hi, arrayminus=delta_err_lo,
-            visible=True,
-        ),
-        hovertemplate="%{x}<br>Δ: %{y:.1f}%<extra></extra>",
-    ))
-
-    fig.update_layout(
-        **LAYOUT_DEFAULTS,
-        barmode="stack",
-        xaxis=dict(tickangle=45),
-        yaxis=dict(title="Cumulative load-time change (%)"),
-    )
-    export_figure(fig, "waterfall_loadMs")
-
-
-def plot_marginal_loadMs() -> None:
-    print("Generating marginal_loadMs…")
-    pivot = _load_ci_levels()
-    if pivot is None:
-        print("  Skipped (run generate_ci.py first)")
-        return
-
-    baseline = pivot.loc[0]
-    pct = (pivot.subtract(baseline)) / baseline * 100
-
-    steps = sorted(pct.index)
-
-    plot_steps, plot_labels = [], []
-    deltas, err_lo, err_hi = [], [], []
-    colors = []
-
-    for i, s in enumerate(steps):
-        if i == 0:
-            continue
-        prev = steps[i - 1]
-        per_style_delta = (pct.loc[s] - pct.loc[prev]).dropna().values
-        m, lo, hi = _bootstrap_ci(per_style_delta)
-
-        # skip deduped steps (near-zero deltas)
-        if abs(m) < 0.05 and abs(lo) < 0.1 and abs(hi) < 0.1:
-            continue
-
-        plot_steps.append(s)
-        plot_labels.append(_step_label_marked(int(s)))
-        deltas.append(m)
-        err_lo.append(m - lo)
-        err_hi.append(hi - m)
-        colors.append("#009E73" if m <= 0 else "#D55E00")
-
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=plot_labels, y=deltas,
-        marker_color=colors, showlegend=False,
-        error_y=dict(
-            type="data", symmetric=False,
-            array=err_hi, arrayminus=err_lo,
-            visible=True,
-        ),
-        hovertemplate="%{x}<br>Δ: %{y:.1f}%<extra></extra>",
-    ))
-
-    fig.update_layout(
-        **LAYOUT_DEFAULTS,
-        xaxis=dict(tickangle=45),
-        yaxis=dict(title="Marginal load-time change (%)"),
-    )
-    export_figure(fig, "marginal_loadMs")
 
 
 def main() -> None:
@@ -585,8 +383,6 @@ def main() -> None:
         print("\nSkipped: interaction_plot (pass --bench <jsonl> with tile_shave data)")
 
     plot_rendering_metrics_mlt()
-    plot_waterfall_loadMs()
-    plot_marginal_loadMs()
 
     print(f"\nAll figures written to {OUTPUT_DIR}")
 
@@ -715,7 +511,7 @@ def plot_rendering_metrics_mlt() -> None:
                 showlegend=False,
             ))
             fig.update_yaxes(title_text=y_titles[metric], automargin=True)
-            fig.update_xaxes(tickangle=30, automargin=True)
+            fig.update_xaxes(tickangle=-45, automargin=True)
             layout = {
                 **LAYOUT_DEFAULTS,
                 "margin": dict(l=70, r=20, t=20, b=80),
