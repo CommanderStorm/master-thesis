@@ -180,6 +180,8 @@ for (const sourceLayerId in layerFamilies) {
 }
 \end{lstlisting}
 
+\clearpage
+
 \Cref{lst:bucket_populate} reproduces the \texttt{FillBucket.populate} method, which witnesses the filter-first evaluation order on which the filter-to-property constant-propagation pass in \cref{sub:structural_optimizations} depends.
 In it, \stepcirc{1} rejects a feature before any paint or layout expression is evaluated, so any equality constraint extracted from a layer's filter is guaranteed to hold for every feature that reaches \stepcirc{2}.
 
