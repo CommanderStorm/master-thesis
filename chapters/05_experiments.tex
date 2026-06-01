@@ -805,13 +805,14 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	}
 	
 	\captionof{figure}{
-		Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
+		Heatmap of \ac{FPS} across scenarios (rows) and ablations (cols).
 		Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
 		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
 	}
 	\label{fig:heatmap_fps}
 \end{landscape}
 
+\clearpage
 %loadMs
 \begin{landscape}
 	\thispagestyle{empty}
@@ -820,7 +821,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\makebox[\linewidth][c]{%
 		\includegraphics[
 		width=1.05\linewidth,
-		trim=1cm 50.5cm 0 0,
+		trim=1cm 40.5cm 0 0,
 		clip
 		]{figures/heatmap_loadMs-crop}
 	}%
@@ -832,7 +833,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\makebox[\linewidth][c]{%
 		\includegraphics[
 		width=1.05\linewidth,
-		trim=1cm 0 0 40.5cm,
+		trim=1cm 0 0 50.5cm,
 		clip
 		]{figures/heatmap_loadMs-crop}
 	}
@@ -854,7 +855,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\makebox[\linewidth][c]{%
 		\includegraphics[
 		width=1.05\linewidth,
-		trim=1cm 50.5cm 0 0,
+		trim=1cm 40.5cm 0 0,
 		clip
 		]{figures/heatmap_jankCount-crop}
 	}%
@@ -866,7 +867,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\makebox[\linewidth][c]{%
 		\includegraphics[
 		width=1.05\linewidth,
-		trim=1cm 0 0 40.5cm,
+		trim=1cm 0 0 50.5cm,
 		clip
 		]{figures/heatmap_jankCount-crop}
 	}
