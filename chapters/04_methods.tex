@@ -1353,7 +1353,6 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 	\label{fig:minhash_clustering}
 \end{figure}
 
-
 \paragraph{Shared dictionary grouping}\label{sub:cardinality}
 The \ac{MLT} format supports shared dictionaries where multiple string columns reference a common deduplicated corpus, amortizing dictionary overhead across columns with overlapping vocabularies.
 The reference encoder groups columns by naming prefix (e.g., \mlval{name}, \mlval{name:en}, \mlval{name:de}), which misses semantic overlaps (e.g., \mlval{class} and \mlval{subclass} in \ac{OMT} share many values).
