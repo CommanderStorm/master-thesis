@@ -180,7 +180,34 @@ for (const sourceLayerId in layerFamilies) {
 }
 \end{lstlisting}
 
-\clearpage
+\Cref{lst:bucket_populate} reproduces the \texttt{FillBucket.populate} method, which witnesses the filter-first evaluation order on which the filter-to-property constant-propagation pass in \cref{sub:structural_optimizations} depends.
+In it, \stepcirc{1} rejects a feature before any paint or layout expression is evaluated, so any equality constraint extracted from a layer's filter is guaranteed to hold for every feature that reaches \stepcirc{2}.
+
+\begin{lstlisting}[
+	language=TypeScript,
+	escapeinside={(*@}{@*)},
+	caption={MapLibre GL-JS bucket populate method showing filter-first evaluation (\texttt{src/data/bucket/fill\_bucket.ts})},
+	label=lst:bucket_populate]
+	for (const {feature, id, index, sourceLayerIndex} of features) {
+		const needGeometry = this.layers[0]._featureFilter.needGeometry;
+		const evaluationFeature = toEvaluationFeature(feature, needGeometry);
+		
+		(*@\stepcirc{1}@*) if (!this.layers[0]._featureFilter.filter(
+		new EvaluationParameters(this.zoom), evaluationFeature, canonical
+		)) continue;  // feature rejected: no paint evaluation occurs
+		
+		// Only reached for features that passed the filter:
+		const bucketFeature: BucketFeature = {
+			id, properties: feature.properties, type: feature.type,
+			sourceLayerIndex, index,
+			geometry: needGeometry ? evaluationFeature.geometry
+			: loadGeometry(feature),
+			patterns: {}, sortKey
+		};
+		(*@\stepcirc{2}@*) bucketFeatures.push(bucketFeature);
+	}
+\end{lstlisting}
+
 \Cref{lst:placement} reproduces the per-layer placement loop that justifies the exclusion of symbol layers from the merge candidate set in \cref{sub:structural_optimizations}, where \stepcirc{1} constructs a fresh \texttt{LayerPlacement} when a symbol layer's placement begins and \stepcirc{2} tears it down before the next layer starts.
 This means that two symbol layers fused into one would interleave their symbols within a single \texttt{LayerPlacement} and alter collision outcomes.
 
@@ -211,33 +238,7 @@ while (this._currentPlacementIndex >= 0) {
 }
 \end{lstlisting}
 
-\Cref{lst:bucket_populate} reproduces the \texttt{FillBucket.populate} method, which witnesses the filter-first evaluation order on which the filter-to-property constant-propagation pass in \cref{sub:structural_optimizations} depends.
-In it, \stepcirc{1} rejects a feature before any paint or layout expression is evaluated, so any equality constraint extracted from a layer's filter is guaranteed to hold for every feature that reaches \stepcirc{2}.
 
-\begin{lstlisting}[
-	language=TypeScript,
-	escapeinside={(*@}{@*)},
-	caption={MapLibre GL-JS bucket populate method showing filter-first evaluation (\texttt{src/data/bucket/fill\_bucket.ts})},
-	label=lst:bucket_populate]
-for (const {feature, id, index, sourceLayerIndex} of features) {
-    const needGeometry = this.layers[0]._featureFilter.needGeometry;
-    const evaluationFeature = toEvaluationFeature(feature, needGeometry);
-
-    (*@\stepcirc{1}@*) if (!this.layers[0]._featureFilter.filter(
-        new EvaluationParameters(this.zoom), evaluationFeature, canonical
-    )) continue;  // feature rejected: no paint evaluation occurs
-
-    // Only reached for features that passed the filter:
-    const bucketFeature: BucketFeature = {
-        id, properties: feature.properties, type: feature.type,
-        sourceLayerIndex, index,
-        geometry: needGeometry ? evaluationFeature.geometry
-                               : loadGeometry(feature),
-        patterns: {}, sortKey
-    };
-    (*@\stepcirc{2}@*) bucketFeatures.push(bucketFeature);
-}
-\end{lstlisting}
 \clearpage
 
 \section{Camera Animation Patterns}\label{app:animation_patterns}
