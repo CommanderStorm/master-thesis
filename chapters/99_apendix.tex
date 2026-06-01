@@ -180,6 +180,7 @@ for (const sourceLayerId in layerFamilies) {
 }
 \end{lstlisting}
 
+\clearpage
 \Cref{lst:placement} reproduces the per-layer placement loop that justifies the exclusion of symbol layers from the merge candidate set in \cref{sub:structural_optimizations}, where \stepcirc{1} constructs a fresh \texttt{LayerPlacement} when a symbol layer's placement begins and \stepcirc{2} tears it down before the next layer starts.
 This means that two symbol layers fused into one would interleave their symbols within a single \texttt{LayerPlacement} and alter collision outcomes.
 
