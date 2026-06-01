@@ -54,7 +54,7 @@ Both halves are exercised on the style level by the round-trip proptest and on t
 We target MapLibre GL~JS as the system under test.
 As discussed in \cref{sec:styles}, performance research on interactive vector maps is concentrated on Mapbox and MapLibre styles.
 The Mapbox codebase is proprietary and may not be evaluated without explicit consent, leaving MapLibre as the only viable open research target.
-Within MapLibre, the web renderer \texttt{maplibre-gl-js} is the reference implementation that first tracks new specification features and exposes the richest instrumentation hooks for Puppeteer-driven benchmarking, which is what makes it our benchmark target rather than the Native or mobile renderers that share the same styling engine.
+Within MapLibre, the web renderer \texttt{maplibre-gl-js} is the reference implementation that first tracks new specification features and exposes the richest instrumentation hooks for Puppeteer\footnote{\url{https://pptr.dev/}, last accessed 2026-05-23}-driven benchmarking, which is what makes it our benchmark target rather than the Native or mobile renderers that share the same styling engine.
 
 In scope are the three pass families that make up the optimizer pipeline (\cref{sub:pipeline}): expression-level rewrites on style~\ac{JSON} (constant folding, algebraic simplification, statistics-driven folding, selectivity reordering), structural rewrites over a typed style model (dead-layer elimination, metadata refinement, layer merging), and data-level rewrites on the served tile payload (style-driven tile shaving and \ac{MLT} encoding-strategy selection).
 Style and data passes are co-designed so that data rewrites are advised by the optimized style, and every pass is bound by the visual-equivalence constraint of \cref{eq:visual_equivalence} as its soundness criterion.
@@ -1493,7 +1493,7 @@ To reduce measurement noise, the benchmark harness pins rendering to real \ac{GP
 This ensures that we measure \ac{GPU}-bound workloads (fragment shading, texture sampling, blend operations) realistically.
 
 We serve all tile requests from a local caching proxy as described in \cref{sub:tile_data}.
-The benchmark harness itself is a Puppeteer\footnote{\url{https://pptr.dev/}, last accessed 2026-05-23}-driven headless browser that programmatically loads the MapLibre GL~JS renderer, applies a camera animation scenario, collects performance counters via the \texttt{Performance} \ac{API}\footnote{\url{https://developer.mozilla.org/en-US/docs/Web/API/Performance_API}, last accessed 2026-05-23} and adding custom instrumentation hooks into the renderer.
+The benchmark harness itself is a Puppeteer-driven headless browser that programmatically loads the MapLibre GL~JS renderer, applies a camera animation scenario, collects performance counters via the \texttt{Performance} \ac{API}\footnote{\url{https://developer.mozilla.org/en-US/docs/Web/API/Performance_API}, last accessed 2026-05-23} and adding custom instrumentation hooks into the renderer.
 
 \begin{chaptersummary}
 The optimizer is a \textbf{three-level pipeline} (\cref{sub:pipeline}) operating on the $(S, T) \to (S', T')$ problem of \cref{sec:problem_statement}.

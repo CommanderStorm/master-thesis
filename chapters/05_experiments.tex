@@ -250,7 +250,6 @@ In this experiment we ask whether we can optimize the \emph{data} it consumes us
 This is the joint-optimization question at the heart of Research Goal~R1 and formalized in \cref{sec:problem_statement}.
 The data-level pipeline we apply here (\cref{sub:data_optimizations}) takes the optimized style and uses it to drive the tile pruning advisory and the encoding strategy competition.
 
-\clearpage
 \textit{We carried out this experiment in collaboration with Rivian Automotive, Inc to optimize performance, correctness, and software architecture of the encoder-decoder pair.
 We implemented the encoder and its strategy-selection routine ourselves.
 Rivian contributed the runtime performance engineering, which brings transcoding of the Germany \ac{OMT} tileset down from roughly five hours under the prior Tremmel \& Zink reference encoder~\cite{tremmelMapLibreTileNext2025b} to about one minute.
@@ -852,7 +851,9 @@ We measured each of the four additive cost terms $C_\text{style}$, $C_\text{stat
 \emph{Tile pruning and \ac{MVT} re-encoding} ($C_\text{enc}$, MVT) took \qty{15.6}{\second} using Rayon\footnote{\url{https://github.com/rayon-rs/rayon}, last accessed 2026-05-23} parallelism.
 \emph{\ac{MLT} encoding with sort-strategy competition} ($C_\text{enc}$, \ac{MLT} auto) was the dominant term: \qty{5}{\minute}\,\qty{42}{\second} single-threaded, or \qty{47}{\second} with 16 threads.
 Without the competition ($C_\text{enc}$, \ac{MLT} none), single-threaded encoding took \qty{2}{\minute}\,\qty{55}{\second}.
-We therefore measured the overhead ratio of the full competition at $342 / 175 = 1.95\times$ in \ac{CPU} time, substantially lower than the analytical 3-5$\times$ estimate, because the cost-control mechanisms formalized in \cref{sub:preprocessing_cost_model} eliminated most redundant work.
+We therefore measured the overhead ratio of the full competition at $342 / 46.7 \approx 7.3\times$ in \ac{CPU} time.
+This value is substantially higher than the algorithmic 3-5$\times$ estimate, because the cost-control mechanisms formalized in \cref{sub:preprocessing_cost_model} eliminated most redundant work.
+It is not higher than the hardware threads 8 since there is some single threaded critical section and because we are CPU bound, so we loose some of 
 
 \begin{table}[htbp]
 \centering\small

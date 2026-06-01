@@ -110,22 +110,6 @@ def _step_label_marked(step: int) -> str:
     return label
 
 
-def _add_marker_annotation(fig: go.Figure) -> None:
-    """Footnote explaining the † / ★ pass markers."""
-    fig.update_layout(margin=dict(b=170))
-    fig.add_annotation(
-        text="† = 10 end-to-end styles only   ★ = requires tile statistics",
-        xref="paper",
-        yref="paper",
-        x=1.0,
-        y=0,
-        xanchor="right",
-        yanchor="top",
-        yshift=-110,
-        showarrow=False,
-        font=dict(size=14, color="#666"),
-    )
-
 def _bootstrap_ci(
     values: np.ndarray, n_boot: int = 10_000, seed: int = 42,
 ) -> tuple[float, float, float]:
@@ -514,7 +498,6 @@ def plot_waterfall_loadMs() -> None:
         xaxis=dict(tickangle=45),
         yaxis=dict(title="Cumulative load-time change (%)"),
     )
-    _add_marker_annotation(fig)
     export_figure(fig, "waterfall_loadMs")
 
 
@@ -569,7 +552,6 @@ def plot_marginal_loadMs() -> None:
         xaxis=dict(tickangle=45),
         yaxis=dict(title="Marginal load-time change (%)"),
     )
-    _add_marker_annotation(fig)
     export_figure(fig, "marginal_loadMs")
 
 

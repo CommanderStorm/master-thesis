@@ -715,7 +715,7 @@ Language toolchains used to build and run the encoder, optimizer, harness, and a
 \label{tab:bench_toolchains}
 \end{table}
 
-The rendering scenarios (\cref{sub:scenarios}) drive a headless Chromium instance via Puppeteer.
+The rendering scenarios (\cref{sub:scenarios}) drive a headless Chromium instance via Puppeteer\footnote{\url{https://pptr.dev/}, last accessed 2026-05-23}.
 The visual-correctness check (\cref{sec:visual_correctness}) uses MapLibre~GL~JS's Node-side software rasterizer with \texttt{pixelmatch}.
 Used chrome launch flags are \texttt{--enable-gpu},\allowbreak\texttt{--ignore-gpu-blocklist},\allowbreak\
 \texttt{--enable-unsafe-swiftshader},\allowbreak\texttt{--use-angle=vulkan},\allowbreak\
@@ -744,10 +744,10 @@ Used chrome launch flags are \texttt{--enable-gpu},\allowbreak\texttt{--ignore-g
 		Device pixel ratio           & \texttt{1.0} (\cref{sec:visual_correctness}) \\
 		\bottomrule
 	\end{tabular}
-	\caption{
+	\caption[Headless browser harness driving the rendering scenarios.]{%
 Headless browser harness driving the rendering scenarios.
 The bench harness produces the timings reported in \cref{ch:experiments}.
-The separate visual-check harness is used offline for \texttt{pixelmatch}-based correctness validation.}
+The separate visual-check harness is used offline for \texttt{pixelmatch}\protect\footnote{\url{https://github.com/mapbox/pixelmatch}, last accessed 2026-05-23}-based correctness validation.}
 	\label{tab:bench_browser}
 \end{table}
 
