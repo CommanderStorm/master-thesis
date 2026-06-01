@@ -77,7 +77,7 @@ Each bar shows the median change introduced by adding one expression pass on top
 We can see that in the extremes, unary simplification has the largest effect.
 The aggregate load-time improvement across all expression passes is modest (\qty{-2.0}{\percent} per-style median), with expression passes serving primarily as enablers for downstream structural and data-level passes.
 Compared to the effects of the passes introduced in \cref{sec:exp_structural}, the passes added here are not as effective in reducing load time.
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:waterfall_loadMs}
 \end{figure}
 
@@ -89,7 +89,7 @@ Marginal contribution of each expression pass to parse the style in miliseconds.
 Variance is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
 The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
 This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:marginal_styleParseMs}
 \end{figure}
 
@@ -167,7 +167,7 @@ Dead elimination rarely removes whole layers because styles are designed to expo
 Total expression-tree node count is driven mostly by the expression passes (steps~1--7).
 Structural passes contribute additional, smaller reductions by removing or merging layers that own subtrees.
 Filter count is reduced primarily by metadata refinement (consuming zoom predicates) and dead elimination, with cleanup removing residual \mlval{true} filters that refinement leaves behind.
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:complexity_metrics}
 \end{figure}
 
@@ -700,7 +700,7 @@ Per-run distribution of load time and \ac{FPS} across all scenarios and styles, 
 Each box aggregates the same measurement pool as the corresponding heatmap row, exposing the spread that the heatmap median hides.
 Load-time variance compresses sharply at \texttt{tile\_shave}.
 The \ac{FPS} spread instead widens past the same step, exposing per-style headroom.
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:box_load_fps}
 \end{figure}
 
@@ -718,7 +718,7 @@ Data-level passes drove the bulk of the reduction: tile shaving (step~17) alone 
 Time breakdown across ablation steps: style parse, first tile, first frame, and remaining load time.
 Style-parse time shrinks monotonically with each expression pass.
 First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied (steps~17-19).
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:time_breakdown}
 \end{figure}
 
@@ -729,7 +729,7 @@ First-tile and remaining-load times are unchanged by style-only steps and decrea
 Mean heap used in MB across all scenarios and benchmark styles across ablation steps.
 Style-level passes (steps 1-15) reduce the heap by \qty{3.1}{\mega\byte}.
 The bulk of the heap savings comes from data-level passes (steps 17-19) where the in-memory tile payload itself shrinks, yielding a cumulative reduction of \qty{-35.7}{\percent} from baseline to step~19.
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:memory_ablation}
 \end{figure}
 
@@ -745,7 +745,7 @@ Cumulative ablation of mean style gzip bytes across all 19 steps.
 The orange line is the mean across scenarios, and thin gray lines bound the per-scenario distribution.
 Most of the wire-size win lands by \texttt{strip\_metadata}.
 The \texttt{tile\_shave\_only} spike is the unoptimized-style baseline of Configuration~3, which \texttt{tile\_shave} and \texttt{tile\_rewrite} recover and surpass.
-\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:waterfall_gzip_bytes}
 \end{figure}
 
@@ -783,7 +783,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 		Heatmap of load time across scenarios (rows) and ablation steps (columns), where more-brown cells indicate greater improvement relative to baseline.
 		Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
 		Structural passes produce concentrated gains where dead elimination or layer merging applies.
-		\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
+		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
 	}
 	\label{fig:heatmap_loadMs}
 \end{figure}
@@ -797,7 +797,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\caption{
 		Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
 		Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
-		\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmap_fps}
 \end{figure}
 
@@ -811,7 +811,7 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 		Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
 		Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
 		Real consumer hardware caps well below this rate, so the same pauses would not cross the jank threshold there.
-		\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
 	\label{fig:heatmapjankcount}
 \end{figure}
 
