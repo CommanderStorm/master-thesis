@@ -77,6 +77,7 @@ Cumulative ablation waterfall for load time.
 Each bar shows the median change introduced by adding one expression pass on top of all previous passes, aggregated across all 18 scenarios and the 13 styles of the deep corpus.
 We can see that in the extremes, unary simplification has the largest effect.
 The aggregate load-time improvement across all expression passes is modest (\qty{-2.0}{\percent} per-style median), with expression passes serving primarily as enablers for downstream structural and data-level passes.
+Compared to the effects of the passes introduced in \cref{sec:exp_structural}, the passes added here are not as effective in reducing load time.
 For caveats, please see \cref{sub:expr_discussion}}
     \label{fig:waterfall_loadMs}
 \end{figure}
