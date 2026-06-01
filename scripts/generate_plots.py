@@ -21,7 +21,7 @@ from plotly.subplots import make_subplots
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR.parent / "figures"
-FORMATS = ["png", "pdf"]
+FORMATS = ["pdf"]
 
 FIG_WIDTH = 1400
 FIG_HEIGHT = 700
