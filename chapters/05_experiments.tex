@@ -378,7 +378,7 @@ The two contributions stack (shaved tiles encoded with our encoder are smaller t
 \paragraph{Isolating the Contribution of Our Encoder's Strategy Selection}
 To separate the contribution of the multi-strategy competition (this work) from that of the \ac{MLT} format as proposed by Tremmel and Zink~\cite{tremmelMapLibreTileNext2025b}, we report in \cref{fig:encoder_comparison} both a per-zoom breakdown and the total encoded size of the Germany \ac{OMT} tileset (zoom~0-14, \qty{256.5}{\kilo tiles}) under three encoders (\ac{MVT} as the row-oriented protobuf baseline, the reference \ac{MLT} encoder of Tremmel and Zink as the columnar baseline, and our \ac{MLT} encoder with sort-strategy competition, per-stream profiling, and shared-dictionary clustering) and across four wire compressions (none, gzip-9, brotli-11, zstd-22).
 
-\begin{figure}[htbp]
+\begin{figure}[p]
 	\centering
 	\begin{subfigure}[b]{\linewidth}
 		\centering
