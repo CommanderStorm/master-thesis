@@ -785,11 +785,12 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\thispagestyle{empty}
 	\centering
 	
-	\includegraphics[
-	width=1.1\linewidth,
-	trim=0 50cm 0 0,
-	clip
-	]{figures/heatmap_fps.pdf}
+	\makebox[\paperwidth][c]{%
+		\includegraphics[
+		width=1.15\paperwidth,
+		keepaspectratio
+		]{figures/heatmap_fps.pdf}%
+	}
 	
 	\clearpage
 	\thispagestyle{empty}
