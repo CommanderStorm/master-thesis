@@ -799,9 +799,11 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\label{fig:heatmap_fps}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[p]
 	\centering
-	\includegraphics[height=0.91\textheight]{figures/heatmap_jankCount}
+	\makebox[\textwidth][c]{%
+		\includegraphics[width=1.15\paperwidth]{figures/heatmap_jankCount}
+	}
 	\caption{
 		Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
 		Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
