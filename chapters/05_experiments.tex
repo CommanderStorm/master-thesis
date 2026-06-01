@@ -805,12 +805,6 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 		]{figures/heatmap_fps.pdf}
 	}
 	
-	\includegraphics[
-	width=1.1\linewidth,
-	trim=0 0 0 50cm,
-	clip
-	]{figures/heatmap_fps.pdf}
-	
 	\captionof{figure}{
 		Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
 		Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
