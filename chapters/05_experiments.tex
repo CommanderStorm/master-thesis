@@ -773,6 +773,40 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 \label{tab:per_style_summary}
 \end{table}
 
+% this is a gnarly fix..
+\clearpage
+\ifodd\value{page}\else
+\thispagestyle{empty}
+\hbox{}\newpage
+\fi
+
+%fps
+\thispagestyle{empty}
+
+\centering
+\includegraphics[
+width=1.1\textheight,
+keepaspectratio
+]{figures/heatmap_fps.pdf}
+\newpage
+
+\thispagestyle{empty}
+\centering
+\includegraphics[
+width=1.1\textheight,
+keepaspectratio
+]{figures/heatmap_fps.pdf}
+\vspace{1em}
+\captionof{figure}{
+	Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
+	Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
+	$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
+}
+\label{fig:heatmap_fps}
+
+\end{landscape}
+\newpage
+
 \begin{figure}[p]
 	\centering
 	\vspace*{-2cm}
@@ -787,21 +821,6 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	}
 	\label{fig:heatmap_loadMs}
 \end{figure}
-
-\begin{landscape}
-	\begin{figure}[p]
-		\centering
-		\includegraphics[
-		width=\textheight,
-		keepaspectratio
-		]{figures/heatmap_fps.pdf}
-		
-		\caption{Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
-			Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
-			$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
-		\label{fig:heatmap_fps}
-	\end{figure}
-\end{landscape}
 
 \begin{figure}[p]
 	\centering
