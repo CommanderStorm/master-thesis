@@ -400,7 +400,7 @@ Visual equivalence (the soundness criterion of~(\ref{eq:visual_equivalence})) is
 
 
 \paragraph{Concrete Examples}
-To illustrate how expression passes compose, \cref{fig:expr_before_after} shows four representative transformations.
+To illustrate how expression passes compose, \cref{fig:expr_before_after} shows five representative transformations.
 
 \begin{figure}[ht]
 	\centering
@@ -408,7 +408,7 @@ To illustrate how expression passes compose, \cref{fig:expr_before_after} shows 
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -436,7 +436,7 @@ To illustrate how expression passes compose, \cref{fig:expr_before_after} shows 
 			\vfill
 		\end{minipage}
 		\hfill
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -464,7 +464,7 @@ Expression rewriting via distributive factoring and \mlop{any}$\to$\mlop{in} pro
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -490,7 +490,7 @@ paint:
 			\vfill
 		\end{minipage}
 		\hfill
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -514,7 +514,7 @@ Filter to Property Constant Propagation simplifying data-driven to constant.}
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -536,7 +536,7 @@ Filter to Property Constant Propagation simplifying data-driven to constant.}
 			\vfill
 		\end{minipage}
 		\hfill
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -558,7 +558,7 @@ Duplicate predicate elimination via subsumption.}
 	\begin{subfigure}[t]{\linewidth}
 		\centering
 
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -580,7 +580,7 @@ Duplicate predicate elimination via subsumption.}
 			\vfill
 		\end{minipage}
 		\hfill
-		\begin{minipage}[c]{0.42\linewidth}
+		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\begin{lstlisting}[
 				style=maplibrestyle,
@@ -598,6 +598,51 @@ Duplicate predicate elimination via subsumption.}
 		\caption{
 Negation pushdown and operator normalization.}
 		\label{fig:expr_d}
+	\end{subfigure}
+
+	\vspace{4mm}
+
+	\begin{subfigure}[t]{\linewidth}
+		\centering
+
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\begin{lstlisting}[
+				style=maplibrestyle,
+				basicstyle=\ttfamily\scriptsize,
+				frame=single,
+				aboveskip=0pt,
+				belowskip=0pt
+				]
+["interpolate", ["linear"], ["zoom"],
+  5,  "#888",
+  10, "#888",
+  15, "#888"
+]\end{lstlisting}
+		\end{minipage}
+		\hfill
+		\begin{minipage}[c]{0.08\linewidth}
+			\centering
+			\vfill
+			{\Huge$\Longrightarrow$}
+			\vfill
+		\end{minipage}
+		\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\begin{lstlisting}[
+				style=maplibrestyle,
+				basicstyle=\ttfamily\scriptsize,
+				frame=single,
+				aboveskip=0pt,
+				belowskip=0pt
+				]
+"#888"\end{lstlisting}
+		\end{minipage}
+
+		\caption{
+Interpolation ramp collapsing when all stops map to the same value.}
+		\label{fig:expr_e}
 	\end{subfigure}
 
 	\caption{
