@@ -773,6 +773,56 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 \label{tab:per_style_summary}
 \end{table}
 
+
+\subsection{Marginal Contribution Analysis}\label{sub:combined_marginal}
+
+Not all passes contribute equally, and the marginal contribution of each pass depends on the metric under consideration.
+
+\paragraph{Rendering Time Metrics}
+After tile shaving, we observed that expression-level constant folding and structural dead elimination tended to produce the largest marginal improvements in frame time and \ac{FPS}, as they reduce the number of expressions the renderer must evaluate per feature per frame and the number of layers it must process, respectively.
+Layer merging produced a large marginal improvement in draw-call-heavy styles (many road layers, many boundary layers) but a smaller improvement in simple styles.
+
+\paragraph{Transfer Size Metrics}
+Passes that primarily reduce serialized style size (default stripping, metadata stripping, color minification) show smaller rendering improvements but contribute meaningfully to transfer size, particularly under compression (gzip, brotli).
+A smaller style reduces the time to first render because the \ac{JSON} must be fetched, decompressed, and parsed before the renderer can initialize.
+Data-level tile shaving dominates the transfer-size metric, as tiles are fetched continuously during map interaction whereas the style is loaded only once.
+
+
+\paragraph{Load Time Metrics}
+Both style size (initial fetch and parse) and tile size (first tile fetch) influence load time.
+Style-level passes improve style parse time.
+Data-level passes improve first-tile time.
+The relative contribution depends on the network bandwidth.
+Under the \qty{10}{\Mbps} throttle, tile-fetch latency dominates.
+Under the \qty{1.5}{\Mbps} throttle, style-fetch latency becomes significant for large styles.
+
+\subsection{Preprocessing Cost}\label{sub:preprocessing_cost}
+
+We measured each of the four additive cost terms $C_\text{style}$, $C_\text{stats}$, $C_\text{adv}$, and $C_\text{enc}$ from the preprocessing cost model (\cref{eq:cost_model}, \cref{sub:preprocessing_cost_model}) on a real tileset, and confirmed that the cost-control mechanisms formalized there kept the multi-strategy overhead well below the naive worst case.
+
+\begin{table}[H]
+	\centering\small
+	\begin{tabular}{l l r}
+		\textbf{Stage} & \textbf{Description} & \textbf{Wall-clock} \\
+		\midrule
+		$C_\text{style}$ & Style optimization (all passes, Liberty) & \qty{7.5}{\milli\second} \\
+		$C_\text{stats}$ & Tile statistics (\qty{256.5}{\kilo tiles}, 1 thread) & \qty{57.4}{\second} \\
+		$C_\text{adv}$ & Advisory computation & \qty{1.1}{\milli\second} \\
+		$C_\text{enc}$ (\ac{MVT} prune) & Tile pruning + \ac{MVT} re-encode (16 threads) & \qty{15.6}{\second} \\
+		$C_\text{enc}$ (\ac{MLT} none, 1T) & \ac{MLT} encoding, single strategy, 1 thread & \qty{175}{\second} \\
+		$C_\text{enc}$ (\ac{MLT} auto, 1T) & \ac{MLT} encoding, full competition, 1 thread & \qty{342}{\second} \\
+		$C_\text{enc}$ (\ac{MLT} auto, 16T) & \ac{MLT} encoding, full competition, 16 threads & \qty{46.7}{\second} \\
+		\midrule
+		Overhead factor & auto\,/ \,none (single-threaded CPU time) & $1.95\times$ \\
+	\end{tabular}
+	\caption{
+		Preprocessing wall-clock time per pipeline stage on the Germany \ac{OMT} tileset (zoom 0-14, \num{256156} tiles after pruning) when run on \cref{tab:bench_hardware}.
+		Median of 3~runs.
+		Style optimization ($C_\text{style}$, \qty{7.5}{\milli\second}) and advisory computation ($C_\text{adv}$, \qty{1.1}{\milli\second}) are negligible.
+		\ac{MLT} encoding with full sort-strategy competition dominates at \qty{342}{\second} single-threaded (\qty{46.7}{\second} with 16 threads), with an overhead factor of $1.95\times$ vs.\ a fixed-plan encoder.}
+	\label{tab:preprocessing_cost}
+\end{table}
+
 % this is a gnarly fix..
 \clearpage
 \ifodd\value{page}\else
@@ -874,31 +924,6 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 \end{landscape}
 
 \addtocounter{page}{-3}
-\subsection{Marginal Contribution Analysis}\label{sub:combined_marginal}
-
-Not all passes contribute equally, and the marginal contribution of each pass depends on the metric under consideration.
-
-\paragraph{Rendering Time Metrics}
-After tile shaving, we observed that expression-level constant folding and structural dead elimination tended to produce the largest marginal improvements in frame time and \ac{FPS}, as they reduce the number of expressions the renderer must evaluate per feature per frame and the number of layers it must process, respectively.
-Layer merging produced a large marginal improvement in draw-call-heavy styles (many road layers, many boundary layers) but a smaller improvement in simple styles.
-
-\paragraph{Transfer Size Metrics}
-Passes that primarily reduce serialized style size (default stripping, metadata stripping, color minification) show smaller rendering improvements but contribute meaningfully to transfer size, particularly under compression (gzip, brotli).
-A smaller style reduces the time to first render because the \ac{JSON} must be fetched, decompressed, and parsed before the renderer can initialize.
-Data-level tile shaving dominates the transfer-size metric, as tiles are fetched continuously during map interaction whereas the style is loaded only once.
-
-
-\paragraph{Load Time Metrics}
-Both style size (initial fetch and parse) and tile size (first tile fetch) influence load time.
-Style-level passes improve style parse time.
-Data-level passes improve first-tile time.
-The relative contribution depends on the network bandwidth.
-Under the \qty{10}{\Mbps} throttle, tile-fetch latency dominates.
-Under the \qty{1.5}{\Mbps} throttle, style-fetch latency becomes significant for large styles.
-
-\subsection{Preprocessing Cost}\label{sub:preprocessing_cost}
-
-We measured each of the four additive cost terms $C_\text{style}$, $C_\text{stats}$, $C_\text{adv}$, and $C_\text{enc}$ from the preprocessing cost model (\cref{eq:cost_model}, \cref{sub:preprocessing_cost_model}) on a real tileset, and confirmed that the cost-control mechanisms formalized there kept the multi-strategy overhead well below the naive worst case.
 
 \paragraph{Measured Stage Costs}
 \Cref{tab:preprocessing_cost} reports wall-clock time for each stage of the preprocessing pipeline on the Germany \ac{OMT} tileset..
@@ -909,30 +934,6 @@ We measured each of the four additive cost terms $C_\text{style}$, $C_\text{stat
 Without the competition ($C_\text{enc}$, \ac{MLT} none), single-threaded encoding took \qty{2}{\minute}\,\qty{55}{\second}.
 We therefore measured the overhead ratio of the full competition at $342 / 46.7 \approx 7.3\times$ in \ac{CPU} time.
 This value is substantially higher than the algorithmic 3-5$\times$ estimate, because the cost-control mechanisms formalized in \cref{sub:preprocessing_cost_model} eliminated most redundant work.
-It is not higher than the hardware threads 8 since there is some single threaded critical section and because we are CPU bound, so we loose some of 
-
-\begin{table}[htbp]
-\centering\small
-\begin{tabular}{l l r}
-\textbf{Stage} & \textbf{Description} & \textbf{Wall-clock} \\
-\midrule
-$C_\text{style}$ & Style optimization (all passes, Liberty) & \qty{7.5}{\milli\second} \\
-$C_\text{stats}$ & Tile statistics (\qty{256.5}{\kilo tiles}, 1 thread) & \qty{57.4}{\second} \\
-$C_\text{adv}$ & Advisory computation & \qty{1.1}{\milli\second} \\
-$C_\text{enc}$ (\ac{MVT} prune) & Tile pruning + \ac{MVT} re-encode (16 threads) & \qty{15.6}{\second} \\
-$C_\text{enc}$ (\ac{MLT} none, 1T) & \ac{MLT} encoding, single strategy, 1 thread & \qty{175}{\second} \\
-$C_\text{enc}$ (\ac{MLT} auto, 1T) & \ac{MLT} encoding, full competition, 1 thread & \qty{342}{\second} \\
-$C_\text{enc}$ (\ac{MLT} auto, 16T) & \ac{MLT} encoding, full competition, 16 threads & \qty{46.7}{\second} \\
-\midrule
-Overhead factor & auto\,/ \,none (single-threaded CPU time) & $1.95\times$ \\
-\end{tabular}
-\caption{
-Preprocessing wall-clock time per pipeline stage on the Germany \ac{OMT} tileset (zoom 0-14, \num{256156} tiles after pruning) when run on \cref{tab:bench_hardware}.
-Median of 3~runs.
-Style optimization ($C_\text{style}$, \qty{7.5}{\milli\second}) and advisory computation ($C_\text{adv}$, \qty{1.1}{\milli\second}) are negligible.
-\ac{MLT} encoding with full sort-strategy competition dominates at \qty{342}{\second} single-threaded (\qty{46.7}{\second} with 16 threads), with an overhead factor of $1.95\times$ vs.\ a fixed-plan encoder.}
-\label{tab:preprocessing_cost}
-\end{table}
 
 \paragraph{Amortization and Headline Numbers}
 Taken together, the cost-control mechanisms formalized in \cref{sub:preprocessing_cost_model} (bounding-box pruning, data profiling, warm-start caching, scratch-buffer recycling, and the \ac{RAII} alternatives guard) reduced the measured overhead of the full sort-strategy competition to $1.95\times$ compared to a fixed-plan (single-strategy) encoder (\cref{tab:preprocessing_cost}), well below the naive $4\times$ expectation from four candidate sort orders.
