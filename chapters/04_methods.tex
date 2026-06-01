@@ -615,7 +615,7 @@ Negation pushdown and operator normalization.}
 				belowskip=0pt
 				]
 ["interpolate", ["linear"], ["zoom"],
-  5,  "#888",
+  5,  ["match", ["literal", true], true, "#888", "#000"],
   10, "#888",
   15, "#888"
 ]\end{lstlisting}
@@ -641,7 +641,7 @@ Negation pushdown and operator normalization.}
 		\end{minipage}
 
 		\caption{
-Interpolation ramp collapsing when all stops map to the same value.}
+Interpolation ramp collapsing and constant folding.}
 		\label{fig:expr_e}
 	\end{subfigure}
 
