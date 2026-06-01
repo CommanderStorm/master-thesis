@@ -692,25 +692,6 @@ Host operating system, kernel, and graphics driver stack.}
 \label{tab:bench_os}
 \end{table}
 
-\begin{table}[htbp]
-\centering
-\begin{tabular}{@{}l l@{}}
-\toprule
-\textbf{Toolchain} & \textbf{Installed on bench host} \\
-\midrule
-Rust (\texttt{rustc})  & \texttt{1.94.1} (2026-03-25) \\
-Cargo                  & \texttt{1.94.1} (2026-03-24) \\
-JDK                    & Eclipse Temurin \texttt{22.0.2+9} \\
-Node.js                & \texttt{v25.8.1} \\
-npm                    & \texttt{11.12.1} \\
-Python                 & \texttt{3.13.2} \\
-\bottomrule
-\end{tabular}
-\caption{
-Language toolchains used to build and run the encoder, optimizer, harness, and analysis scripts.}
-\label{tab:bench_toolchains}
-\end{table}
-
 The rendering scenarios (\cref{sub:scenarios}) drive a headless Chromium instance via Puppeteer\footnote{\url{https://pptr.dev/}, last accessed 2026-05-23}.
 The visual-correctness check (\cref{sec:visual_correctness}) uses MapLibre~GL~JS's Node-side software rasterizer with \texttt{pixelmatch}.
 Used chrome launch flags are \texttt{--enable-gpu},\allowbreak\texttt{--ignore-gpu-blocklist},\allowbreak\
@@ -826,6 +807,27 @@ The y-axis is zoomed to the data range to make the differences visible.
 The full range spans approximately \qty{6}{\mega\byte} out of \qty{3.14}{\giga\byte} total}
     \label{fig:minhash_sweep}
 \end{figure}
+
+
+
+\begin{table}[htbp]
+	\centering
+	\begin{tabular}{@{}l l@{}}
+		\toprule
+		\textbf{Toolchain} & \textbf{Installed on bench host} \\
+		\midrule
+		Rust (\texttt{rustc})  & \texttt{1.94.1} (2026-03-25) \\
+		Cargo                  & \texttt{1.94.1} (2026-03-24) \\
+		JDK                    & Eclipse Temurin \texttt{22.0.2+9} \\
+		Node.js                & \texttt{v25.8.1} \\
+		npm                    & \texttt{11.12.1} \\
+		Python                 & \texttt{3.13.2} \\
+		\bottomrule
+	\end{tabular}
+	\caption{
+		Language toolchains used to build and run the encoder, optimizer, harness, and analysis scripts.}
+	\label{tab:bench_toolchains}
+\end{table}
 
 \clearpage
 \section{Use of Generative AI and Writing Assistance}\label{app:ai_disclosure}
