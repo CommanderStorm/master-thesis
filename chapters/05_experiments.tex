@@ -88,7 +88,7 @@ For caveats, please see \cref{sub:expr_discussion}}
     \caption{
 Marginal contribution of each expression pass to load time reduction shows the effect of each of the passes cleanly.
 Compared to the effects of the passes introduced in \cref{sec:exp_structural}, the passes added here are not as effective in reducing load time.
-For caveats, please see \cref{sub:expr_discussion}}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:marginal_loadMs}
 \end{figure}
 
@@ -100,7 +100,7 @@ Marginal contribution of each expression pass to parse the style in miliseconds.
 Variance is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
 The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
 This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.
-For caveats, please see \cref{sub:expr_discussion}}
+\newline Step markers $\dagger$ and $\ast$: see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:marginal_styleParseMs}
 \end{figure}
 
