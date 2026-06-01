@@ -109,6 +109,30 @@ function sliceVectorTileLayer(sourceLayer, maxZoomTileID, targetTileID) {
 }
 \end{lstlisting}
 
+The layer-merging savings in \cref{sub:structural_optimizations} depend on the two render-pass loops the painter runs over \texttt{layerIds} (opaque top-to-bottom, translucent bottom-to-top).
+Every layer eliminated by a merge shortens \texttt{layerIds} and removes one texttt{renderLayer} dispatch from each pass.
+
+\begin{lstlisting}[language=TypeScript,caption={MapLibre GL-JS painter render loop (\texttt{src/render/painter.ts})},label=lst:painter_loop]
+// opaque pass (top-to-bottom)
+for (this.currentLayer = layerIds.length - 1;
+this.currentLayer >= 0; this.currentLayer--) {
+	const layer = this.style._layers[layerIds[this.currentLayer]];
+	const tileManager = tileManagers[layer.source];
+	const coords = coordsAscending[layer.source];
+	this._renderTileClippingMasks(layer, coords, false);
+	this.renderLayer(this, tileManager, layer, coords, renderOptions);
+}
+
+// translucent pass (bottom-to-top)
+for (this.currentLayer = 0;
+this.currentLayer < layerIds.length; this.currentLayer++) {
+	const layer = this.style._layers[layerIds[this.currentLayer]];
+	const tileManager = tileManagers[layer.source];
+	// ...
+	this.renderLayer(this, tileManager, layer, coords, renderOptions);
+}
+\end{lstlisting}
+
 \Cref{lst:worker_pipeline} shows the steps MapLibre GL-JS's \texttt{WorkerTile.parse} method goes through to process a tile's data to produce the vertex buffers for the painter.
 
 \begin{lstlisting}[
@@ -151,30 +175,6 @@ for (const sourceLayerId in layerFamilies) {
         bucket.populate(features, options, this.tileID.canonical);
         featureIndex.bucketLayerIDs.push(family.map((l) => l.id));
     }
-}
-\end{lstlisting}
-
-The layer-merging savings in \cref{sub:structural_optimizations} depend on the two render-pass loops the painter runs over \texttt{layerIds} (opaque top-to-bottom, translucent bottom-to-top).
-Every layer eliminated by a merge shortens \texttt{layerIds} and removes one texttt{renderLayer} dispatch from each pass.
-
-\begin{lstlisting}[language=TypeScript,caption={MapLibre GL-JS painter render loop (\texttt{src/render/painter.ts})},label=lst:painter_loop]
-// opaque pass (top-to-bottom)
-for (this.currentLayer = layerIds.length - 1;
-     this.currentLayer >= 0; this.currentLayer--) {
-    const layer = this.style._layers[layerIds[this.currentLayer]];
-    const tileManager = tileManagers[layer.source];
-    const coords = coordsAscending[layer.source];
-    this._renderTileClippingMasks(layer, coords, false);
-    this.renderLayer(this, tileManager, layer, coords, renderOptions);
-}
-
-// translucent pass (bottom-to-top)
-for (this.currentLayer = 0;
-     this.currentLayer < layerIds.length; this.currentLayer++) {
-    const layer = this.style._layers[layerIds[this.currentLayer]];
-    const tileManager = tileManagers[layer.source];
-    // ...
-    this.renderLayer(this, tileManager, layer, coords, renderOptions);
 }
 \end{lstlisting}
 
