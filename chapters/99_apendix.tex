@@ -584,9 +584,7 @@ Step 17 (tile shave only, applied to the baseline tile data without prior struct
 
 \section{Per-Zoom Tile Size Breakdown}\label{app_tile_sizes}
 
-In \cref{tab:tile_sizes_per_zoom}, we report the per-zoom-level tile size (gzip) for the Germany \ac{OMT} tileset across four encoding configurations, namely the \ac{MVT} baseline, the reference \ac{MLT} encoder of Tremmel \& Zink, our \ac{MLT} encoder (without shaving), and the full pipeline (style optimizations + tile shaving + our encoder).
-For the shaved configuration, we use the advisory generated from the fiord style.
-Other styles would produce slightly different shaving results depending on their property and layer references.
+In \cref{tab:tile_sizes_per_zoom}, we report per-zoom-level gzip-compressed tile sizes for the Germany \ac{OMT} tileset under four configurations: the \ac{MVT} baseline, Tremmel & Zink's reference \ac{MLT} encoder, our \ac{MLT} encoder, and the full shaved pipeline using a fiord-derived advisory.
 
 \begin{table}[htbp]
 \centering \small
