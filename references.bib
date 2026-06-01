@@ -76,7 +76,7 @@ Literaturangaben Rev. ed. of: Compilers, principles, techniques, and tools / Alf
   url = {https://www.rfc-editor.org/info/rfc7932},
   urldate = {2026-05-11},
   langid = {english},
-  file = {/home/frank/Zotero/storage/IYLE584M/Alakuijala and Szabadka - 2016 - brotli Compressed Data Format.pdf}
+  file = {/home/frank/Zotero/storage/IYLE584M/Alakuijala and Szabadka - 2016 - Brotli Compressed Data Format.pdf}
 }
 
 @article{amiraghdamLOCALISLocallyadaptiveLine2020,
@@ -869,6 +869,27 @@ Literaturangaben Rev. ed. of: Compilers, principles, techniques, and tools / Alf
   file = {/home/frank/Zotero/storage/HE74LV4G/Ma et al. - 2021 - HiVision Rapid visualization of large-scale spatial vector data.pdf}
 }
 
+@online{maronVectorTilesAre2025,
+  title = {Vector {{Tiles}} Are Deployed on {{OpenStreetMap}}.Org | {{OpenStreetMap Blog}}},
+  author = {Maron, Mikel},
+  date = {2025-07-22},
+  url = {https://blog.openstreetmap.org/2025/07/22/vector-tiles-are-deployed-on-openstreetmap-org/},
+  urldate = {2025-10-24},
+  langid = {american},
+  file = {/home/frank/Zotero/storage/VM5U63MC/vector-tiles-are-deployed-on-openstreetmap-org.html}
+}
+
+@online{masoOGCAPITiles2022,
+  type = {Standard},
+  title = {{{OGC API}} - {{Tiles}} - {{Part}} 1: {{Core}}},
+  author = {Masó, Joan and Jacovella-St-Louis, Jérôme},
+  date = {2022-11-10},
+  url = {https://docs.ogc.org/is/20-057/20-057.html},
+  urldate = {2026-05-11},
+  organization = {OGC API - Tiles - Part 1: Core},
+  file = {/home/frank/Zotero/storage/FZVR4KNL/20-057.html}
+}
+
 @standard{masoOpenGISWebMap2010,
   type = {OpenGIS® Standard},
   title = {{{OpenGIS Web Map Tile Service Implementation Standard}}},
@@ -913,12 +934,21 @@ Literaturangaben Rev. ed. of: Compilers, principles, techniques, and tools / Alf
   langid = {english}
 }
 
-@article{melnikDremelInteractiveAnalysis,
-  title = {Dremel: {{Interactive Analysis}} of {{Web-Scale Datasets}}},
+@article{melnikDremelInteractiveAnalysis2010,
+  title = {Dremel: Interactive Analysis of Web-Scale Datasets},
+  shorttitle = {Dremel},
   author = {Melnik, Sergey and Gubarev, Andrey and Long, Jing Jing and Romer, Geoffrey and Shivakumar, Shiva and Tolton, Matt and Vassilakis, Theo},
+  date = {2010-09},
+  journaltitle = {Proc. VLDB Endow.},
+  volume = {3},
+  number = {1--2},
+  pages = {330--339},
+  issn = {2150-8097},
+  doi = {10.14778/1920841.1920886},
+  url = {https://dl.acm.org/doi/10.14778/1920841.1920886},
+  urldate = {2026-06-01},
   abstract = {Dremel is a scalable, interactive ad-hoc query system for analysis of read-only nested data. By combining multi-level execution trees and columnar data layout, it is capable of running aggregation queries over trillion-row tables in seconds. The system scales to thousands of CPUs and petabytes of data, and has thousands of users at Google. In this paper, we describe the architecture and implementation of Dremel, and explain how it complements MapReduce-based computing. We present a novel columnar storage representation for nested records and discuss experiments on few-thousand node instances of the system.},
-  langid = {english},
-  file = {/home/frank/Zotero/storage/JX9YDNCA/Melnik et al. - Dremel Interactive Analysis of Web-Scale Datasets.pdf}
+  langid = {english}
 }
 
 @book{miettinenNonlinearMultiobjectiveOptimization1998a,
@@ -1039,13 +1069,6 @@ Literaturangaben Rev. ed. of: Compilers, principles, techniques, and tools / Alf
   file = {/home/frank/Zotero/storage/Q8PN4DN7/Newcomb et al. - 2020 - Verifying and improving Halide’s term rewriting system with program synthesis.pdf}
 }
 
-@online{OGCAPITiles,
-  title = {{{OGC API}} - {{Tiles}} - {{Part}} 1: {{Core}}},
-  url = {https://docs.ogc.org/is/20-057/20-057.html},
-  urldate = {2026-05-11},
-  file = {/home/frank/Zotero/storage/FZVR4KNL/20-057.html}
-}
-
 @book{paretoCoursDEconomiePolitique1896,
   title = {Cours d'\{\{{{Economie}}\}\} {{Politique Professe}} a l'\{\{{{Universite}}\}\} de {{Lausanne}}},
   author = {Pareto, V.},
@@ -1138,7 +1161,7 @@ Literaturangaben Rev. ed. of: Compilers, principles, techniques, and tools / Alf
 }
 
 @online{StyleoptimizedVectorTiles,
-  title = {Style-Optimized Vector Tiles | {{Help}} | {{Mapbox}}},
+  title = {Style-Optimized Vector Tiles | {{Mapbox}}},
   url = {https://docs.mapbox.com/help/glossary/style-optimized-vector-tiles/},
   urldate = {2026-04-21},
   file = {/home/frank/Zotero/storage/Y8DDDEIC/style-optimized-vector-tiles.html}
@@ -1227,15 +1250,6 @@ Literaturangaben Rev. ed. of: Compilers, principles, techniques, and tools / Alf
   abstract = {As a result of decades of research and industrial development, modern query optimizers are complex software artifacts. However, the quality of the query plan chosen by an optimizer is largely determined by the quality of the underlying statistical summaries. Small selectivity estimation errors, propagated exponentially, can lead to severely sub-optimal plans. Modern optimizers typically maintain one-dimensional statistical summaries and make the attribute value independence and join uniformity assumptions for efficiently estimating selectivities. Therefore, selectivity estimation errors in today’s optimizers are frequently caused by missed correlations between attributes. We present a selectivity estimation approach that does not make the independence assumptions. By carefully using concepts from the field of graphical models, we are able to factor the joint probability distribution of all the attributes in the database into small, usually two-dimensional distributions. We describe several optimizations that can make selectivity estimation highly efficient, and we present a complete implementation inside PostgreSQL’s query optimizer. Experimental results indicate an order of magnitude better selectivity estimates, while keeping optimization time in the range of tens of milliseconds.},
   langid = {english},
   file = {/home/frank/Zotero/storage/GLG37K2C/Tzoumas et al. - 2011 - Lightweight graphical models for selectivity estimation without independence assumptions.pdf}
-}
-
-@online{VectorTilesAre2025,
-  title = {Vector {{Tiles}} Are Deployed on {{OpenStreetMap}}.Org | {{OpenStreetMap Blog}}},
-  date = {2025-07-22},
-  url = {https://blog.openstreetmap.org/2025/07/22/vector-tiles-are-deployed-on-openstreetmap-org/},
-  urldate = {2025-10-24},
-  langid = {american},
-  file = {/home/frank/Zotero/storage/VM5U63MC/vector-tiles-are-deployed-on-openstreetmap-org.html}
 }
 
 @online{Vectortilespec21Master,

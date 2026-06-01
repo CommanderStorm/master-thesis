@@ -159,7 +159,7 @@ If a source has no tile at a zoom lower than \mlprop{minzoom}, the layer is not 
 
 A \emph{vector tile} encodes map data in a compact binary format rather than in a pre-rendered image.
 Each tile is organized into \emph{source layers} (e.g., roads, buildings, water), and each source layer contains a set of \emph{features}.
-A feature consists of geometry (point, linestring, or polygon encoded as integer coordinates relative to the tile's extent), optionally a set of key-value \emph{properties} (e.g., \texttt{class=motorway} or \texttt{name=Main~Street}), optionally a set of IDs, and metadata such as the tile extent.
+A feature consists of geometry (point, linestring, or polygon encoded as integer coordinates relative to the tile's extent), optionally a set of key-value \emph{properties} (e.g., \mlval{class}=\mlval{"motorway"} or \mlval{name}=\mlval{"Main~Street"}), optionally a set of IDs, and metadata such as the tile extent.
 
 The following formats are used for encoding and transferring data to the client:
 
@@ -418,7 +418,7 @@ The independence assumption is known to be inaccurate when columns are correlate
 More sophisticated estimators (such as multi-dimensional histograms, sampling-based methods, or the lightweight graphical models proposed by Tzoumas et~al.~\cite{tzoumasLightweightGraphicalModels2011} that capture inter-attribute correlations without the full cost of joint-distribution estimation) improve accuracy at higher computational cost.
 
 Map-style filters are in fact known to violate independence.
-In \ac{OMT}, for example, \texttt{class} and \texttt{subclass} are strongly correlated by schema design (every value of \texttt{subclass} implies a constrained set of \texttt{class} values), as are \texttt{admin\_level} and \texttt{maritime}.
+In \ac{OMT}, for example, \mlval{class} and \mlval{subclass} are strongly correlated by schema design (every value of \mlval{subclass} implies a constrained set of \mlval{class} values), as are \mlval{admin\_level} and \mlval{maritime}.
 A joint-distribution estimator, such as the one we propose in \cref{sec:selectivity_reordering}, would therefore give tighter bounds, but our selectivity signal is consumed only by a \emph{reordering} heuristic (not by a cost-based plan chooser) and reordering is monotone in the ordering of the individual selectivities rather than in their absolute values.
 The independence-estimator error therefore propagates into the quality of the short-circuit ordering but never into the correctness of the rewritten style, which makes the cheap estimator an acceptable engineering choice for our use case.
 
@@ -454,12 +454,12 @@ Traditional database systems store data in \emph{row-oriented} layouts, where al
 This layout is efficient for transactional workloads that access entire records, but wasteful for analytical queries that access only a few columns, as the entire record must be read to access every single attribute.
 
 \emph{Column-oriented} (columnar) storage transposes this layout, storing all values of a single attribute contiguously~\cite{abadiDesignImplementationModern2013}.
-The foundational system in this space is by Dremel~\cite{melnikDremelInteractiveAnalysis}, who introduced the record shredding and assembly algorithm for nested columnar data using definition and repetition levels, the representation pattern that directly inspired Apache Parquet and, by extension, the columnar layout that \ac{MLT} adapts for tile data.
+The foundational system in this space is by Dremel~\cite{melnikDremelInteractiveAnalysis2010}, who introduced the record shredding and assembly algorithm for nested columnar data using definition and repetition levels, the representation pattern that directly inspired Apache Parquet and, by extension, the columnar layout that \ac{MLT} adapts for tile data.
 This layout offers three advantages for read-heavy workloads. \emph{Reduced I/O} follows from reading or transferring only the referenced columns. \emph{Better compression} follows from the higher local homogeneity of values of the same type and semantic domain compared to interleaved multi-type records. \emph{Vectorized processing} follows from the layout's natural fit for \ac{SIMD}-style batch operations over arrays of the same type.
 
 In the context of vector tiles, the row-oriented \ac{MVT} format stores all properties of a feature together, whereas the columnar \ac{MLT} format stores each property as an independent column.
 The columnar layout allows per-column encoding strategies.
-A column of \texttt{road} classes can use dictionary encoding, while a column of \texttt{building\_height} can use a DeltaRLE logical chain handed to a physical technique such as FastPFOR, each chosen independently.
+A column of \mlval{road} classes can use dictionary encoding, while a column of \mlval{building\_height} can use a DeltaRLE logical chain handed to a physical technique such as FastPFOR, each chosen independently.
 
 \subsection{Logical Integer Encodings}\label{sub:logical_integer_encodings}
 
@@ -511,7 +511,7 @@ String data in vector tiles includes feature names, road classes, land-use categ
 The same logical-then-physical split applies as for integer columns.
 
 \textbf{Dictionary encoding} is the logical-level string technique.
-It stores each unique string once and replaces occurrences with integer indices, which is effective when many features share the same value (e.g., thousands of features with \texttt{class = \texttt{residential}}).
+It stores each unique string once and replaces occurrences with integer indices, which is effective when many features share the same value (e.g., thousands of features with \mlval{class} = \mlval{residential}).
 The resulting index column is itself handed to the integer techniques of \cref{sub:logical_integer_encodings,sub:physical_integer_compressions}.
 
 \textbf{\acf{FSST}}~\cite{bonczFSSTFastRandom2020} is the physical-level string technique.
