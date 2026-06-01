@@ -53,7 +53,6 @@ The rendering and static-size metric set is defined in \cref{sub:metrics}.
 
 \cref{fig:waterfall_loadMs} shows the cumulative effect of adding each expression pass in ablation order on median load time, aggregated across the full scenario corpus.
 Lower bars mean a shorter end-to-end load.
-%\cref{fig:marginal_loadMs} then isolates the \emph{marginal} contribution of each pass, stripping out the cumulative accumulation so that individual passes can be compared on a level footing.
 Read together, the two views separate \enquote{which passes are pulling their weight} from \enquote{how much does the stack as a whole improve over the baseline}.
 
 Across the 13 benchmarked styles, the seven expression passes reduced the per-style median load time by \qty{2.0}{\percent} (median across styles, range \qtyrange{-58.8}{+12.3}{\percent} per style).
