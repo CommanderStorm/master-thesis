@@ -773,9 +773,12 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 \label{tab:per_style_summary}
 \end{table}
 
-\begin{figure}[H]
+
+\begin{figure}[p]
 	\centering
-	\includegraphics[height=0.91\textheight]{figures/heatmap_loadMs.pdf}
+	\makebox[\textwidth][c]{%
+		\includegraphics[width=1.15\paperwidth]{figures/heatmap_loadMs.pdf}
+	}
 	\caption{
 		Heatmap of load time across scenarios (rows) and ablation steps (columns), where more-brown cells indicate greater improvement relative to baseline.
 		Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
@@ -785,9 +788,11 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\label{fig:heatmap_loadMs}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[p]
 	\centering
-	\includegraphics[height=0.91\textheight]{figures/heatmap_fps.pdf}
+	\makebox[\textwidth][c]{%
+		\includegraphics[width=1.15\paperwidth]{figures/heatmap_fps.pdf}
+	}
 	\caption{
 		Heatmap of \ac{FPS} across scenarios (rows) and ablation steps (columns).
 		Compared to \cref{fig:heatmap_loadMs}, the \ac{FPS} gains are distributed more uniformly across scenarios, since sustained frame rate is driven by per-feature evaluation cost rather than by tile-fetch latency once tiles are resident.
