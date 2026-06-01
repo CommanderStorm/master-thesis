@@ -46,7 +46,7 @@ The rendering style serves as the generalization specification, and the pruning 
 The distinction is that classical generalization selects features by geometric criteria (area, length, density), whereas style-driven shaving selects by attribute criteria (properties and values referenced by the style).
 
 At a higher level of abstraction, tile schemas themselves embody data-level design decisions.
-The \ac{OMT} schema~\cite{VectorTilesAre2025} defines which attributes are included at which zoom levels for OpenStreetMap data.
+The \ac{OMT} schema~\cite{maronVectorTilesAre2025} defines which attributes are included at which zoom levels for OpenStreetMap data.
 Wallner et al.~\cite{wallnerOpenSourceVector2022} describe a PostGIS-based pipeline for dynamic vector tile creation with runtime geometry simplification and \ac{MVT} encoding for spatial data infrastructures.
 Tile generators such as Planetiler\footnote{\url{https://github.com/onthegomap/planetiler}, last accessed 2026-04-21} and Tilemaker\footnote{\url{https://tilemaker.org/}, last accessed 2026-04-21} apply schema-aware rules during the initial tile build step, and Protomaps basemap\footnote{\url{https://protomaps.com}, last accessed 2026-04-21} ships a style-specific schema in which column selection is effectively hard-coded into the tile generator.
 These systems define the data that enters the pipeline.
