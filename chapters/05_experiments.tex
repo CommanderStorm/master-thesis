@@ -812,34 +812,73 @@ Tile shaving produces the most visible drops in load time and \ac{FPS} improveme
 	\label{fig:heatmap_fps}
 \end{landscape}
 
-\begin{figure}[p]
+%loadMs
+\begin{landscape}
+	\thispagestyle{empty}
 	\centering
-	\vspace*{-2cm}
-	\makebox[\textwidth][c]{%
-		\includegraphics[width=0.9\paperwidth]{figures/heatmap_loadMs-crop}
+	
+	\makebox[\linewidth][c]{%
+		\includegraphics[
+		width=1.05\linewidth,
+		trim=1cm 50.5cm 0 0,
+		clip
+		]{figures/heatmap_loadMs-crop}
+	}%
+	
+	\newpage
+	\thispagestyle{empty}
+	\centering
+	
+	\makebox[\linewidth][c]{%
+		\includegraphics[
+		width=1.05\linewidth,
+		trim=1cm 0 0 40.5cm,
+		clip
+		]{figures/heatmap_loadMs-crop}
 	}
-	\caption{
+	
+	\captionof{figure}{
 		Heatmap of load time across scenarios (rows) and ablation steps (columns), where more-brown cells indicate greater improvement relative to baseline.
 		Urban, tile-dense scenarios (New York, Tokyo, Paris) show the largest absolute improvements.
 		Structural passes produce concentrated gains where dead elimination or layer merging applies.
 		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
 	}
 	\label{fig:heatmap_loadMs}
-\end{figure}
+\end{landscape}
 
-\begin{figure}[p]
+%loadMs
+\begin{landscape}
+	\thispagestyle{empty}
 	\centering
-	\vspace*{-2cm}
-	\makebox[\textwidth][c]{%
-		\includegraphics[width=0.9\paperwidth]{figures/heatmap_jankCount-crop}
+	
+	\makebox[\linewidth][c]{%
+		\includegraphics[
+		width=1.05\linewidth,
+		trim=1cm 50.5cm 0 0,
+		clip
+		]{figures/heatmap_jankCount-crop}
+	}%
+	
+	\newpage
+	\thispagestyle{empty}
+	\centering
+	
+	\makebox[\linewidth][c]{%
+		\includegraphics[
+		width=1.05\linewidth,
+		trim=1cm 0 0 40.5cm,
+		clip
+		]{figures/heatmap_jankCount-crop}
 	}
-	\caption{
+	
+	\captionof{figure}{
 		Heatmap of jank-frame counts (frame times substantially slower than their neighbors) across scenarios and ablation steps.
 		Counts increase across the ablation because sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as proportionally large outliers.
 		Real consumer hardware caps well below this rate, so the same pauses would not cross the jank threshold there.
-		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+		$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.
+	}
 	\label{fig:heatmapjankcount}
-\end{figure}
+\end{landscape}
 
 \clearpage
 
