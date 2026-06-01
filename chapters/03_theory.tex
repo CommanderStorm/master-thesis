@@ -290,7 +290,7 @@ In this section we introduce the foundational concepts we apply in \cref{ch:meth
 \subsection{Peephole Optimization}
 
 \begin{sloppypar}
-A \emph{peephole optimizer} examines a small, fixed-size window of code (the \enquote{peephole}) and applies local pattern-matching rewrites that replace instruction sequences with shorter or faster equivalents~\cite{davidsonCodeSelectionObject1984}.
+A \emph{peephole optimizer} examines a small, fixed-sized window of code (the \enquote{peephole}) and applies local pattern-matching rewrites that replace instruction sequences with shorter or faster equivalents~\cite{davidsonCodeSelectionObject1984}.
 Each rewrite rule is independent, matching a local pattern and emitting a replacement without requiring knowledge of the surrounding program.
 Many small, local improvements accumulate into substantial global gains under repeated application.
 \end{sloppypar}
@@ -487,7 +487,7 @@ The canonical chain applies delta first and then \ac{RLE} (written DeltaRLE), ef
 
 \subsection{Physical Integer Compressions}\label{sub:physical_integer_compressions}
 
-A physical-level technique packs a value sequence (possibly the output of a logical chain) into bytes, and each integer column applies exactly one.
+A physical-level technique packs a value sequence (the possible output of a logical chain) into bytes, and each integer column applies to exactly one.
 Our encoder uses two:
 
 \begin{description}
@@ -516,7 +516,7 @@ The resulting index column is itself handed to the integer techniques of \cref{s
 
 \textbf{\acf{FSST}}~\cite{bonczFSSTFastRandom2020} is the physical-level string technique.
 It is a lightweight, block-oriented compressor that learns a \emph{symbol table} of up to 255 frequent byte sequences from the input corpus and replaces occurrences with single-byte codes.
-Unlike general-purpose compressors such as LZ77~\cite{zivUniversalAlgorithmSequential1977} or ~\cite{colletZstandardCompressionApplication2021}, \ac{FSST} preserves random access, so each compressed string can be decompressed independently.
+Unlike general-purpose compressors such as LZ77~\cite{zivUniversalAlgorithmSequential1977} or zstd~\cite{colletZstandardCompressionApplication2021}, \ac{FSST} preserves random access, so each compressed string can be decompressed independently.
 The symbol table is stored once and amortized over all strings in the column.
 
 The two compose in the same logical-then-physical pattern.
