@@ -1,0 +1,49 @@
+/* Global deck styles. Auto-loaded by Slidev from the project root, so these
+   apply to every slide (unlike a `<style>` block in slides.md, which Slidev
+   scopes to a single slide). */
+
+/* Alata (MapLibre brand font), vendored locally for offline use. */
+@font-face {
+  font-family: 'Alata'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('/fonts/alata-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Alata'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('/fonts/alata-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  --ml-primary: #285DAA;
+  --ml-accent: #95BEFA;
+  --ml-bg: #111725;
+}
+
+html, body, #slidev-app { background: var(--ml-bg); color: #eef2f8; }
+.slidev-layout { background: var(--ml-bg); color: #eef2f8; }
+.slidev-slide-content, .dark .slidev-slide-content { background-color: var(--ml-bg) !important; }
+
+.slidev-layout h1, .slidev-layout h2 { color: var(--ml-accent); }
+.slidev-layout a { color: var(--ml-accent); }
+.ml-accent { color: var(--ml-accent); }
+.ml-primary { color: var(--ml-primary); }
+strong { color: var(--ml-accent); }
+
+.big-num { font-size: 2.6rem; font-weight: 700; color: var(--ml-accent); line-height: 1.1; }
+.muted { opacity: 0.7; font-size: 0.85em; }
+table { font-size: 0.85em; }
+.finding-box { border-left: 4px solid var(--ml-accent); padding-left: 1rem; }
+
+/* Globe anchored at the bottom-right corner: its center sits on the corner, so
+   only the top-left quarter of the sphere is on-screen. */
+.globe-corner {
+  position: absolute;
+  right: -45vh; bottom: -60vh;
+  width: 120vh; height: 120vh;
+  z-index: 0;
+  pointer-events: none;
+}
+.globe-corner .globe { border-radius: 0; }
+
+#slidev-goto-dialog.-top-20 { overflow: hidden; max-height: 80px; }
