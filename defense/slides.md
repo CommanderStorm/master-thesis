@@ -32,13 +32,29 @@ Joint style + tile co-optimization for scalable vector maps
 </div>
 
 <div class="globe-corner">
-  <GlobeMap height="130vh" :zoom="2.2" />
+  <GlobeMap height="130vh" :zoom="2.1" />
 </div>
 
 <div class="abs-bl mt-6  text-md opacity-80 relative z-10">
 M.Sc. Defense Frank Elsinga<br>
 Examiner Prof. Dr. Martin Werner<br>
 Supervisors: Paul Walther, Balthasar Teuscher
+</div>
+
+---
+layout: iframe-right
+url: https://blog.openstreetmap.org/2025/07/22/vector-tiles-are-deployed-on-openstreetmap-org/
+---
+
+# Vector Tiles Just Went Mainstream
+
+July 2025: **openstreetmap.org** ships vector tiles.
+
+<div v-click>
+
+**Tiles** + **style**, rendered in the browser, for Millions of users.<br>
+Every **byte** and **frame** counts
+
 </div>
 
 ---
@@ -64,25 +80,23 @@ A CPU/GPU/thermally-bound <strong>device</strong> stalls the second.
 # The Gap: Each Side Optimizes Alone
 
 <div class="grid grid-cols-2 gap-8 mt-10">
-<div v-click>
+<div v-click class="text-center">
 
 ### Style
-Tuned for **appearance**.<br>
-Layers, filters, paint.
+Tuned for **appearance**.
 
 </div>
-<div v-click>
+<div v-click class="text-center">
 
 ### Tiles
-Encoded **generically**.<br>
-Every property, generic compression.
+Encoded **generically**.
 
 </div>
 </div>
 
 <div v-click class="mt-12  text-center text-lg">
-A filter folding away a property could let the encoder<br>
-<strong>drop that whole column</strong> - if the two sides talk.
+Filter-folding a property lets encoder<br>
+<strong>drop a column</strong> - if the two sides talk.
 </div>
 
 ---
@@ -171,7 +185,7 @@ flowchart LR
   ADV --> L3
   subgraph L3 [Data passes]
     direction TB
-    C1[tile shaving] --> C2[adaptive<br>MLT encoding]
+    C1[tile shaving] --> C3[interning] --> C2[adaptive<br>MLT encoding]
   end
   T[Tiles T] --> L3
   L3 --> OUT[S′<br>T′]
@@ -179,14 +193,14 @@ flowchart LR
 
 </div>
 
-<div v-click>
-<div class="flex items-center justify-center gap-4 mt-5 text-sm">
+<div>
+<div class="flex items-center justify-center gap-4 mt-2 text-sm">
 <span class="ml-accent">simpler / style rewrites</span>
-<div class="w-56 h-1 rounded-full bg-gradient-to-r from-[#285DAA] to-[#95BEFA]"></div>
+<div class="w-64 h-2 rounded-full bg-gradient-to-r from-[#285DAA] to-[#95BEFA]"></div>
 <span class="ml-accent">whole-document / data</span>
 </div>
 
-<div class="muted text-center mt-3">
+<div class="muted text-center -mt-1">
 Scope
 </div>
 </div>
@@ -238,7 +252,7 @@ Non-confluent, but iterating until no rule fires is sound for any order.
 </div>
 
 <div v-click class="mt-3 finding-box">
-Barely move load time (<strong>−2.0%</strong> median).
+Barely move load time (<strong>-2.0%</strong> median).
 
 Value is <strong>enabling downstream passes</strong> - narrowing the advisory, exposing dead layers.
 </div>
@@ -250,7 +264,7 @@ Value is <strong>enabling downstream passes</strong> - narrowing the advisory, e
 <div class="grid grid-cols-2 gap-6 mt-4">
 <div>
 
-Typed passes over the whole style document:
+Typed passes over the whole style document:<br>
 **dead elimination**, metadata refinement, **layer merging**, cleanup.
 
 <v-clicks>
@@ -263,7 +277,7 @@ Typed passes over the whole style document:
 </div>
 <div>
 
-<div class="grid grid-cols-2">
+<div v-click at="-2" class="grid grid-cols-2">
 
 ```mermaid {scale: 0.62}
 %%{init: {'theme':'base','themeVariables':{'fontFamily':'Alata, sans-serif','primaryColor':'#1b2336','primaryTextColor':'#e8eefc','primaryBorderColor':'#285DAA','lineColor':'#95BEFA','clusterBkg':'#141b2c','clusterBorder':'#285DAA','edgeLabelBackground':'#111725'}}}%%
@@ -294,9 +308,9 @@ flowchart TB
 </div>
 
 <div v-click class="mt-3 finding-box">
-<strong>These two are synergistic:</strong> a dead layer between two mergeable layers blocks the merge.<br>
+<strong>Synergistic:</strong> Dead layer between two mergeable layers may block the merge.<br>
 Dead elimination removes the gap, then merging fires.
-<span class="muted">Fiord −36.8% expression-tree nodes, Liberty merged 4 layers.</span>
+<span class="muted">Liberty merged 4 layers.</span>
 </div>
 
 ---
@@ -310,23 +324,23 @@ layout: center
 <div class="grid grid-cols-2 gap-x-8 gap-y-6">
 
 <div v-click class="finding-box">
-<div class="text-xl"><strong>Germany OMT</strong></div>
-<div class="muted mt-1">encoder-only baseline</div>
+<div class="text-xl"><strong>end-to-end benchmarks</strong></div>
+<div class="muted mt-1">10-style deep corpus</div>
 </div>
 
 <div v-click class="finding-box">
-<div class="text-xl"><strong>10-style deep corpus</strong></div>
-<div class="muted mt-1">end-to-end benchmarks</div>
+<div class="text-xl"><strong>static passes &amp; generalization</strong></div>
+<div class="muted mt-1">13-style Maputnik</div>
 </div>
 
 <div v-click class="finding-box">
-<div class="text-xl"><strong>11-style subset</strong></div>
-<div class="muted mt-1">tile-shaving effectiveness</div>
+<div class="text-xl"><strong>tile-shaving effectiveness</strong></div>
+<div class="muted mt-1">11-style subset</div>
 </div>
 
 <div v-click class="finding-box">
-<div class="text-xl"><strong>13-style Maputnik</strong></div>
-<div class="muted mt-1">static passes &amp; generalization</div>
+<div class="text-xl"><strong>encoder-only baseline</strong></div>
+<div class="muted mt-1">Germany OMT</div>
 </div>
 
 </div>
@@ -339,13 +353,13 @@ layout: center
 <div>
 
 <div class="h-[430px]"><BenchExtent /></div>
-<div class="muted text-center text-xs mt-1"><strong>Geo extent</strong> - urban to rural</div>
+<div class="muted text-center text-xs mt-1"><strong>Geographic extent</strong></div>
 
 </div>
 <div>
 
 <div class="h-[430px]"><CameraTour /></div>
-<div class="muted text-center text-xs mt-1">how the <strong>camera moves</strong> - 5 paths per location</div>
+<div class="muted text-center text-xs mt-1">How the <strong>camera animates</strong></div>
 </div>
 </div>
 
@@ -371,14 +385,14 @@ layout: section
 
 <div class="grid grid-cols-2 gap-8 mt-6 text-center">
 <div v-click>
-<div class="big-num">−71%</div>
-<div class="muted">median load time (63–74%, 10 styles)</div>
+<div class="big-num">-71%</div>
+<div class="muted">median load time (63-74%, 10 styles)</div>
 <img :src="'/figures/rendering_metrics_mlt_fiord_loadMs.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
 <div class="muted text-xs mt-1">Fiord Load Time</div>
 </div>
 <div v-click>
 <div class="big-num">+152%</div>
-<div class="muted">median FPS (100–200%)</div>
+<div class="muted">median FPS (100-200%)</div>
 <img :src="'/figures/rendering_metrics_mlt_fiord_fps.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
 <div class="muted text-xs mt-1">Fiord FPS</div>
 </div>
@@ -386,12 +400,12 @@ layout: section
 
 <div class="grid grid-cols-2 gap-8 mt-6 text-center">
 <div v-click>
-<span class="text-3xl ml-accent font-bold">−28%</span>
-<span class="muted ml-3">tile volume vs. reference encoder</span>
+<span class="text-3xl ml-accent font-bold">-28%</span>
+<span class="muted ml-3">total tile size vs. reference encoder</span>
 </div>
 <div v-click>
-<span class="text-3xl ml-accent font-bold">29%</span>
-<span class="muted ml-3">median tile-shaving (19.8–46.3%)</span>
+<span class="text-3xl ml-accent font-bold">-29%</span>
+<span class="muted ml-3">median tile-shaving (19.8-46.3%)</span>
 </div>
 </div>
 
@@ -403,28 +417,17 @@ Not uniform: verbose institutional styles benefit far more than compact basemaps
 
 # Load-Time Wins From Tile Shaving
 
-<div class="mt-4">
+<div class="muted mt-2 mb-4">Advisory keeps only referenced properties, geometries, values - the rest is dropped from every tile.</div>
 
-The optimized style yields a **pruning advisory**: which properties, geometry types, and
-feature values are actually referenced. Everything else is **removed from every tile**.
-
-</div>
-
-<div class="grid grid-cols-2 gap-8 mt-4 items-center">
-<div>
-
+<div class="grid grid-cols-2 gap-8 items-center">
 <img :src="'/figures/tile_shave_per_style.png'" class="rounded" />
-
-</div>
 <div>
 
-- A general schema (OMT) exposes hundreds of properties; any one style uses a fraction
-- On-wire reduction **19.8% (Bright) -> 46.3% (Toner)**, median **29%**
-- *No single optimal tile* - the best encoding depends on the style
+- On-wire **19.8% - 46.3%**, median **29%**
+- *No single optimal tile* - depends on the style
 
 <div v-click class="finding-box mt-4">
-Shaving alone drops pooled median load time <strong>396 ms -> 134 ms (−66%)</strong>
-and lifts FPS <strong>+102%</strong>.
+Shaving alone: pooled load <strong>-66%</strong> (396 -> 134 ms), FPS <strong>+102%</strong>.
 </div>
 
 </div>
@@ -436,21 +439,20 @@ and lifts FPS <strong>+102%</strong>.
 
 <div class="w-1/2">
 
-Instead of a fixed per-column plan, **compete strategies at encode time**:
-sort orderings, integer codecs, string compression (dictionary / FSST), shared dictionaries.
+No fixed per-column plan, **compete strategies at encode time**:
+sorting, integer codecs, string comp. (dictionary / FSST), shared dictionaries.
 
 <v-clicks>
 
-- vs. reference MLT: **−28.4%** uncompressed
-- vs. gzip-MVT: **−12.3%**; vs. zstd-22-MVT: **−13.0%**
-- Naive cost would be 4×; bounding-box pruning + profiling + warm-start -> **1.95×**
+- vs. reference MLT: **-28.4%** uncompressed
+- vs. gzip-MVT: **-12.3%**; vs. zstd-22-MVT: **-13.0%**
+- **Naive** cost would be **4×**; BBox pruning + profiling + warm-start -> ours **1.95×**
 
 </v-clicks>
 
 <div v-click class="mt-6 finding-box">
-The win is the <strong>strategy competition, not the columnar format</strong>: the reference
-MLT under gzip is actually <em>worse</em> than gzip-MVT. Our uncompressed output (3.06 GB) already
-beats MVT+gzip (3.08 GB).
+Winning is <strong>strat. competition, not the format</strong>: Reference MLT under gzip is <em>worse</em> than gzip-MVT.
+Our uncompressed output (3.06 GB) beats MVT+gzip (3.08 GB).
 </div>
 
 </div>
@@ -473,7 +475,7 @@ layout: section
 
 ---
 
-# Ranking the passes - memory
+# Ranking the Passes - Memory
 
 
 <div>
@@ -483,7 +485,7 @@ layout: section
 
 ---
 
-# Ranking the passes - Load Time
+# Ranking the Passes - Load Time
 
 
 <div>
@@ -516,14 +518,14 @@ Liberty: combined 4.8% vs. style-only 4.8%.<br>
 <div class="mt-6 grid grid-cols-2 gap-8">
 <div v-click>
 
-Per-scenario synergy appears in **17 / 36** style–scenario pairs - too sparse to lift the aggregate.
+Per-scenario synergy appears in **17/36** style-scenario pairs - too sparse to lift the aggregate.
 
 </div>
 
 <div v-click class="finding-box">
 
 **Good news:**<br>
-*Independently adoptability*.
+*Independently adoptable*.
 </div>
 </div>
 
@@ -555,48 +557,52 @@ layout: section
 | MLT re-encode (16 T) | 47 s |
 
 <div class="muted mt-3">
-<strong>Re-encoding dominates</strong> at ~= 2 min/tileset, <strong>paid once</strong><br>
-Sort competition only at <strong>1.95×</strong> instead of <strong>4×</strong>.
+<strong>Re-encoding dominates</strong> ~= 2 min/tileset, <strong>paid once</strong><br>
+Sort competition held to <strong>1.95×</strong> instead of <strong>4x</strong>
 </div>
 
 </div>
-<div>
+<div v-click>
 
-<v-clicks>
+### Winning axis
 
-### Pick your axis
-
-
-<v-clicks>
-
-- **Decode** the big win - **4.6–8.3×** vs MVT+gzip
-- **Transfer size** the most reliable
-- **FPS** improvement currently driven by pruning
-
-</v-clicks>
+- **Decode** the big win - **4.6-8.3×** vs MVT+gzip<br>
+  But not currently implemented
+- **FPS** and **Transfer size** the most reliable
+  Improvement currently driven by pruning
 
 </div>
 </div>
 
 ---
 
-# Threats & Scope
-
 <div class="grid grid-cols-2 gap-8 mt-6">
 <div>
 
-### Limitations
-- Measured on a **desktop workstation**, not a battery device. **No direct energy** measurement
-- Jank metric *worsens* >2000 FPS - small GC pauses become proportionally large (a regime real hardware never enters)
-- Rust decoder's 4.6–8.3× **not yet deployed** in-browser (WASM–JS boundary cost remains)
+# Limitations
+<v-clicks>
+
+- **No** direct **energy** measurement (desktop host). Transfer size + FPS as proxies.
+- Jank metric worsens as FPS increases:<br>GC cause issues that real hardware never reaches.
+- **Existing browser decoder** only.<br>
+  Rust decoder's 4.6-8.3× perf compared to MVT needs integration.
+
+</v-clicks>
 
 </div>
 <div>
 
-### Out of Scope
-- **Geometry simplification** (would break pixel-identity)
-- **Symbol-layer merging** (per-layer collision detection)
-- Proprietary styles (Mapbox/Esri ToS) - results confirmed on **open-source styles**
+# Scope
+
+<v-clicks>
+
+- **Symbol-layer merging** excluded (glyph collision)
+- **Thresholds tuned** on **open data** and **styles**.<br>
+  Cross-dataset and provider <small>(Mapbox/Esri ToS)</small> sensitivity uncharacterized
+- Perfect pixel equality and allowed to remove errors
+
+</v-clicks>
+
 
 </div>
 </div>
@@ -607,15 +613,16 @@ Sort competition only at <strong>1.95×</strong> instead of <strong>4×</strong>
 
 <div class="mt-4 space-y-3">
 
-<div v-click>R1 <strong>How much?</strong> −71% load, +152% FPS, −28% tile size.</div>
+<div v-click>R1 <strong>How much?</strong> -71% load, +152% FPS, -28% tile size.</div>
 
 <div v-click>R2 <strong>Which passes, do they compound?</strong> Shaving dominates. <em>additive</em>, not synergistic.</div>
 
-<div v-click>R2 <strong>What does it cost?</strong> ~2 min/tileset, amortized once. decode latency the big win.</div>
+<div v-click>R3 <strong>What does it cost?</strong> ~2 min/tileset, amortized once. decode latency the big win.</div>
 
 </div>
 
-<div v-click class="mt-6 finding-box">
+<div v-click>
+<div class="mt-6 finding-box">
 
 ### Future Work
 Online/incremental serving,<br>
@@ -624,7 +631,8 @@ WASM decoder in MapLibre GL JS
 
 </div>
 
-<div v-click class="text-center text-xl ml-accent mt-6">Questions?</div>
+<div class="text-center text-xl ml-accent mt-6">Questions?</div>
+</div>
 
 ---
 
@@ -655,7 +663,7 @@ WASM decoder in MapLibre GL JS
 
 ---
 
-# Per-style Generalisation
+# Per-Style Generalization
 
 <div>
 <img :src="'/figures/cross_style_reduction.png'" class="rounded bg-white p-1" />
@@ -687,11 +695,11 @@ That the size **reductions** happen to **sum** rather than **super-add** is an *
 </div>
 
 - The formal object $\mathcal{O}: \mathcal{S}\times\mathcal{T}\to\mathcal{S}\times\mathcal{T}$ is what made the additive-vs-synergistic question *askable*.
-- Synergy **does** occur per-scenario (17/36) - just not large enough to dominate the aggregate.
+- Synergy **does** occur per-scenario (17/36), but not large enough to dominate the aggregate.
 
 ---
 
-# Expression-Pass Wins Come From Typos ???
+# Expression-Pass Wins Come From Typos?
 
 <div class="mt-4 finding-box">
 Large <code>unary-simplification</code> outliers trace to <strong>typos / suboptimal authoring</strong> in specific styles.<br>
@@ -700,7 +708,7 @@ Reported, but not <em>not</em> generalized.
 
 <div class="mt-6">
 
-- Reason for expression passes as **enablers**, not direct load-time lever (−2.0% median).
+- Reason for expression passes as **enablers**, not direct load-time lever (-2.0% median).
 - Generalizable expression result is the **static-corpus** number. <br>Median **31.4% raw** reduction across 13 styles, none regressed.
 - Initial complexity does *not* predict reduction.<br>
   <code>Americana</code> drives it, dropping it flips the sign.
@@ -715,11 +723,11 @@ Reported, but not <em>not</em> generalized.
 
 - Each rule is **individually semantics-preserving**. Expressions are compositional.
 - Iterating to a fixpoint is therefore **sound for any order** - different orders reach different but **visually-equivalent** normal forms.
-- Termination: a well-founded measure (expression-tree size + a bounded promotion budget); hard cap 8 iters, converges in 2–3 in practice.
+- Termination: a well-founded measure (expression-tree size + a bounded promotion budget); hard cap 8 iters, converges in 2-3 in practice.
 
 </div>
 
-<div v-click class="mt-6 finding-box">
+<div class="mt-6 finding-box">
 <strong>Equality saturation</strong> (egg) would remove the ordering dependence and find a global optimum -
 flagged as future work. I'd only reach for it if rule-ordering sensitivity became a *measured* problem.
 </div>
