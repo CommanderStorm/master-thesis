@@ -4,6 +4,7 @@ title: Automatic Data and Style-Driven Map Optimization
 info: |
   Master's thesis defense - Frank Elsinga, TUM.
   Automatic Data and Style-Driven Map Optimization for Scalable Geospatial Visualization.
+favicon: https://maplibre.org/favicon.ico
 class: text-left
 background: '#111725'
 transition: slide-left
@@ -34,21 +35,21 @@ Joint style + tile co-optimization for scalable vector maps
   <GlobeMap height="130vh" :zoom="2.2" />
 </div>
 
-<div class="abs-bl m-6 text-sm opacity-80 relative z-10">
-Frank Elsinga - M.Sc. Defense<br>
-Examiner: Prof. Dr. Martin Werner<br>
+<div class="abs-bl mt-6  text-md opacity-80 relative z-10">
+M.Sc. Defense Frank Elsinga<br>
+Examiner Prof. Dr. Martin Werner<br>
 Supervisors: Paul Walther, Balthasar Teuscher
 </div>
 
 ---
 
-# An interactive map runs two paths
+# An Interactive Map Runs Two Paths
 
 <v-clicks>
 
-- **Per-tile path** (load time)<br>
+- **Load time**<br>
   fetch tiles -> decode -> bind style to every feature
-- **Per-frame path** (render time)<br>
+- **Per-frame time**<br>
   re-evaluate view-dependent expressions -> draw calls -> GPU
 
 </v-clicks>
@@ -60,7 +61,7 @@ A CPU/GPU/thermally-bound <strong>device</strong> stalls the second.
 
 ---
 
-# The gap: each side optimizes alone
+# The Gap: Each Side Optimizes Alone
 
 <div class="grid grid-cols-2 gap-8 mt-10">
 <div v-click>
@@ -79,20 +80,16 @@ Every property, generic compression.
 </div>
 </div>
 
-<div v-click class="mt-12 finding-box text-center text-lg">
-A filter that folds away a property could let the encoder<br>
-<strong>drop that whole column</strong> - but only if the two sides talk.
-</div>
-
-<div v-click class="mt-8 text-center text-2xl ml-accent">
-Synergistic, or merely additive?
+<div v-click class="mt-12  text-center text-lg">
+A filter folding away a property could let the encoder<br>
+<strong>drop that whole column</strong> - if the two sides talk.
 </div>
 
 ---
 
-# Research questions
+# Research Questions
 
-<div class="mt-12 space-y-10">
+<div class="mt-10 space-y-8">
 
 <div v-click class="flex items-center gap-6">
 <span class="big-num">R1</span>
@@ -120,9 +117,13 @@ Synergistic, or merely additive?
 
 </div>
 
+<div v-click class="mt-10 text-center text-xl ml-accent">
+The rest of this talk is these three questions.
+</div>
+
 ---
 
-# Approach: a standalone co-optimizer
+# Approach: A Standalone Co-Optimizer
 
 <div class="text-center mt-8 text-2xl">
 
@@ -130,19 +131,17 @@ $$ \mathcal{O}: \mathcal{S} \times \mathcal{T} \;\to\; \mathcal{S} \times \mathc
 
 </div>
 
-<div class="text-center muted mt-2">style + tiles in, optimized replacement out - same space</div>
-
-<div class="grid grid-cols-2 gap-8 mt-12">
+<div class="grid grid-cols-2 gap-10 mt-12">
 <div v-click class="finding-box">
 
-### Visual equivalence
+### Visual Equivalence
 $$R(S,T,v)\neq\bot \,\Rightarrow\, R(S',T',v)\equiv R(S,T,v)$$
-<div class="muted mt-2">Pixel-checked across zooms and viewports.<br><strong>May drop a render error, never add one</strong>.</div>
+<div class="muted mt-2">Pixel-checked across zooms and viewports.<br><strong>May drop a render error</strong>, never add one.</div>
 
 </div>
 <div v-click class="finding-box">
 
-### Strict idempotency
+### Strict Idempotency
 $$\mathcal{O}(\mathcal{O}(x)) = \mathcal{O}(x)$$
 <div class="muted mt-2">Re-optimizing changes nothing. Proptest + libFuzzer</div>
 
@@ -151,11 +150,11 @@ $$\mathcal{O}(\mathcal{O}(x)) = \mathcal{O}(x)$$
 
 ---
 
-# The three-level pipeline
+# The Three-Level Pipeline
 
 <div class="flex justify-center">
 
-```mermaid {scale: 0.65}
+```mermaid {scale: 0.75}
 %%{init: {'theme':'base','themeVariables':{'fontFamily':'Alata, sans-serif','primaryColor':'#1b2336','primaryTextColor':'#e8eefc','primaryBorderColor':'#285DAA','lineColor':'#95BEFA','clusterBkg':'#141b2c','clusterBorder':'#285DAA','edgeLabelBackground':'#111725'}}}%%
 flowchart LR
   S[Style S] --> L1
@@ -180,26 +179,27 @@ flowchart LR
 
 </div>
 
-<div class="flex flex-col items-center mt-3">
-<div class="text-sm ml-accent">simpler</div>
-<div class="w-3/4 h-0.5 bg-white/40 relative">
-<div class="absolute right-0 -top-1.5 w-0 h-0 border-y-6 border-y-transparent border-l-8 border-l-white/40"></div>
-</div>
+<div v-click>
+<div class="flex items-center justify-center gap-4 mt-5 text-sm">
+<span class="ml-accent">simpler / style rewrites</span>
+<div class="w-56 h-1 rounded-full bg-gradient-to-r from-[#285DAA] to-[#95BEFA]"></div>
+<span class="ml-accent">whole-document / data</span>
 </div>
 
-<div class="muted text-center mt-4">
-Ordering addresses the <strong>phase-ordering problem</strong>.
+<div class="muted text-center mt-3">
+Scope
+</div>
 </div>
 
 ---
 
-# Expression Pass Optimisation
+# Expression Passes
 
 <div class="grid grid-cols-2 gap-6 mt-4">
 <div>
 
-Peephole rewrites run to a **fixpoint**:
-constant/stats-driven folding, algebraic simplification, default stripping, selectivity reordering, ...
+Peephole rewrites run to a **fixpoint**:<br>
+constant/stats-driven folding,<br>algebraic simplification, default stripping,<br>selectivity reordering, ...
 
 <div class="muted mt-3">
 Simple, semantics-preserving rules.
@@ -211,7 +211,7 @@ Non-confluent, but iterating until no rule fires is sound for any order.
 
 ````md magic-move
 ```json
-// any-of-alls
+// any-of-all
 ["any",
   ["all",
     ["has","name"],
@@ -245,7 +245,7 @@ Value is <strong>enabling downstream passes</strong> - narrowing the advisory, e
 
 ---
 
-# Structural passes: synergy *within* the family
+# Structural Passes: Synergy *Within* the Family
 
 <div class="grid grid-cols-2 gap-6 mt-4">
 <div>
@@ -263,30 +263,145 @@ Typed passes over the whole style document:
 </div>
 <div>
 
-```mermaid {scale: 0.6}
+<div class="grid grid-cols-2">
+
+```mermaid {scale: 0.62}
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Alata, sans-serif','primaryColor':'#1b2336','primaryTextColor':'#e8eefc','primaryBorderColor':'#285DAA','lineColor':'#95BEFA','clusterBkg':'#141b2c','clusterBorder':'#285DAA','edgeLabelBackground':'#111725'}}}%%
 flowchart TB
   subgraph before [before]
-    R1[road-primary] --> DEAD[road-ferry<br/>DEAD]
+    direction TB
+    R1[road-primary] --> DEAD[road-ferry]
     DEAD --> R2[road-secondary]
   end
-  subgraph after [after dead-elim + merge]
-    M[road * merged]
+  classDef dead fill:#3a2230,stroke:#d98a8a,color:#f0c9c9,stroke-dasharray:5 3;
+  classDef merged fill:#1b3a5c,stroke:#95BEFA,color:#eef2f8;
+  class DEAD dead
+  class M merged
+```
+
+```mermaid {scale: 0.62}
+%%{init: {'theme':'base','themeVariables':{'fontFamily':'Alata, sans-serif','primaryColor':'#1b2336','primaryTextColor':'#e8eefc','primaryBorderColor':'#285DAA','lineColor':'#95BEFA','clusterBkg':'#141b2c','clusterBorder':'#285DAA','edgeLabelBackground':'#111725'}}}%%
+flowchart TB
+  subgraph after [after]
+    M[road]
   end
-  before -.->|"gap removed,<br/>then merged"| after
+  classDef merged fill:#1b3a5c,stroke:#95BEFA,color:#eef2f8;
+  class M merged
 ```
 
 </div>
 </div>
+</div>
 
 <div v-click class="mt-3 finding-box">
-<strong>These two are synergistic:</strong> a dead layer between two mergeable layers blocks
-the merge. Dead elimination removes the gap, then merging fires.
-<span class="muted">Fiord −36.8% expression-tree nodes; Liberty merged 4 layer pairs.</span>
+<strong>These two are synergistic:</strong> a dead layer between two mergeable layers blocks the merge.<br>
+Dead elimination removes the gap, then merging fires.
+<span class="muted">Fiord −36.8% expression-tree nodes, Liberty merged 4 layers.</span>
+</div>
+
+---
+layout: center
+---
+
+# How We Measure It
+
+<div class="muted -mt-2 mb-8">Four complementary corpora, each chosen for what it isolates</div>
+
+<div class="grid grid-cols-2 gap-x-8 gap-y-6">
+
+<div v-click class="finding-box">
+<div class="text-xl"><strong>Germany OMT</strong></div>
+<div class="muted mt-1">encoder-only baseline</div>
+</div>
+
+<div v-click class="finding-box">
+<div class="text-xl"><strong>10-style deep corpus</strong></div>
+<div class="muted mt-1">end-to-end benchmarks</div>
+</div>
+
+<div v-click class="finding-box">
+<div class="text-xl"><strong>11-style subset</strong></div>
+<div class="muted mt-1">tile-shaving effectiveness</div>
+</div>
+
+<div v-click class="finding-box">
+<div class="text-xl"><strong>13-style Maputnik</strong></div>
+<div class="muted mt-1">static passes &amp; generalization</div>
+</div>
+
+</div>
+
+---
+layout: center
+---
+
+<div class="grid grid-cols-2 gap-6 -mx-12">
+<div>
+
+<div class="h-[430px]"><BenchExtent /></div>
+<div class="muted text-center text-xs mt-1"><strong>Geo extent</strong> - urban to rural</div>
+
+</div>
+<div>
+
+<div class="h-[430px]"><CameraTour /></div>
+<div class="muted text-center text-xs mt-1">how the <strong>camera moves</strong> - 5 paths per location</div>
+</div>
+</div>
+
+<div class="text-center muted mt-3">
+Running a 19-step cumulative ablation, fixed order x 15 runs + warmup
+</div>
+
+---
+layout: section
+---
+
+<div class="flex items-center gap-6">
+<span class="big-num">R1</span>
+<div>
+<div class="text-3xl"><strong>How much</strong> can co-optimization gain?</div>
+<div class="muted mt-2">To what extent can it improve rendering and shrink tiles?</div>
+</div>
 </div>
 
 ---
 
-# Style-driven tile shaving
+# Headline Results
+
+<div class="grid grid-cols-2 gap-8 mt-6 text-center">
+<div v-click>
+<div class="big-num">−71%</div>
+<div class="muted">median load time (63–74%, 10 styles)</div>
+<img :src="'/figures/rendering_metrics_mlt_fiord_loadMs.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
+<div class="muted text-xs mt-1">Fiord Load Time</div>
+</div>
+<div v-click>
+<div class="big-num">+152%</div>
+<div class="muted">median FPS (100–200%)</div>
+<img :src="'/figures/rendering_metrics_mlt_fiord_fps.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
+<div class="muted text-xs mt-1">Fiord FPS</div>
+</div>
+</div>
+
+<div class="grid grid-cols-2 gap-8 mt-6 text-center">
+<div v-click>
+<span class="text-3xl ml-accent font-bold">−28%</span>
+<span class="muted ml-3">tile volume vs. reference encoder</span>
+</div>
+<div v-click>
+<span class="text-3xl ml-accent font-bold">29%</span>
+<span class="muted ml-3">median tile-shaving (19.8–46.3%)</span>
+</div>
+</div>
+
+<div v-click class="mt-4 text-center muted">
+Not uniform: verbose institutional styles benefit far more than compact basemaps.
+</div>
+
+---
+
+# Load-Time Wins From Tile Shaving
 
 <div class="mt-4">
 
@@ -317,7 +432,7 @@ and lifts FPS <strong>+102%</strong>.
 
 ---
 
-# Adaptive MLT encoder
+# Adaptive MLT Encoder
 
 <div class="w-1/2">
 
@@ -345,270 +460,260 @@ beats MVT+gzip (3.08 GB).
 </div>
 
 ---
-layout: center
+layout: section
 ---
 
-# Evaluation
-
-<div class="grid grid-cols-2 gap-10 mt-2">
+<div class="flex items-center gap-6">
+<span class="big-num">R2</span>
 <div>
-
-### Four complementary corpora
-- **Germany OMT** - encoder-only baseline (256.5 k tiles)
-- **10-style deep corpus** - end-to-end browser benchmarks
-- **11-style subset** - tile-shaving effectiveness
-- **13-style Maputnik** - static passes, generalization
-
-### Method
-**18 scenarios** on **19-step cumulative ablation** with fixed pass order
-
+<div class="text-3xl"><strong>Which passes</strong> matter, and do they compound?</div>
+<div class="muted mt-2">additive or synergistic?</div>
 </div>
+</div>
+
+---
+
+# Ranking the passes - memory
+
+
 <div>
-
-<CameraTour />
-
-</div>
+<img :src="'/figures/memory_ablation.png'" class="rounded bg-white p-1" />
+<div class="muted text-center text-sm mt-1">Average memory usage</div>
 </div>
 
 ---
 
-# Headline results
+# Ranking the passes - Load Time
 
-<div class="grid grid-cols-4 gap-4 mt-8 text-center">
-<div v-click>
-<div class="big-num">−71%</div>
-<div class="muted">median load time<br>(63–74%, 10 styles)</div>
-</div>
-<div v-click>
-<div class="big-num">+152%</div>
-<div class="muted">median FPS<br>(100–200%)</div>
-</div>
-<div v-click>
-<div class="big-num">−28%</div>
-<div class="muted">tile volume vs.<br>reference encoder</div>
-</div>
-<div v-click>
-<div class="big-num">4.6–8.3×</div>
-<div class="muted">decode throughput<br>(native µbench)</div>
-</div>
-</div>
 
-<div v-click class="mt-10">
-<img :src="'/figures/rendering_metrics_mlt_fiord_loadMs.png'" class="h-52 mx-auto rounded bg-white p-1" />
-<div class="muted text-center">Fiord load time across configs: baseline -> style-only -> shaving -> +MLT</div>
+<div>
+<img :src="'/figures/marginal_loadMs.png'" width="90%" class="mx-auto rounded bg-white p-1" />
+<div class="muted text-center text-sm mt-1">Average Load time change</div>
 </div>
 
 ---
 
-# The central finding: additive, not synergistic
 
-<div class="mt-6 finding-box text-lg">
-We <strong>expected</strong> style-level dead-elimination to narrow the advisory and
-<strong>compound</strong> with data-level shaving on tile size.
+<div>
+<img :src="'/figures/complexity_metrics.png'" width="75%" class="mx-auto rounded bg-white p-1" />
+</div>
+
+---
+
+# The Central Finding: Additive, Not Synergistic
+
+<div class="mt-6 text-lg">
+<strong>Expectation:</strong> style-dead-elimination narrows advisory and <strong>compound</strong> with data-level shaving.
 </div>
 
 <div v-click class="mt-6 finding-box text-lg">
-The aggregate shows <strong>combined ≈ style-only + shaving-only</strong>.
-Fiord: combined 14.7% vs. style-only 14.5%. Liberty: 4.8% = 4.8%. <strong>Additive.</strong>
+The aggregate shows <strong>combined ~= style-only + shaving-only</strong>. <br>
+Fiord: combined 14.7% vs. style-only 14.5%. <br>
+Liberty: combined 4.8% vs. style-only 4.8%.<br>
+=> <strong>Additive.</strong>
 </div>
 
-<div v-click class="mt-6 grid grid-cols-2 gap-8">
-<div>
+<div class="mt-6 grid grid-cols-2 gap-8">
+<div v-click>
 
 Per-scenario synergy appears in **17 / 36** style–scenario pairs - too sparse to lift the aggregate.
 
 </div>
-<div class="finding-box">
 
-**Good news for deployment:** the three families are *independently adoptable*. Mobile/network ->
-prioritize shaving + encoding. Desktop/draw-call bound -> structural passes alone.
+<div v-click class="finding-box">
+
+**Good news:**<br>
+*Independently adoptability*.
+</div>
+</div>
+
+---
+layout: section
+---
+
+<div class="flex items-center gap-6">
+<span class="big-num">R3</span>
+<div>
+<div class="text-3xl"><strong>What does it cost?</strong></div>
+<div class="muted mt-2">preprocessing time vs. decode / render / transfer payoff</div>
+</div>
+</div>
+
+---
+
+# Cost & Trade-Offs
+
+<div class="grid grid-cols-2 gap-8 mt-6 items-start">
+<div>
+
+### Preprocessing
+
+| Stage | Wall-clock |
+|---|---|
+| Style + advisory | < 10 ms |
+| Statistics (1 T) | 57 s |
+| MLT re-encode (16 T) | 47 s |
+
+<div class="muted mt-3">
+<strong>Re-encoding dominates</strong> at ~= 2 min/tileset, <strong>paid once</strong><br>
+Sort competition only at <strong>1.95×</strong> instead of <strong>4×</strong>.
+</div>
+
+</div>
+<div>
+
+<v-clicks>
+
+### Pick your axis
+
+
+<v-clicks>
+
+- **Decode** the big win - **4.6–8.3×** vs MVT+gzip
+- **Transfer size** the most reliable
+- **FPS** improvement currently driven by pruning
+
+</v-clicks>
 
 </div>
 </div>
 
 ---
 
-# Threats & scope
+# Threats & Scope
 
 <div class="grid grid-cols-2 gap-8 mt-6">
 <div>
 
-### Honest limitations
-- Headline FPS measured on a **desktop workstation**, not a battery device; **no direct energy** measurement
+### Limitations
+- Measured on a **desktop workstation**, not a battery device. **No direct energy** measurement
 - Jank metric *worsens* >2000 FPS - small GC pauses become proportionally large (a regime real hardware never enters)
 - Rust decoder's 4.6–8.3× **not yet deployed** in-browser (WASM–JS boundary cost remains)
 
 </div>
 <div>
 
-### Deliberately out of scope
+### Out of Scope
 - **Geometry simplification** (would break pixel-identity)
 - **Symbol-layer merging** (per-layer collision detection)
 - Proprietary styles (Mapbox/Esri ToS) - results confirmed on **open-source styles**
-- MinHash τ tuned on Germany OMT only
 
 </div>
 </div>
 
 ---
 
-# Conclusion
+# Conclusion: The Three Questions Answered
 
 <div class="mt-4 space-y-3">
 
-<div v-click><strong>R1 - Yes, meaningfully.</strong> −71% load, +152% FPS, −28%/−12% tile size. Not uniform: verbose institutional styles benefit far more than compact basemaps.</div>
+<div v-click>R1 <strong>How much?</strong> −71% load, +152% FPS, −28% tile size.</div>
 
-<div v-click><strong>R2 - Tile shaving dominates;</strong> structural passes synergize internally; style×data composes <em>additively</em>. Three independently-adoptable mechanisms.</div>
+<div v-click>R2 <strong>Which passes, do they compound?</strong> Shaving dominates. <em>additive</em>, not synergistic.</div>
 
-<div v-click><strong>R3 - Re-encoding is the cost driver</strong> (~2 min/tileset at 16 threads, amortized once). Decode latency is the most dramatic gain; transfer size the most reliable.</div>
+<div v-click>R2 <strong>What does it cost?</strong> ~2 min/tileset, amortized once. decode latency the big win.</div>
 
 </div>
 
 <div v-click class="mt-6 finding-box">
 
-### Future work
-Online/incremental serving · selective column decoding (late materialization) ·
-equality saturation for the rewrite engine · Rust->WASM decoder in MapLibre GL JS
+### Future Work
+Online/incremental serving,<br>
+late (column) materialization,<br>
+WASM decoder in MapLibre GL JS
 
 </div>
 
-<div v-click class="text-center text-xl ml-accent mt-6">Thank you - questions?</div>
+<div v-click class="text-center text-xl ml-accent mt-6">Questions?</div>
 
 ---
-layout: section
-class: text-center
-background: '#111725'
----
-
-# Backup slides
-
-<div class="muted">anticipated questions</div>
-
----
-
-# Synergy failed - why call it *joint* optimization?
-
-<div class="mt-4 finding-box">
-
-The **mechanism** is genuinely joint: the data-level advisory is *derived from the optimized
-style*. Without the style passes there is no advisory. That the size *reductions* happen to sum
-rather than super-add is an **empirical finding about magnitude**, not a refutation of the coupling.
-
-</div>
-
-<v-clicks>
-
-- The formal object $\mathcal{O}: \mathcal{S}\times\mathcal{T}\to\mathcal{S}\times\mathcal{T}$ is what made the additive-vs-synergistic question *askable* - that's contribution C1.
-- Two separate tools could not enforce the joint soundness criterion (a style edit must remain consistent with what was shaved from the tile).
-- Synergy *does* occur per-scenario (17/36) - it exists, it's just not large enough to dominate the aggregate.
-
-</v-clicks>
-
----
-
-# Desktop numbers - do they hold on real devices?
 
 <div class="grid grid-cols-2 gap-6 mt-4">
 <div>
-
-- **Transfer size** is deterministic under compression - device-independent. The −28%/−71% bytes hold everywhere.
-- **FPS headroom**: >1000 FPS on the host means the renderer is GPU-idle. On a capped device that headroom converts to *sustained* frame rate and *lower* energy.
-- Frame-time percentiles (p95/p99) improve too, not just the mean.
-
+  FPS
+  <img :src="'/figures/heatmap_fps.png'" class="rounded bg-white p-1" />
 </div>
 <div>
-
-<img :src="'/figures/heatmap_jankCount.png'" class="rounded bg-white p-1" />
-<div class="muted">Jank count - note it worsens only in the >2000 FPS regime real hardware never reaches.</div>
-
+  Jank Counts
+  <img :src="'/figures/heatmap_jankCount.png'" class="rounded bg-white p-1" />
 </div>
 </div>
-
-<div class="muted mt-3">No direct energy measurement - transfer size and frame rate are well-established mobile proxies.</div>
 
 ---
 
-# Is the 4.6–8.3× decode speedup real in production?
+<div class="grid grid-cols-2 gap-6 mt-4">
+<div>
+  FPS
+  <img :src="'/figures/heatmap_fps.png'" class="rounded bg-white p-1" />
+</div>
+<div>
+  First Load
+  <img :src="'/figures/heatmap_loadMs.png'" class="rounded bg-white p-1" />
+</div>
+</div>
+
+
+---
+
+# Per-style Generalisation
+
+<div>
+<img :src="'/figures/cross_style_reduction.png'" class="rounded bg-white p-1" />
+<div class="muted text-center mt-2">Cross-style generalization of style size reduction</div>
+</div>
+
+---
+
+# Per-Zoom Shaving
+
+<div>
+<img :src="'/figures/shaving_effectiveness_per_zoom.png'" class="rounded bg-white p-1" />
+
+<div class="muted text-center mt-2">Shaving across zoom (MVT vs MLT)</div>
+</div>
+
+---
+
+# Synergy Failed - Why Call It *"Joint Optimization"*?
 
 <div class="mt-4 finding-box">
-It is a <strong>native Rust Criterion micro-benchmark</strong> (full decode, 100 samples/cell, zoom 4/7/13).
-The browser <code>loadMs</code> numbers do <strong>not</strong> use it - they use the existing JS MLT decoder.
+
+The **mechanism** is genuinely joint:
+The data-level advisory is *derived from the optimized style*.
+Without the style passes there is no advisory.
+
+That the size **reductions** happen to **sum** rather than **super-add** is an **empirical finding about magnitude**.
+
 </div>
 
-<v-clicks>
-
-- A Rust->WASM port would pay a WASM–JS boundary cost: per-column copies into JS typed arrays, GC pressure, 128-bit SIMD cap.
-- Jangda et al. (2019): 45–55% WASM-vs-native slowdown on SPEC CPU.
-- Expectation: full advantage on **large, feature-dense** tiles; near-parity on small tiles.
-- This is why the headline live numbers are attributed to **shaving**, not the decoder.
-
-</v-clicks>
+- The formal object $\mathcal{O}: \mathcal{S}\times\mathcal{T}\to\mathcal{S}\times\mathcal{T}$ is what made the additive-vs-synergistic question *askable*.
+- Synergy **does** occur per-scenario (17/36) - just not large enough to dominate the aggregate.
 
 ---
 
-# How is visual equivalence actually verified?
+# Expression-Pass Wins Come From Typos ???
+
+<div class="mt-4 finding-box">
+Large <code>unary-simplification</code> outliers trace to <strong>typos / suboptimal authoring</strong> in specific styles.<br>
+Reported, but not <em>not</em> generalized.
+</div>
 
 <div class="mt-6">
 
-- Both pipelines render the corpus through MapLibre GL JS's **Node software rasterizer** at `pixelRatio` 1.
-- Compared **pixel-for-pixel** with `pixelmatch` using the upstream render-harness defaults:
-  `allowed = 0.00025`, YIQ-perceptual `threshold = 0.1285`.
-- Encoder soundness: **round-trip property tests + libFuzzer**; no regressions across the corpus.
-- Idempotency: $\mathcal{O}(\mathcal{O}(x)) = \mathcal{O}(x)$ checked as a test invariant.
+- Reason for expression passes as **enablers**, not direct load-time lever (−2.0% median).
+- Generalizable expression result is the **static-corpus** number. <br>Median **31.4% raw** reduction across 13 styles, none regressed.
+- Initial complexity does *not* predict reduction.<br>
+  <code>Americana</code> drives it, dropping it flips the sign.
 
 </div>
-
-<div class="muted mt-4">Caveat: this is the upstream perceptual tolerance, not bit-exactness. Sub-threshold differences are by construction invisible.</div>
 
 ---
 
-# Cache fragmentation from style-specific tiles?
-
-<div class="mt-4">
-
-Shaved tiles are keyed on **(tile, style)** - a shared CDN can't pool them. Moving style *i* off the
-shared MVT pool is net-beneficial when:
-
-</div>
-
-<div class="text-center text-xl my-4">
-
-$$ r \;>\; \big[\, h(\Lambda_\mathcal{M}/N) - h(\lambda_i/N) \,\big] \cdot C_f $$
-
-</div>
-
-<v-clicks>
-
-- With benchmark values ($r\approx3$ ms/tile, $C_f\approx25.8$ ms, $h\approx0.9$): tolerable hit-rate gap ≈ **11.6%**.
-- ⇒ Shave the **1–2 dominant styles** that own the pool; leave the long tail on raw MVT.
-- Driven by **traffic concentration**, not style count. (This is what Mapbox's closed "style-optimized vector tiles" likely does.)
-
-</v-clicks>
-
----
-
-# Expression-pass wins come from typos - non-representative?
-
-<div class="mt-4 finding-box">
-Correct - the large unary-simplification outliers trace to <strong>typos / suboptimal authoring</strong>
-in specific styles. I report this explicitly and do <em>not</em> generalize it.
-</div>
-
-<v-clicks>
-
-- That's exactly why I frame expression passes as **enablers**, not as a direct load-time lever (−2.0% median, within noise).
-- The honest, generalizable expression result is the **static-corpus** number: median **31.4% raw** reduction across 13 unseen styles, none regressed.
-- Initial complexity does *not* predict reduction ($r=0.35$, $p=0.24$, $n=13$) - a single high-leverage point (Americana) drives it; dropping it flips the sign.
-
-</v-clicks>
-
----
-
-# Non-confluent rewrites - why trust the result?
+# Non-Confluent Rewrites - Why Trust the Result?
 
 <div class="mt-6">
 
-- Each rule is **individually semantics-preserving**; expressions are compositional.
+- Each rule is **individually semantics-preserving**. Expressions are compositional.
 - Iterating to a fixpoint is therefore **sound for any order** - different orders reach different but **visually-equivalent** normal forms.
 - Termination: a well-founded measure (expression-tree size + a bounded promotion budget); hard cap 8 iters, converges in 2–3 in practice.
 
@@ -618,46 +723,3 @@ in specific styles. I report this explicitly and do <em>not</em> generalize it.
 <strong>Equality saturation</strong> (egg) would remove the ordering dependence and find a global optimum -
 flagged as future work. I'd only reach for it if rule-ordering sensitivity became a *measured* problem.
 </div>
-
----
-
-# What is yours vs. Rivian's on the encoder?
-
-<div class="mt-6 grid grid-cols-2 gap-8">
-<div>
-
-### Mine
-- The encoder **and its strategy-selection routine**
-- Tile shaving + the pruning advisory
-- The whole style-optimization pipeline
-- All evaluation & analysis
-
-</div>
-<div>
-
-### Rivian
-- Runtime **performance engineering** of the encoder/decoder pair
-- Transcode time: ~5 h (reference) -> **~1 min**
-
-</div>
-</div>
-
-<div class="muted mt-6">
-I credit the speedup to Rivian and deliberately do not analyze encoder *performance* as a contribution.
-The compression *gains* (strategy selection) are mine and measured independently.
-</div>
-
----
-
-# Reference - per-zoom shaving & encoder
-
-<div class="grid grid-cols-2 gap-4 mt-4">
-<div>
-<img :src="'/figures/shaving_effectiveness_per_zoom.png'" class="rounded bg-white p-1" />
-</div>
-<div>
-<img :src="'/figures/cross_style_reduction.png'" class="rounded bg-white p-1" />
-</div>
-</div>
-
-<div class="muted text-center mt-2">Left: shaving across zoom (MVT vs MLT). Right: cross-style generalization, 13 unseen styles.</div>
