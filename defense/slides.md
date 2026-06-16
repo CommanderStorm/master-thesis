@@ -426,10 +426,6 @@ Not uniform: verbose institutional styles benefit far more than compact basemaps
 - On-wire **19.8% - 46.3%**, median **29%**
 - *No single optimal tile* - depends on the style
 
-<div v-click class="finding-box mt-4">
-Shaving alone: pooled load <strong>-66%</strong> (396 -> 134 ms), FPS <strong>+102%</strong>.
-</div>
-
 </div>
 </div>
 
@@ -560,50 +556,6 @@ layout: section
 <strong>Re-encoding dominates</strong> ~= 2 min/tileset, <strong>paid once</strong><br>
 Sort competition held to <strong>1.95×</strong> instead of <strong>4x</strong>
 </div>
-
-</div>
-<div v-click>
-
-### Winning axis
-
-- **Decode** the big win - **4.6-8.3×** vs MVT+gzip<br>
-  But not currently implemented
-- **FPS** and **Transfer size** the most reliable
-  Improvement currently driven by pruning
-
-</div>
-</div>
-
----
-
-<div class="grid grid-cols-2 gap-8 mt-6">
-<div>
-
-# Limitations
-<v-clicks>
-
-- **No** direct **energy** measurement (desktop host). Transfer size + FPS as proxies.
-- Jank metric worsens as FPS increases:<br>GC cause issues that real hardware never reaches.
-- **Existing browser decoder** only.<br>
-  Rust decoder's 4.6-8.3× perf compared to MVT needs integration.
-
-</v-clicks>
-
-</div>
-<div>
-
-# Scope
-
-<v-clicks>
-
-- **Symbol-layer merging** excluded (glyph collision)
-- **Thresholds tuned** on **open data** and **styles**.<br>
-  Cross-dataset and provider <small>(Mapbox/Esri ToS)</small> sensitivity uncharacterized
-- Perfect pixel equality and allowed to remove errors
-
-</v-clicks>
-
-
 </div>
 </div>
 
@@ -636,21 +588,49 @@ WASM decoder in MapLibre GL JS
 
 ---
 
-# Per-Scenario Heatmap - FPS
+<div class="grid grid-cols-2 gap-8 mt-6">
+<div>
 
-<img :src="'/figures/heatmap_fps.png'" class="rounded" />
+# Limitations
 
----
+- **No** direct **energy** measurement.<br>
+  Transfer size + FPS as proxies.
+- Jank metric worsens as FPS increases:<br>
+  GC cause issues that real hardware never reaches.
+- **Existing browser decoder** only.<br>
+  Rust decoder's 4.6-8.3× perf compared to MVT needs integration.
 
-# Jank Count
+</div>
+<div>
 
-<img :src="'/figures/heatmap_jankCount.png'" class="rounded" />
+# Scope
+
+- **Symbol-layer merging** excluded (glyph collision)
+- **Thresholds tuned** on **open data** and **styles**.<br>
+  Cross-dataset and provider <small>(Mapbox/Esri ToS)</small> sensitivity uncharacterized
+- Perfect pixel equality and allowed to remove errors
+
+</div>
+</div>
 
 ---
 
 # Load Time
 
-<img :src="'/figures/heatmap_loadMs.png'" class="rounded" />
+
+<img :src="'/figures/heatmap_loadMs.png'" class="rounded ms-50 -mt-24 -z-10 my-auto" width="740px" />
+
+---
+
+# FPS
+
+<img :src="'/figures/heatmap_fps.png'" class="rounded ms-50 -mt-24 -z-10 my-auto" width="740px" />
+
+---
+
+# Jank Count
+
+<img :src="'/figures/heatmap_jankCount.png'" class="rounded ms-50 -mt-24 -z-10 my-auto" width="740px" />
 
 ---
 
@@ -704,21 +684,4 @@ Reported, but not <em>not</em> generalized.
 - Initial complexity does *not* predict reduction.<br>
   <code>Americana</code> drives it, dropping it flips the sign.
 
-</div>
-
----
-
-# Non-Confluent Rewrites - Why Trust the Result?
-
-<div class="mt-6">
-
-- Each rule is **individually semantics-preserving**. Expressions are compositional.
-- Iterating to a fixpoint is therefore **sound for any order** - different orders reach different but **visually-equivalent** normal forms.
-- Termination: a well-founded measure (expression-tree size + a bounded promotion budget); hard cap 8 iters, converges in 2-3 in practice.
-
-</div>
-
-<div class="mt-6 finding-box">
-<strong>Equality saturation</strong> (egg) would remove the ordering dependence and find a global optimum -
-flagged as future work. I'd only reach for it if rule-ordering sensitivity became a *measured* problem.
 </div>
