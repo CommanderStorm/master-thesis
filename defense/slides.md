@@ -636,30 +636,21 @@ WASM decoder in MapLibre GL JS
 
 ---
 
-<div class="grid grid-cols-2 gap-6 mt-4">
-<div>
-  FPS
-  <img :src="'/figures/heatmap_fps.png'" class="rounded bg-white p-1" />
-</div>
-<div>
-  Jank Counts
-  <img :src="'/figures/heatmap_jankCount.png'" class="rounded bg-white p-1" />
-</div>
-</div>
+# Per-Scenario Heatmap - FPS
+
+<img :src="'/figures/heatmap_fps.png'" class="rounded" />
 
 ---
 
-<div class="grid grid-cols-2 gap-6 mt-4">
-<div>
-  FPS
-  <img :src="'/figures/heatmap_fps.png'" class="rounded bg-white p-1" />
-</div>
-<div>
-  First Load
-  <img :src="'/figures/heatmap_loadMs.png'" class="rounded bg-white p-1" />
-</div>
-</div>
+# Jank Count
 
+<img :src="'/figures/heatmap_jankCount.png'" class="rounded" />
+
+---
+
+# Load Time
+
+<img :src="'/figures/heatmap_loadMs.png'" class="rounded" />
 
 ---
 

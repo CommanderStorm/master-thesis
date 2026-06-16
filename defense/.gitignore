@@ -2,5 +2,3 @@ node_modules/
 dist/
 .slidev/
 *.local
-shot*.mjs
-shot-*.png
