@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import csv
-import json
 import re
-import sys
 from collections import defaultdict
 from pathlib import Path
 from statistics import median
+
+from _common import load_jsonl_dir
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
@@ -112,23 +112,6 @@ SUMMARY_ORDER: list[str] = [
 ]
 
 
-def load_jsonl(input_dir: Path) -> list[dict]:
-    rows: list[dict] = []
-    for path in sorted(input_dir.glob("*.jsonl")):
-        with path.open() as fh:
-            for line in fh:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rows.append(json.loads(line))
-                except json.JSONDecodeError:
-                    pass
-    if not rows:
-        sys.exit(f"No JSONL files found under {input_dir}")
-    return rows
-
-
 def filter_latest_session(records: list[dict]) -> list[dict]:
     by_style: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
     for r in records:
@@ -170,10 +153,14 @@ def aggregate_steps(records: list[dict], style: str) -> list[dict]:
         group = by_step[step_num]
         _, pass_name = parse_variant(group[0]["variant"])
 
-        style_bytes = int(group[0].get("style_bytes", 0))
-        gzip_bytes = int(group[0].get("gzip_bytes", 0))
-        brotli_bytes = int(group[0].get("brotli_bytes", 0))
-        layer_count = int(group[0].get("layer_count", 0))
+        rec = group[0]
+        for field in ("style_bytes", "gzip_bytes", "brotli_bytes", "layer_count"):
+            if field not in rec:
+                raise KeyError(f"missing {field!r} in variant {rec.get('variant')!r}")
+        style_bytes = int(rec["style_bytes"])
+        gzip_bytes = int(rec["gzip_bytes"])
+        brotli_bytes = int(rec["brotli_bytes"])
+        layer_count = int(rec["layer_count"])
 
         loads = [r["loadMs"] for r in group if r.get("loadMs") is not None]
         fpss = [r["fps"] for r in group if r.get("fps") is not None]
@@ -364,7 +351,7 @@ def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
 
 def main() -> int:
     print("Loading JSONL data...")
-    records = load_jsonl(INPUT_DIR)
+    records = load_jsonl_dir(INPUT_DIR)
     print(f"  {len(records)} records from {INPUT_DIR}")
 
     print("\nFiltering to latest session per style...")

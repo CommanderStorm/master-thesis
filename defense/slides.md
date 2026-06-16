@@ -391,8 +391,8 @@ layout: section
 <div class="muted text-xs mt-1">Fiord Load Time</div>
 </div>
 <div v-click>
-<div class="big-num">+152%</div>
-<div class="muted">median FPS (100-200%)</div>
+<div class="big-num">+151%/div>
+<div class="muted">median FPS (99.6-200.3%)</div>
 <img :src="'/figures/rendering_metrics_mlt_fiord_fps.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
 <div class="muted text-xs mt-1">Fiord FPS</div>
 </div>

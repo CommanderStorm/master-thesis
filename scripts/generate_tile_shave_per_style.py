@@ -8,11 +8,11 @@
 # ///
 
 import argparse
-import json
 from pathlib import Path
 
-import pandas as pd
 import plotly.graph_objects as go
+
+from _common import fmt_bytes, load_jsonl_df
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -40,28 +40,6 @@ def export_figure(fig: go.Figure, name: str) -> None:
         print(f"  -> {path}")
 
 
-def fmt_bytes(val: float) -> str:
-    if val >= 1e9:
-        return f"{val / 1e9:.2f} GB"
-    if val >= 1e6:
-        return f"{val / 1e6:.1f} MB"
-    if val >= 1e3:
-        return f"{val / 1e3:.0f} KB"
-    return f"{val:.0f} B"
-
-
-def load_jsonl(path: Path) -> pd.DataFrame:
-    rows = []
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                rows.append(json.loads(line))
-    if not rows:
-        raise SystemExit(f"No data found in {path}")
-    return pd.DataFrame(rows)
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -70,7 +48,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    df = load_jsonl(args.input)
+    df = load_jsonl_df(args.input)
     df = df.sort_values("reduction_pct", ascending=True)
 
     print(f"Loaded {len(df)} styles")

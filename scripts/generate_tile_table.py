@@ -30,7 +30,10 @@ def main() -> None:
     header = ["zoom", "tiles", "mvtBytes", "mvtShavedBytes", "mltJavaBytes", "mltRustBytes", "mltShavedBytes", "deltaPct", "isTotal"]
 
     for z in zooms:
-        vals = {s: data.get((s, z), 0) for s in SOURCES}
+       for s in SOURCES:
+            if (s, z) not in data:
+                raise KeyError(f"missing tile data for source {s!r} at zoom {z}")
+        vals = {s: data[(s, z)] for s in SOURCES}
         for s in SOURCES:
             totals[s] += vals[s]
         tc = tile_counts[z]

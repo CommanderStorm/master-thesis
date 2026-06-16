@@ -5,7 +5,7 @@
 #     "zstandard>=0.23",
 # ]
 # ///
-# extarct per-zoom tile sizes from mbtiles, write CSV
+# extract per-zoom tile sizes from mbtiles, write CSV
 
 import csv
 import gzip

@@ -84,16 +84,6 @@ def export_figure(
         print(f"  → {path}")
 
 
-def fmt_bytes(val: float) -> str:
-    if val >= 1e9:
-        return f"{val / 1e9:.1f} GB"
-    if val >= 1e6:
-        return f"{val / 1e6:.1f} MB"
-    if val >= 1e3:
-        return f"{val / 1e3:.0f} KB"
-    return f"{val:.0f} B"
-
-
 def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
     print("Generating encoder_comparison_per_zoom…")
 
@@ -449,8 +439,13 @@ def plot_interaction(df: pd.DataFrame) -> None:
         print("  (skipped - not enough config data)")
         return
 
-    shave_pct = [(1 - shave_only.get(s, baseline[s]) / baseline[s]) * 100 for s in styles]
-    combined_pct = [(1 - combined.get(s, baseline[s]) / baseline[s]) * 100 for s in styles]
+    # Fail loud if a style is missing from either series: the old `.get(s, baseline[s])`
+    # fallback silently plotted a fake 0% reduction bar (since 1 - baseline/baseline = 0).
+    missing = [s for s in styles if s not in shave_only.index or s not in combined.index]
+    if missing:
+        raise SystemExit(f"missing shave/combined data for styles: {missing}")
+    shave_pct = [(1 - shave_only[s] / baseline[s]) * 100 for s in styles]
+    combined_pct = [(1 - combined[s] / baseline[s]) * 100 for s in styles]
 
     fig = go.Figure()
     fig.add_trace(go.Bar(name="Shaving-only (baseline advisory)", x=styles, y=shave_pct,

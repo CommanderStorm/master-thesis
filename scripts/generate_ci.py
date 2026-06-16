@@ -9,15 +9,15 @@
 from __future__ import annotations
 
 import csv
-import json
 import re
-import sys
 from collections import defaultdict
 from pathlib import Path
 from statistics import median
 
 import numpy as np
 from scipy import stats
+
+from _common import load_jsonl_dir
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
@@ -114,23 +114,6 @@ KEY_CLAIMS = [
 ]
 
 
-def load_jsonl(input_dir: Path) -> list[dict]:
-    rows: list[dict] = []
-    for path in sorted(input_dir.glob("*.jsonl")):
-        with path.open() as fh:
-            for line in fh:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    rows.append(json.loads(line))
-                except json.JSONDecodeError:
-                    pass
-    if not rows:
-        sys.exit(f"No JSONL files found under {input_dir}")
-    return rows
-
-
 def filter_latest_session(records: list[dict]) -> list[dict]:
     by_style: dict[str, dict[str, list[dict]]] = defaultdict(lambda: defaultdict(list))
     for r in records:
@@ -146,6 +129,8 @@ def filter_latest_session(records: list[dict]) -> list[dict]:
             ts: len({r["variant"] for r in recs})
             for ts, recs in by_ts.items()
         }
+        # Pick the session that ran the most variants (the most complete bench run);
+        # break ties by latest timestamp (lexicographic on ISO timestamps).
         best_ts = max(variant_counts, key=lambda ts: (variant_counts[ts], ts))
         filtered.extend(by_ts[best_ts])
         print(f"  {style}: {best_ts} ({variant_counts[best_ts]} variants)")
@@ -196,6 +181,9 @@ def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
 
     diff = treatment - baseline
     nonzero = diff[diff != 0]
+    # Require at least 10 non-zero paired differences: below that the Wilcoxon
+    # signed-rank p-value is unreliable (its normal approximation needs n>=10, and
+    # the exact distribution is too coarse), so we report "not testable" instead.
     if len(nonzero) < 10:
         return None
 
@@ -278,7 +266,7 @@ def compute_synergy(
 
 def main() -> int:
     print("Loading JSONL data...")
-    records = load_jsonl(INPUT_DIR)
+    records = load_jsonl_dir(INPUT_DIR)
     print(f"  {len(records)} records from {INPUT_DIR}")
 
     print("\nFiltering to latest session per style...")

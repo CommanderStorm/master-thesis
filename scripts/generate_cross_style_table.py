@@ -9,13 +9,14 @@
 
 import argparse
 import csv
-import json
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 from scipy import stats
+
+from _common import load_jsonl_df
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -27,18 +28,6 @@ SUMMARY_METRICS: list[tuple[str, str, str]] = [
     ("layers", "Layer count reduction (%)", "layer_reduction_pct"),
     ("ast", "AST node reduction (%)", "ast_reduction_pct"),
 ]
-
-
-def load_jsonl(path: Path) -> pd.DataFrame:
-    rows: list[dict[str, Any]] = []
-    with path.open() as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                rows.append(json.loads(line))
-    if not rows:
-        raise SystemExit(f"No data found in {path}")
-    return pd.DataFrame(rows)
 
 
 def safe_reduction(orig: pd.Series, opt: pd.Series) -> pd.Series:
@@ -57,7 +46,7 @@ def main() -> None:
                         default=DATA_DIR / "cross_style_summary.csv")
     args = parser.parse_args()
 
-    df = load_jsonl(args.input)
+    df = load_jsonl_df(args.input)
     df["layer_reduction_pct"] = safe_reduction(
         pd.Series(df["original_layer_count"]),
         pd.Series(df["optimized_layer_count"]),
@@ -77,8 +66,10 @@ def main() -> None:
         "original_max_depth", "optimized_max_depth",
         "original_filter_count", "optimized_filter_count",
     ]
-    cols = [c for c in per_style_cols if c in df.columns]
-    per_style: pd.DataFrame = pd.DataFrame(df[cols]).copy()
+    missing = [c for c in per_style_cols if c not in df.columns]
+    if missing:
+        raise SystemExit(f"input is missing expected columns: {missing}")
+    per_style = pd.DataFrame(df[per_style_cols])
     per_style = per_style.sort_values(by=["reduction_pct"], ascending=False)
     args.per_style_out.parent.mkdir(parents=True, exist_ok=True)
     per_style.to_csv(args.per_style_out, index=False, float_format="%.4f")
@@ -125,7 +116,7 @@ def main() -> None:
         print(f"  {row['style_title']:24s}  {row['reduction_pct']:5.1f}%  "
               f"(AST nodes: {int(row['original_ast_nodes'])})")
     print("Top 3 (raw reduction):")
-    for _, row in sorted_raw.tail(3).iloc[::-1].iterrows():
+    for _, row in df.nlargest(3, "reduction_pct").iterrows():
         print(f"  {row['style_title']:24s}  {row['reduction_pct']:5.1f}%  "
               f"(AST nodes: {int(row['original_ast_nodes'])})")
     print()
