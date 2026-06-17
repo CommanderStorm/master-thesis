@@ -386,13 +386,13 @@ layout: section
 <div class="grid grid-cols-2 gap-8 mt-6 text-center">
 <div v-click>
 <div class="big-num">-71%</div>
-<div class="muted">median load time (63-74%, 10 styles)</div>
+<div class="muted">median load time (63-74%, e2e)</div>
 <img :src="'/figures/rendering_metrics_mlt_fiord_loadMs.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
 <div class="muted text-xs mt-1">Fiord Load Time</div>
 </div>
 <div v-click>
-<div class="big-num">+151%/div>
-<div class="muted">median FPS (99.6-200.3%)</div>
+<div class="big-num">x2.51</div>
+<div class="muted">median FPS (x2-3, e2e)</div>
 <img :src="'/figures/rendering_metrics_mlt_fiord_fps.png'" class="h-56 mx-auto mt-2 rounded bg-white p-1" />
 <div class="muted text-xs mt-1">Fiord FPS</div>
 </div>
@@ -409,8 +409,8 @@ layout: section
 </div>
 </div>
 
-<div v-click class="mt-4 text-center muted">
-Not uniform: verbose institutional styles benefit far more than compact basemaps.
+<div class="mt-4 text-center muted font-bold">
+Results effect style dependent
 </div>
 
 ---
