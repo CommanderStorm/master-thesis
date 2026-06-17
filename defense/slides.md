@@ -494,6 +494,16 @@ layout: section
 
 ---
 
+# Ranking the Passes - FPS
+
+
+<div>
+<img :src="'/figures/box_fps.png'" width="90%" class="mx-auto rounded bg-white p-1" />
+<div class="muted text-center text-sm mt-1">FPS</div>
+</div>
+
+---
+
 
 <div>
 <img :src="'/figures/complexity_metrics.png'" width="75%" class="mx-auto rounded bg-white p-1" />
