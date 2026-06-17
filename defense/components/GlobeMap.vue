@@ -14,6 +14,15 @@ const failed = ref(false);
 let map: maplibregl.Map | undefined;
 let raf = 0;
 
+// Fold Slidev's slide-scale transform into the pixel ratio so the WebGL buffer
+// matches real screen pixels (otherwise it's rendered small, then stretched).
+const effectivePixelRatio = () => {
+  const layoutWidth = el.value?.clientWidth || 1;
+  const renderedWidth = el.value?.getBoundingClientRect().width || layoutWidth;
+  const slideScale = renderedWidth / layoutWidth;
+  return Math.min((window.devicePixelRatio || 1) * slideScale, 4);
+};
+
 onMounted(() => {
   try {
     map = new maplibregl.Map({
@@ -24,6 +33,9 @@ onMounted(() => {
       zoom: props.zoom,
       attributionControl: false,
       interactive: false,
+      antialias: true,
+      fadeDuration: 0,
+      pixelRatio: effectivePixelRatio(),
     });
     map.on("style.load", () => {
       map!.setProjection({ type: "globe" });
@@ -40,14 +52,19 @@ onMounted(() => {
         raf = requestAnimationFrame(step);
       });
     }
+    window.addEventListener("resize", onResize);
   } catch (e) {
     console.warn("GlobeMap: map init failed, showing fallback", e);
     failed.value = true;
   }
 });
 
+// Slide-scale changes on resize / fullscreen, so the buffer must follow.
+const onResize = () => map?.setPixelRatio(effectivePixelRatio());
+
 onBeforeUnmount(() => {
   cancelAnimationFrame(raf);
+  window.removeEventListener("resize", onResize);
   map?.remove();
 });
 </script>
