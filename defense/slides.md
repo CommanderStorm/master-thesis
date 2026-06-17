@@ -409,7 +409,7 @@ layout: section
 </div>
 </div>
 
-<div class="mt-4 text-center muted font-bold">
+<div v-after class="mt-4 text-center muted font-bold">
 Results effect style dependent
 </div>
 
@@ -442,12 +442,15 @@ sorting, integer codecs, string comp. (dictionary / FSST), shared dictionaries.
 
 - vs. reference MLT: **-28.4%** uncompressed
 - vs. gzip-MVT: **-12.3%**; vs. zstd-22-MVT: **-13.0%**
-- **Naive** cost would be **4×**; BBox pruning + profiling + warm-start -> ours **1.95×**
+- **Naive** cost would be **4×**.<br>
+  BTRBlocks integer codec sel + BBox pruning + profiling + warm-start<br>
+  -> ours **1.95×**
 
 </v-clicks>
 
 <div v-click class="mt-6 finding-box">
-Winning is <strong>strat. competition, not the format</strong>: Reference MLT under gzip is <em>worse</em> than gzip-MVT.
+Winning is <strong>strategy competition</strong>, not the format:<br>
+Reference MLT-gzip <em>worse</em> than gzip-MVT.<br>
 Our uncompressed output (3.06 GB) beats MVT+gzip (3.08 GB).
 </div>
 
