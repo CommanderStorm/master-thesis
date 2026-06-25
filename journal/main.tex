@@ -1,12 +1,25 @@
-%% IJGIS submission: Taylor & Francis tGIS2e class, double-anonymous research article.
+\documentclass[]{interact}
 
-%% tGIS2e overrides the kernel \document with a 2009 copy that (a) over-closes via a
-%% leading \endgroup under the 2025-11 kernel, and (b) fires only the legacy begindocument
-%% hook, so natbib's \AtBeginDocument setup never runs and citations break. Capture the kernel
-%% \document before the class loads and restore it after, re-enabling the full hook system.
-\let\KERNELdocument\document
-\documentclass[]{tGIS2e}
-\let\document\KERNELdocument
+\usepackage{epstopdf}% To incorporate .eps illustrations using PDFLaTeX, etc.
+\usepackage{subfigure}% Support for small, `sub' figures and tables
+
+\usepackage{natbib}% Citation support using natbib.sty
+\bibpunct[, ]{(}{)}{,}{a}{}{,}% Citation support using natbib.sty
+\renewcommand\bibfont{\fontsize{10}{12}\selectfont}% Bibliography support using natbib.sty
+
+\theoremstyle{plain}% Theorem-like structures
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{notation}{Notation}
 
 \usepackage{epsfig}
 \usepackage{graphicx}
@@ -25,12 +38,10 @@
 \sisetup{group-separator={\,}, group-minimum-digits=4, range-phrase={--}, range-units=single}
 \DeclareSIUnit{\byte}{B}
 
-%% TikZ for the two schematic figures ported from the thesis (system architecture, tile shaving).
 \usepackage{tikz}
 \usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit, calc, backgrounds, decorations.pathreplacing, decorations.markings}
-%% The tGIS2e class already bundles subfigure.sty (provides \subfigure); do not reload it.
 
-%% Okabe-Ito CVD-safe palette + semantic role aliases used by the ported figures.
+%% Okabe-Ito CVD-safe palette
 \definecolor{cvdblack}{HTML}{000000}
 \definecolor{cvdorange}{HTML}{E69F00}
 \definecolor{cvdskyblue}{HTML}{56B4E9}
@@ -85,10 +96,6 @@
 \maketitle
 
 \input{sections/00_abstract}
-
-\begin{keywords}
-vector tiles; web mapping; MapLibre; map style optimization; columnar tile encoding
-\end{keywords}
 
 \input{sections/01_introduction}
 \input{sections/02_background}
