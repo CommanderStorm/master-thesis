@@ -1,0 +1,10 @@
+%% Stub replacing the deprecated bundled subfigure.sty, which throws a recoverable
+%% "Extra \endgroup" under the 2025 LaTeX kernel. The tGIS2e class loads subfigure only
+%% for author convenience and does not use it internally. If sub-figures are needed,
+%% load `subcaption` in main.tex instead. Original preserved as subfigure.sty.orig.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{subfigure}[2026/06/22 no-op stub; use subcaption instead]
+\providecommand{\subfigure}[2][]{#2}
+\providecommand{\subtable}[2][]{#2}
+\providecommand{\subref}[1]{\ref{#1}}
+\endinput

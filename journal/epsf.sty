@@ -1,0 +1,8 @@
+% Minimal epsf.sty shim for tGIS2e.cls (real epsf not installed; we use graphicx).
+% Provides no-op definitions of the epsf macros the class references inside \ArtPiece.
+\ProvidesPackage{epsf}[2026/06/22 minimal shim]
+\newdimen\epsfxsize \newdimen\epsfysize
+\def\epsfscale{1000}
+\def\epsfbox#1{\includegraphics{#1}}
+\def\epsffile#1{\includegraphics{#1}}
+\endinput
