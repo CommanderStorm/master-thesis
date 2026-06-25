@@ -15,9 +15,8 @@ from pathlib import Path
 from statistics import median
 
 import numpy as np
-from scipy import stats
-
 from _common import load_jsonl_dir
+from scipy import stats
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 THESIS_DIR = SCRIPT_DIR.parent
@@ -52,7 +51,18 @@ PASS_LABELS: dict[str, str] = {
     "tile_rewrite": "Tile rewrite",
 }
 
-FULL_PIPELINE_STYLES = {"fiord", "liberty"}
+FULL_PIPELINE_STYLES = {
+    "bright",
+    "dark-matter",
+    "fiord",
+    "klokan-basic",
+    "liberty",
+    "osm-bright",
+    "osm-liberty",
+    "positron",
+    "stadia-outdoors",
+    "toner",
+}
 
 SYNERGY_VARIANTS = {
     "baseline": "step-00-baseline",
@@ -126,8 +136,7 @@ def filter_latest_session(records: list[dict]) -> list[dict]:
     for style in sorted(by_style):
         by_ts = by_style[style]
         variant_counts = {
-            ts: len({r["variant"] for r in recs})
-            for ts, recs in by_ts.items()
+            ts: len({r["variant"] for r in recs}) for ts, recs in by_ts.items()
         }
         # Pick the session that ran the most variants (the most complete bench run);
         # break ties by latest timestamp (lexicographic on ISO timestamps).
@@ -165,7 +174,11 @@ def bootstrap_ci(
         method="percentile",
     )
     med = float(np.median(data))
-    return med, float(result.confidence_interval.low), float(result.confidence_interval.high)
+    return (
+        med,
+        float(result.confidence_interval.low),
+        float(result.confidence_interval.high),
+    )
 
 
 def wilcoxon_test(baseline: np.ndarray, treatment: np.ndarray) -> float | None:
@@ -201,7 +214,8 @@ def collect_values(
     metric: str,
 ) -> np.ndarray:
     recs = [
-        r for r in records
+        r
+        for r in records
         if r.get("style") == style
         and r.get("variant") == variant
         and r.get(metric) is not None
@@ -248,19 +262,69 @@ def compute_synergy(
         sho_red = (b - sho) / b
         c_red = (b - c) / b
         interaction = c_red - (so_red + sho_red)
-        results.append({
-            "style": style,
-            "scenario": scenario,
-            "baseline_median": b,
-            "style_only_median": so,
-            "shaving_only_median": sho,
-            "combined_median": c,
-            "style_only_red_pct": so_red * 100,
-            "shaving_only_red_pct": sho_red * 100,
-            "combined_red_pct": c_red * 100,
-            "interaction_pct": interaction * 100,
-            "super_additive": interaction > 0,
-        })
+        results.append(
+            {
+                "style": style,
+                "scenario": scenario,
+                "baseline_median": b,
+                "style_only_median": so,
+                "shaving_only_median": sho,
+                "combined_median": c,
+                "style_only_red_pct": so_red * 100,
+                "shaving_only_red_pct": sho_red * 100,
+                "combined_red_pct": c_red * 100,
+                "interaction_pct": interaction * 100,
+                "super_additive": interaction > 0,
+            }
+        )
+    return results
+
+
+def compute_size_additivity(
+    records: list[dict],
+    styles: set[str],
+) -> list[dict]:
+    by_style: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    target = {
+        SYNERGY_VARIANTS["baseline"],
+        SYNERGY_VARIANTS["shaving_only"],
+        SYNERGY_VARIANTS["combined"],
+    }
+    for r in records:
+        style = r.get("style")
+        variant = r.get("variant")
+        val = r.get("tile_bytes")
+        if (
+            style in styles
+            and variant in target
+            and val is not None
+            and not r.get("deduped", False)
+        ):
+            by_style[style][variant].append(float(val))
+
+    results: list[dict] = []
+    for style in sorted(by_style):
+        buckets = by_style[style]
+        if not all(v in buckets and buckets[v] for v in target):
+            continue
+        b = median(buckets[SYNERGY_VARIANTS["baseline"]])
+        sho = median(buckets[SYNERGY_VARIANTS["shaving_only"]])
+        c = median(buckets[SYNERGY_VARIANTS["combined"]])
+        if b <= 0:
+            continue
+        sho_red = (b - sho) / b * 100
+        c_red = (b - c) / b * 100
+        results.append(
+            {
+                "style": style,
+                "baseline_tile_bytes": b,
+                "shaving_only_tile_bytes": sho,
+                "combined_tile_bytes": c,
+                "shaving_only_red_pct": sho_red,
+                "combined_red_pct": c_red,
+                "extra_pct": c_red - sho_red,
+            }
+        )
     return results
 
 
@@ -273,7 +337,13 @@ def main() -> int:
     filtered = filter_latest_session(records)
     print(f"  {len(filtered)} records after filtering")
 
-    styles = sorted({r["style"] for r in filtered if r.get("style") and r["style"] not in EXCLUDED_STYLES})
+    styles = sorted(
+        {
+            r["style"]
+            for r in filtered
+            if r.get("style") and r["style"] not in EXCLUDED_STYLES
+        }
+    )
     variants_by_style: dict[str, list[str]] = {}
     for style in styles:
         vs = sorted(
@@ -289,10 +359,17 @@ def main() -> int:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     csv_path = OUTPUT_DIR / "confidence_intervals.csv"
     header = [
-        "style", "variant", "step", "metric",
-        "median", "ci_lo", "ci_hi",
-        "iqr_lo", "iqr_hi",
-        "n_runs", "wilcoxon_p",
+        "style",
+        "variant",
+        "step",
+        "metric",
+        "median",
+        "ci_lo",
+        "ci_hi",
+        "iqr_lo",
+        "iqr_hi",
+        "n_runs",
+        "wilcoxon_p",
     ]
 
     rows: list[list] = []
@@ -321,20 +398,27 @@ def main() -> int:
 
                 wilcoxon_p = None
                 if variant != baseline_variant:
-                    baseline_vals = collect_values(filtered, style, baseline_variant, metric)
+                    baseline_vals = collect_values(
+                        filtered, style, baseline_variant, metric
+                    )
                     if len(baseline_vals) > 0:
                         wilcoxon_p = wilcoxon_test(baseline_vals, vals)
 
-                rows.append([
-                    style, variant, step_num, metric,
-                    f"{med:.4f}",
-                    f"{ci_lo:.4f}",
-                    f"{ci_hi:.4f}",
-                    f"{q1:.4f}",
-                    f"{q3:.4f}",
-                    len(vals),
-                    f"{wilcoxon_p:.6g}" if wilcoxon_p is not None else "",
-                ])
+                rows.append(
+                    [
+                        style,
+                        variant,
+                        step_num,
+                        metric,
+                        f"{med:.4f}",
+                        f"{ci_lo:.4f}",
+                        f"{ci_hi:.4f}",
+                        f"{q1:.4f}",
+                        f"{q3:.4f}",
+                        len(vals),
+                        f"{wilcoxon_p:.6g}" if wilcoxon_p is not None else "",
+                    ]
+                )
 
                 claim_data[(style, variant, metric)] = {
                     "median": med,
@@ -401,7 +485,9 @@ def main() -> int:
             if sig and better:
                 print(f"    --> SIGNIFICANT and in expected direction (p < 0.05)")
             elif sig and not better:
-                print(f"    --> SIGNIFICANT but OPPOSITE to expected direction (p < 0.05)")
+                print(
+                    f"    --> SIGNIFICANT but OPPOSITE to expected direction (p < 0.05)"
+                )
             else:
                 print(f"    --> NOT significant at alpha=0.05")
         else:
@@ -429,9 +515,15 @@ def main() -> int:
         red_hi = (b["median"] - v["ci_lo"]) / b["median"] * 100
 
         print(f"\n  {style}:")
-        print(f"    Baseline: {b['median']:.1f} ms (95% CI: [{b['ci_lo']:.1f}, {b['ci_hi']:.1f}])")
-        print(f"    Final:    {v['median']:.1f} ms (95% CI: [{v['ci_lo']:.1f}, {v['ci_hi']:.1f}])")
-        print(f"    Reduction: {reduction_pct:.1f}% (approx CI: [{red_lo:.1f}%, {red_hi:.1f}%])")
+        print(
+            f"    Baseline: {b['median']:.1f} ms (95% CI: [{b['ci_lo']:.1f}, {b['ci_hi']:.1f}])"
+        )
+        print(
+            f"    Final:    {v['median']:.1f} ms (95% CI: [{v['ci_lo']:.1f}, {v['ci_hi']:.1f}])"
+        )
+        print(
+            f"    Reduction: {reduction_pct:.1f}% (approx CI: [{red_lo:.1f}%, {red_hi:.1f}%])"
+        )
 
     print("\n" + "=" * 72)
     print("PER-SCENARIO STYLE/SHAVING SYNERGY (loadMs)")
@@ -441,27 +533,37 @@ def main() -> int:
     synergy_path = OUTPUT_DIR / "synergy_per_scenario.csv"
     with synergy_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow([
-            "style", "scenario",
-            "baseline_median_ms", "style_only_median_ms",
-            "shaving_only_median_ms", "combined_median_ms",
-            "style_only_red_pct", "shaving_only_red_pct",
-            "combined_red_pct", "interaction_pct",
-            "super_additive",
-        ])
+        w.writerow(
+            [
+                "style",
+                "scenario",
+                "baseline_median_ms",
+                "style_only_median_ms",
+                "shaving_only_median_ms",
+                "combined_median_ms",
+                "style_only_red_pct",
+                "shaving_only_red_pct",
+                "combined_red_pct",
+                "interaction_pct",
+                "super_additive",
+            ]
+        )
         for row in synergy_rows:
-            w.writerow([
-                row["style"], row["scenario"],
-                f"{row['baseline_median']:.3f}",
-                f"{row['style_only_median']:.3f}",
-                f"{row['shaving_only_median']:.3f}",
-                f"{row['combined_median']:.3f}",
-                f"{row['style_only_red_pct']:.3f}",
-                f"{row['shaving_only_red_pct']:.3f}",
-                f"{row['combined_red_pct']:.3f}",
-                f"{row['interaction_pct']:.3f}",
-                "true" if row["super_additive"] else "false",
-            ])
+            w.writerow(
+                [
+                    row["style"],
+                    row["scenario"],
+                    f"{row['baseline_median']:.3f}",
+                    f"{row['style_only_median']:.3f}",
+                    f"{row['shaving_only_median']:.3f}",
+                    f"{row['combined_median']:.3f}",
+                    f"{row['style_only_red_pct']:.3f}",
+                    f"{row['shaving_only_red_pct']:.3f}",
+                    f"{row['combined_red_pct']:.3f}",
+                    f"{row['interaction_pct']:.3f}",
+                    "true" if row["super_additive"] else "false",
+                ]
+            )
 
     total = len(synergy_rows)
     super_count = sum(1 for r in synergy_rows if r["super_additive"])
@@ -476,6 +578,52 @@ def main() -> int:
             f"median: {med_int:+.2f}%, max: {interactions[-1]:+.2f}%"
         )
     print(f"\nPer-scenario synergy CSV written to {synergy_path}")
+
+    print("\n" + "=" * 72)
+    print("DATA-VOLUME ADDITIVITY: TILE BYTES, SHAVE-ONLY vs COMBINED (per style)")
+    print("=" * 72)
+
+    size_rows = compute_size_additivity(filtered, FULL_PIPELINE_STYLES)
+    size_path = OUTPUT_DIR / "size_additivity_per_style.csv"
+    with size_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(
+            [
+                "style",
+                "baseline_tile_bytes",
+                "shaving_only_tile_bytes",
+                "combined_tile_bytes",
+                "shaving_only_red_pct",
+                "combined_red_pct",
+                "extra_pct",
+            ]
+        )
+        for row in size_rows:
+            w.writerow(
+                [
+                    row["style"],
+                    f"{row['baseline_tile_bytes']:.0f}",
+                    f"{row['shaving_only_tile_bytes']:.0f}",
+                    f"{row['combined_tile_bytes']:.0f}",
+                    f"{row['shaving_only_red_pct']:.3f}",
+                    f"{row['combined_red_pct']:.3f}",
+                    f"{row['extra_pct']:.3f}",
+                ]
+            )
+
+    print(f"\n{'style':18s} {'shave_red%':>11s} {'comb_red%':>11s} {'extra%':>8s}")
+    for row in size_rows:
+        print(
+            f"{row['style']:18s} {row['shaving_only_red_pct']:11.2f} "
+            f"{row['combined_red_pct']:11.2f} {row['extra_pct']:+8.2f}"
+        )
+    if size_rows:
+        extras = [r["extra_pct"] for r in size_rows]
+        print(
+            f"\nextra_pct (style-opt contribution to shaving) - "
+            f"min: {min(extras):+.2f}%, median: {median(extras):+.2f}%, max: {max(extras):+.2f}%"
+        )
+    print(f"\nData-volume additivity CSV written to {size_path}")
 
     print()
     return 0

@@ -17,7 +17,18 @@ INPUT_DIR = ROOT / "maplibre-optimiser" / "tests" / "bench" / "results"
 OUTPUT_DIR = SCRIPT_DIR / "data"
 
 EXCLUDED_STYLES: set[str] = set()
-FULL_PIPELINE_STYLES = {"fiord", "liberty"}
+FULL_PIPELINE_STYLES = {
+    "bright",
+    "dark-matter",
+    "fiord",
+    "klokan-basic",
+    "liberty",
+    "osm-bright",
+    "osm-liberty",
+    "positron",
+    "stadia-outdoors",
+    "toner",
+}
 
 _STEP_RE = re.compile(r"^step-(\d+)-(.+)$")
 
@@ -98,17 +109,35 @@ SUMMARY_LABELS: dict[str, str] = {
 }
 
 APPENDIX_ORDER: list[str] = [
-    "liberty", "bright", "positron", "fiord", "dark-matter",
-    "osm-bright", "klokan-basic", "toner", "osm-liberty",
-    "icgc-fosc", "icgc-gris",
-    "stadia-outdoors", "americana",
+    "liberty",
+    "bright",
+    "positron",
+    "fiord",
+    "dark-matter",
+    "osm-bright",
+    "klokan-basic",
+    "toner",
+    "osm-liberty",
+    "icgc-fosc",
+    "icgc-gris",
+    "stadia-outdoors",
+    "americana",
 ]
 
 SUMMARY_ORDER: list[str] = [
-    "bright", "positron", "dark-matter", "osm-bright",
-    "klokan-basic", "toner", "osm-liberty", "stadia-outdoors",
-    "americana", "icgc-fosc", "icgc-gris",
-    "fiord", "liberty",
+    "bright",
+    "positron",
+    "dark-matter",
+    "osm-bright",
+    "klokan-basic",
+    "toner",
+    "osm-liberty",
+    "stadia-outdoors",
+    "americana",
+    "icgc-fosc",
+    "icgc-gris",
+    "fiord",
+    "liberty",
 ]
 
 
@@ -124,8 +153,7 @@ def filter_latest_session(records: list[dict]) -> list[dict]:
     for style in sorted(by_style):
         by_ts = by_style[style]
         variant_counts = {
-            ts: len({r["variant"] for r in recs})
-            for ts, recs in by_ts.items()
+            ts: len({r["variant"] for r in recs}) for ts, recs in by_ts.items()
         }
         best_ts = max(variant_counts, key=lambda ts: (variant_counts[ts], ts))
         filtered.extend(by_ts[best_ts])
@@ -165,23 +193,54 @@ def aggregate_steps(records: list[dict], style: str) -> list[dict]:
         loads = [r["loadMs"] for r in group if r.get("loadMs") is not None]
         fpss = [r["fps"] for r in group if r.get("fps") is not None]
 
-        steps.append({
-            "step": step_num,
-            "pass_name": pass_name,
-            "style_bytes": style_bytes,
-            "gzip_bytes": gzip_bytes,
-            "brotli_bytes": brotli_bytes,
-            "load_ms": median(loads) if loads else None,
-            "fps": median(fpss) if fpss else None,
-            "layers": layer_count,
-        })
+        steps.append(
+            {
+                "step": step_num,
+                "pass_name": pass_name,
+                "style_bytes": style_bytes,
+                "gzip_bytes": gzip_bytes,
+                "brotli_bytes": brotli_bytes,
+                "load_ms": median(loads) if loads else None,
+                "fps": median(fpss) if fpss else None,
+                "layers": layer_count,
+            }
+        )
 
     return steps
 
 
-PER_STYLE_HEADER = ["step", "pass", "rawB", "gzipB", "brotliB", "loadMs", "fps", "layers"]
-SUMMARY_HEADER = ["style", "grp", "baseGzip", "optGzip", "reduction", "deltaLoad", "deltaFps", "isBold", "midruleBefore"]
-MARGINAL_HEADER = ["step", "pass", "deltaRaw", "deltaGzip", "deltaBrotli", "deltaLoad", "deltaLayers", "daggerflag", "starflag"]
+PER_STYLE_HEADER = [
+    "step",
+    "pass",
+    "rawB",
+    "gzipB",
+    "brotliB",
+    "loadMs",
+    "fps",
+    "layers",
+]
+SUMMARY_HEADER = [
+    "style",
+    "grp",
+    "baseGzip",
+    "optGzip",
+    "reduction",
+    "deltaLoad",
+    "deltaFps",
+    "isBold",
+    "midruleBefore",
+]
+MARGINAL_HEADER = [
+    "step",
+    "pass",
+    "deltaRaw",
+    "deltaGzip",
+    "deltaBrotli",
+    "deltaLoad",
+    "deltaLayers",
+    "daggerflag",
+    "starflag",
+]
 
 
 def write_per_style_csv(path: Path, steps: list[dict]) -> None:
@@ -192,10 +251,18 @@ def write_per_style_csv(path: Path, steps: list[dict]) -> None:
             label = PASS_LABELS.get(s["pass_name"], s["pass_name"])
             load_val = f"{s['load_ms']:.1f}" if s["load_ms"] is not None else ""
             fps_val = f"{s['fps']:.1f}" if s["fps"] is not None else ""
-            w.writerow([
-                s["step"], label, s["style_bytes"], s["gzip_bytes"],
-                s["brotli_bytes"], load_val, fps_val, s["layers"],
-            ])
+            w.writerow(
+                [
+                    s["step"],
+                    label,
+                    s["style_bytes"],
+                    s["gzip_bytes"],
+                    s["brotli_bytes"],
+                    load_val,
+                    fps_val,
+                    s["layers"],
+                ]
+            )
 
 
 def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
@@ -236,13 +303,19 @@ def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
         if d_fps is not None:
             all_dfps.append(d_fps)
 
-        rows.append([
-            label, group, base_gzip, opt_gzip,
-            f"{reduction:.1f}",
-            f"{d_load:.1f}" if d_load is not None else "",
-            f"{d_fps:.1f}" if d_fps is not None else "",
-            0, 0,
-        ])
+        rows.append(
+            [
+                label,
+                group,
+                base_gzip,
+                opt_gzip,
+                f"{reduction:.1f}",
+                f"{d_load:.1f}" if d_load is not None else "",
+                f"{d_fps:.1f}" if d_fps is not None else "",
+                0,
+                0,
+            ]
+        )
 
     for s in style_only:
         if s in all_steps:
@@ -263,13 +336,19 @@ def write_summary_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
         mean_dload = sum(all_dload) / len(all_dload) if all_dload else None
         mean_dfps = sum(all_dfps) / len(all_dfps) if all_dfps else None
 
-        rows.append([
-            "Mean", "mean", mean_base, mean_opt,
-            f"{mean_red:.1f}",
-            f"{mean_dload:.1f}" if mean_dload is not None else "",
-            f"{mean_dfps:.1f}" if mean_dfps is not None else "",
-            1, 1,
-        ])
+        rows.append(
+            [
+                "Mean",
+                "mean",
+                mean_base,
+                mean_opt,
+                f"{mean_red:.1f}",
+                f"{mean_dload:.1f}" if mean_dload is not None else "",
+                f"{mean_dfps:.1f}" if mean_dfps is not None else "",
+                1,
+                1,
+            ]
+        )
 
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -310,7 +389,9 @@ def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
 
             if base["style_bytes"] > 0:
                 d_raw.append(
-                    (curr["style_bytes"] - prev["style_bytes"]) / base["style_bytes"] * 100
+                    (curr["style_bytes"] - prev["style_bytes"])
+                    / base["style_bytes"]
+                    * 100
                 )
             if base["gzip_bytes"] > 0:
                 d_gzip.append(
@@ -318,10 +399,14 @@ def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
                 )
             if base["brotli_bytes"] > 0:
                 d_brotli.append(
-                    (curr["brotli_bytes"] - prev["brotli_bytes"]) / base["brotli_bytes"] * 100
+                    (curr["brotli_bytes"] - prev["brotli_bytes"])
+                    / base["brotli_bytes"]
+                    * 100
                 )
             if (
-                base["load_ms"] and curr["load_ms"] and prev["load_ms"]
+                base["load_ms"]
+                and curr["load_ms"]
+                and prev["load_ms"]
                 and base["load_ms"] > 0
             ):
                 d_load.append(
@@ -336,12 +421,19 @@ def write_marginal_csv(path: Path, all_steps: dict[str, list[dict]]) -> None:
         dagger = 1 if step_num >= 15 else 0
         star = 1 if step_num in {4, 10, 13, 16, 17, 18, 19} else 0
 
-        rows.append([
-            step_num, label,
-            _fmt_median(d_raw), _fmt_median(d_gzip), _fmt_median(d_brotli),
-            _fmt_median(d_load) if d_load else "0.0",
-            _fmt_median_int(d_layers), dagger, star,
-        ])
+        rows.append(
+            [
+                step_num,
+                label,
+                _fmt_median(d_raw),
+                _fmt_median(d_gzip),
+                _fmt_median(d_brotli),
+                _fmt_median(d_load) if d_load else "0.0",
+                _fmt_median_int(d_layers),
+                dagger,
+                star,
+            ]
+        )
 
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -402,7 +494,9 @@ def main() -> int:
             final_load = steps[-1]["load_ms"]
             if base_load and final_load:
                 pct = (base_load - final_load) / base_load * 100
-                print(f"  {sid} load reduction: {pct:.1f}% ({base_load:.0f} → {final_load:.0f} ms)")
+                print(
+                    f"  {sid} load reduction: {pct:.1f}% ({base_load:.0f} → {final_load:.0f} ms)"
+                )
 
     print("\nMarginal contribution CSV:")
     write_marginal_csv(OUTPUT_DIR / "marginal_contribution.csv", all_steps)
