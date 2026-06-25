@@ -1,7 +1,6 @@
 \documentclass[]{interact}
 
 \usepackage{epstopdf}% To incorporate .eps illustrations using PDFLaTeX, etc.
-\usepackage{subfigure}% Support for small, `sub' figures and tables
 
 \usepackage{natbib}% Citation support using natbib.sty
 \bibpunct[, ]{(}{)}{,}{a}{}{,}% Citation support using natbib.sty
@@ -24,12 +23,6 @@
 \usepackage{epsfig}
 \usepackage{graphicx}
 \graphicspath{{../figures/}}
-%% subcaption supplies the subfigure environment used in the results section; the bundled
-%% subfigure.sty is only a no-op \subfigure command stub (see subfigure.sty). Undefine the
-%% stub's commands first so subcaption can claim the \subfigure name for its environment.
-\let\subfigure\undefined
-\let\endsubfigure\undefined
-\let\subtable\undefined
 \usepackage{subcaption}
 \usepackage{rotating} % load AFTER \documentclass per the tGIS guide
 \usepackage{booktabs}
@@ -128,7 +121,7 @@ The data and codes supporting this study are available at the private link
 Source code available from: [ANON-VCS-URL]. Archived source code at time of publication: [DOI].
 License: \texttt{MIT OR APACHE2}. PLACEHOLDER.
 
-\bibliographystyle{tGIS}
-\bibliography{../references}
+\bibliographystyle{tfv}
+\bibliography{references.bibtex}
 
 \end{document}
