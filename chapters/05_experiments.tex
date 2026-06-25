@@ -505,7 +505,7 @@ On-Wire data reduction from style-driven \ac{MVT} shaving across 11 styles with 
 A direct operational consequence of style-dependent tiles is that shared \ac{CDN} caching is partially defeated.
 Two styles that served identical tiles under \ac{MVT} now fetch distinct shaved variants, and a \ac{CDN} must either key its cache on (tile, style) pairs or accept that a hit on one style is a miss on another.
 For deployments where a single style dominates traffic, style-driven shaving is strictly beneficial.
-For multi-tenant tile servers hosting dozens of styles, operators should apply shaving per style and cache the resulting tile variants independently (the approach that Mapbox's closed-source \enquote{style-optimized vector tiles} service~\cite{StyleoptimizedVectorTiles} would be likely to use).
+For multi-tenant tile servers hosting dozens of styles, operators should apply shaving per style and cache the resulting tile variants independently (the approach that Mapbox's closed-source \enquote{style-optimized vector tiles} service would be likely to use).
 
 A vector-tile source's \texttt{encoding} field selects \ac{MVT} or \ac{MLT}, so the two formats cannot mix within one source.
 Unshaved \ac{MLT} is possible in principle but not emitted by our tool, so each style is served either as shaved \ac{MLT} (with its own \emph{(tile, style)} cache-key namespace) or as raw \ac{MVT} (sharing cache slots with all other \ac{MVT}-served styles).
