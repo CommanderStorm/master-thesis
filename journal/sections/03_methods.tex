@@ -133,26 +133,26 @@ Expression passes act on the raw JSON representation of style expressions.
 We organize the engine as a table of rewrite rules, each gated by a pass flag and scoped to filters, paint and layout properties, or both.
 A post-order visitor walks every expression node, tests all applicable peephole rules, and fires the first matching rule.
 We modeled this on production-compiler peephole optimizers: individual rules are simple and local, but their composition through fixpoint iteration achieves global simplification.
-Table~\ref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency and its compiler-optimization analogue.
+Table~\ref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency.
 The exhaustive rule list is given in the supplemental material.
 
 \begin{table}[htbp]
 \centering
 \small
-\begin{tabular}{p{3.4cm} p{1.5cm} p{7.0cm}}
+\begin{tabularx}{\textwidth}{p{3.4cm} p{1.5cm} X}
 \toprule
-\textbf{Pass} & \textbf{Data} & \textbf{Description [analogy]} \\
+\textbf{Pass} & \textbf{Data} & \textbf{Description} \\
 \midrule
-Unary simplification & none & Unwrap single-argument \mlop{any}/\mlop{all} wrappers [identity elimination] \\
-Kind normalization & none & Rewrite negated comparisons to their direct form [strength reduction] \\
-Constant folding & none & Evaluate statically determinable expressions, eliminate dead branches [constant folding, SCCP] \\
-Statistics-driven folding & scan & Fold \mlop{has}/\mlop{get}/\mlop{geometry-type} using tile statistics, prune unreachable arms [sparse conditional constant propagation] \\
-Simplification & none & De Morgan, boolean flattening, \mlop{case}$\to$\mlop{match}, \mlop{let}/\mlop{var} inlining, \mlop{any}$\to$\mlop{in} merging [algebraic simplification] \\
-Default stripping & none & Remove paint/layout properties equal to the specification default [dead store elimination] \\
-Color minification & none & Compress color literals to their shortest form [literal compression] \\
-Selectivity reordering & sampling & Reorder filter predicates by selectivity [predicate reordering] \\
+Unary simplification & none & Unwrap single-argument \mlop{any}/\mlop{all} wrappers \\
+Kind normalization & none & Rewrite negated comparisons to their direct form \\
+Constant folding & none & Evaluate statically determinable expressions, eliminate dead branches \\
+Statistics-driven folding & scan & Fold \mlop{has}/\mlop{get}/\mlop{geometry-type} using tile statistics, prune unreachable arms \\
+Simplification & none & De Morgan, boolean flattening, \mlop{case}$\to$\mlop{match}, \mlop{let}/\mlop{var} inlining, \mlop{any}$\to$\mlop{in} merging \\
+Default stripping & none & Remove paint/layout properties equal to the specification default \\
+Color minification & none & Compress color literals to their shortest form \\
+Selectivity reordering & sampling & Reorder filter predicates by selectivity \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \caption{Expression-level optimization passes.
 \emph{None} requires no statistics, \emph{sampling} a partial tile scan, and \emph{scan} a full statistics scan.}
 \label{tab:expression_passes}
@@ -182,18 +182,18 @@ Refinement is asymmetric to respect overzoom: \mlprop{minzoom} may be raised to 
 \begin{table}[htbp]
 \centering
 \small
-\begin{tabular}{p{3.2cm} p{1.7cm} p{7.0cm}}
+\begin{tabularx}{\textwidth}{p{3.2cm} p{1.7cm} X}
 \toprule
-\textbf{Pass} & \textbf{Data} & \textbf{Description [analogy]} \\
+\textbf{Pass} & \textbf{Data} & \textbf{Description} \\
 \midrule
-Metadata stripping & none & Remove \texttt{metadata} fields at style and layer level [debug-info stripping] \\
-Dead layer/source elim. & none/scan & Remove always-false, geometry-mismatched, or empty layers, prune unreferenced sources [dead-code elimination] \\
-Metadata refinement & none/scan & Extract and tighten \mlprop{minzoom}/\mlprop{maxzoom} bounds from filters, ramps, and coverage [range analysis] \\
-Cleanup & none & Remove empty sections, invisible layers, trivial filters, default root properties [dead-code elimination] \\
-Layer merging & none & Merge identical adjacent layers via synthesized \mlop{case}/\mlop{match} [basic-block merging] \\
-Source zoom tightening & none & Tighten source zoom bounds to referencing layers [liveness analysis] \\
+Metadata stripping & none & Remove \texttt{metadata} fields at style and layer level \\
+Dead layer/source elim. & none/scan & Remove always-false, geometry-mismatched, or empty layers, prune unreferenced sources \\
+Metadata refinement & none/scan & Extract and tighten \mlprop{minzoom}/\mlprop{maxzoom} bounds from filters, ramps, and coverage \\
+Cleanup & none & Remove empty sections, invisible layers, trivial filters, default root properties \\
+Layer merging & none & Merge identical adjacent layers via synthesized \mlop{case}/\mlop{match} \\
+Source zoom tightening & none & Tighten source zoom bounds to referencing layers \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \caption{Structural optimization passes operating on the typed style representation.
 Passes marked \emph{none/scan} run unconditionally but gain precision with tile statistics.}
 \label{tab:structural_passes}
@@ -212,31 +212,31 @@ Figure~\ref{fig:layer_merge_example} works a concrete case.
         node distance=0.7cm,
         layer/.style={rectangle, draw, rounded corners=2pt, font=\footnotesize,
                       align=left, inner sep=5pt},
-        input/.style={layer, fill=roleInput!15},
-        output/.style={layer, fill=roleInput!15},
+        input/.style={layer, fill=roleInput!15, text width=4cm},
+        output/.style={layer, fill=roleInput!15, text width=11cm},
         phase/.style={font=\scriptsize, align=left, inner sep=6pt, text width=8.4cm},
         arrow/.style={-Stealth, thick},
     ]
         % two input layers, side by side
         \node[input] (l0) {%
-            \textbf{\mlval{line} layer}\\
+            {\centering\textbf{\mlval{line} layer}\par}\vspace{2pt}
             \mlprop{filter}: \mlval{class} == \mlval{"motorway"}\\
             \mlprop{line-color}: \mlval{\#e892a2}};
         \node[input, right=1.4cm of l0] (l1) {%
-            \textbf{\mlval{line} layer}\\
+            {\centering\textbf{\mlval{line} layer}\par}\vspace{2pt}
             \mlprop{filter}: \mlval{class} == \mlval{"primary"}\\
             \mlprop{line-color}: \mlval{\#fcd6a4}};
         % phase checks, centered below and between the two layers
         \coordinate (mid) at ($(l0.south)!0.5!(l1.south)$);
         \node[phase, below=0.45cm of mid] (ph) {%
-            \textbf{Mergeability checks}\\[2pt]
+            {\centering\textbf{Mergeability checks}\par}\vspace{2pt}
             \stepcirc{1} differing properties are feature-driven, no existing sort-key\\
             \stepcirc{2} filters share property \mlval{class} $\Rightarrow$ \mlop{match} pattern\\
             \stepcirc{3} zoom ranges identical $\Rightarrow$ no zoom guards};
 
         % merged output layer below the phase box
         \node[output, below=0.55cm of ph] (out) {%
-            \textbf{Merged \mlval{line} layer}\\[1pt]
+            {\centering\textbf{Merged \mlval{line} layer}\par}\vspace{1pt}
             \mlprop{filter}: \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], [\mlval{"motorway"}, \mlval{"primary"}], \mlval{true}, \mlval{false}]}\\
             \mlprop{line-color}: \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], \mlval{"motorway"}, \mlval{\#e892a2}, \mlval{\#fcd6a4}]}\\
             \mlprop{line-sort-key}: \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], \mlval{"motorway"}, \mlval{0}, \mlval{1}]}};

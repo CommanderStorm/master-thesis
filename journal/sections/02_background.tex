@@ -34,7 +34,7 @@ Mapbox's \texttt{vtshaver} strips layers, features, and properties a style never
 Tippecanoe builds tilesets with density-budget feature dropping, polygon coalescing, and line simplification, the latter drawing on the cartographic generalization tradition of Douglas-Peucker \citep{douglasALGORITHMSREDUCTIONNUMBER1973} and Visvalingam-Whyatt \citep{visvalingamLineGeneralisationRepeated1993}.
 These heuristics are purely data-driven and have no knowledge of the rendering workload.
 Mapbox's proprietary style-optimized vector tiles\footnote{\url{https://docs.mapbox.com/help/glossary/style-optimized-vector-tiles}, last accessed 26.5.26} is the closest commercial precedent that couples style and data, but it is closed-source, API-only, and its terms of service preclude independent evaluation.
-Schema-aware generators such as Planetiler, Tilemaker, and Protomaps \citep{maronVectorTilesAre2025,wallnerOpenSourceVector2022} fix column selection at build time, upstream of where our optimizations operate.
+Schema-aware generators such as Planetiler\footnote{\url{https://github.com/onthegomap/planetiler}, last accessed 2026-06-26}, Tilemaker\footnote{\url{https://tilemaker.org/}, last accessed 2026-06-26}, and Protomaps\footnote{\url{https://protomaps.com}, last accessed 2026-06-26} \citep{wallnerOpenSourceVector2022} fix column selection at build time, upstream of where our optimizations operate.
 
 \subsubsection{Tile encoding}
 A style is a declarative specification over a tabular feature set, which casts style-driven pruning as the projection and predicate pushdown long studied by query optimizers \citep{piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993,armbrustSparkSQLRelational2015}.
