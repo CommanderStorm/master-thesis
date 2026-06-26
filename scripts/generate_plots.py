@@ -18,13 +18,15 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+from _common import journal_layout
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR.parent / "figures"
 FORMATS = ["pdf"]
 
-FIG_WIDTH = 1400
-FIG_HEIGHT = 700
+FIG_WIDTH = 720
+FIG_HEIGHT = 440
 
 # Okabe-Ito palette (CVD-safe)
 SOURCE_COLORS = {
@@ -66,11 +68,7 @@ COMPRESSION_DASHES = {
     "zstd": "dashdot",
 }
 
-LAYOUT_DEFAULTS = dict(
-    template="plotly_white",
-    font=dict(family="Helvetica, Arial, sans-serif", size=20),
-    margin=dict(l=70, r=30, t=40, b=60),
-)
+LAYOUT_DEFAULTS = journal_layout()
 
 
 def export_figure(
@@ -200,6 +198,13 @@ def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
     positions = {"plain": (1, 1), "gzip": (1, 2), "brotli": (2, 1), "zstd": (2, 2)}
     show_legend_for: set[str] = set()
     series = ["MVT", "MVT-shaved", "MLT-Rust", "MLT-Rust-shaved"]
+    # No reference MLT here, so short labels stay unambiguous and fit one row.
+    short_names = {
+        "MVT": "MVT",
+        "MVT-shaved": "MVT (shaved)",
+        "MLT-Rust": "MLT",
+        "MLT-Rust-shaved": "MLT (shaved)",
+    }
 
     for comp, (row, col) in positions.items():
         sub = df[df["compression"] == comp]
@@ -212,7 +217,7 @@ def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
             fig.add_trace(go.Bar(
                 x=s["zoom"],
                 y=s["total_bytes"],
-                name=SOURCE_DISPLAY[source],
+                name=short_names[source],
                 marker_color=SOURCE_COLORS[source],
                 marker_pattern_shape=SOURCE_PATTERNS[source],
                 showlegend=show,
@@ -220,23 +225,23 @@ def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
             ), row=row, col=col)
 
     fig.update_layout(
-        **LAYOUT_DEFAULTS,
+        **journal_layout(margin=dict(l=70, r=20, t=30, b=95)),
         barmode="group",
         legend=dict(
             orientation="h",
             xanchor="center",
             x=0.5,
             yanchor="top",
-            y=-0.12,
-            bgcolor="rgba(255,255,255,0.8)",
+            y=-0.18,
+            bgcolor="rgba(0,0,0,0)",
         ),
     )
     fig.update_xaxes(title_text="Zoom level", dtick=2, row=2)
     fig.update_yaxes(row=1, col=1, title_text="Total size (bytes)")
     fig.update_yaxes(row=2, col=1, title_text="Total size (bytes)")
-    fig.update_annotations(font_size=22)
+    fig.update_annotations(font_size=15)
 
-    export_figure(fig, "shaving_effectiveness_per_zoom")
+    export_figure(fig, "shaving_effectiveness_per_zoom", height=470)
 
 
 def plot_compression_ratio_per_zoom(df: pd.DataFrame) -> None:

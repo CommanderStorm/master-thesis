@@ -48,6 +48,69 @@ def load_jsonl_df(path: Path) -> "pd.DataFrame":
     return pd.DataFrame(rows)
 
 
+# Journal figure style, kept in sync with maplibre-optimiser/tests/bench/plot_style.py.
+# plotly is imported lazily so plotly-free consumers (generate_ci.py) can import this.
+FONT_FAMILY = "Liberation Serif, Nimbus Roman, Times New Roman, Times, DejaVu Serif, serif"
+FONT_SIZE = 15
+FONT_COLOR = "#000000"
+
+_COLORWAY = [
+    "#0072B2", "#D55E00", "#009E73", "#E69F00",
+    "#CC79A7", "#56B4E9", "#F0E442", "#000000",
+]
+
+
+def register_journal_template() -> None:
+    """Register the ``journal`` plotly template (idempotent)."""
+    import plotly.graph_objects as go
+    import plotly.io as pio
+
+    if "journal" in pio.templates:
+        return
+
+    axis = dict(
+        showgrid=False,
+        zeroline=False,
+        showline=True,
+        linecolor=FONT_COLOR,
+        linewidth=1,
+        ticks="outside",
+        tickcolor=FONT_COLOR,
+        ticklen=4,
+        tickfont=dict(color=FONT_COLOR),
+        title=dict(font=dict(color=FONT_COLOR)),
+        automargin=True,
+    )
+    template = go.layout.Template()
+    template.layout = go.Layout(
+        font=dict(family=FONT_FAMILY, size=FONT_SIZE, color=FONT_COLOR),
+        title=dict(font=dict(family=FONT_FAMILY, color=FONT_COLOR)),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+        colorway=_COLORWAY,
+        xaxis=dict(axis),
+        yaxis=dict(axis),
+        legend=dict(
+            font=dict(color=FONT_COLOR),
+            bgcolor="rgba(0,0,0,0)",
+            borderwidth=0,
+        ),
+    )
+    pio.templates["journal"] = template
+
+
+def journal_layout(**overrides: Any) -> dict:
+    """``update_layout`` defaults for the journal template; ``overrides`` win."""
+    register_journal_template()
+    base = dict(
+        template="journal",
+        font=dict(family=FONT_FAMILY, size=FONT_SIZE, color=FONT_COLOR),
+        margin=dict(l=70, r=20, t=30, b=55),
+    )
+    base.update(overrides)
+    return base
+
+
 def fmt_bytes(val: float) -> str:
     """Format a byte count with a human-readable unit suffix."""
     if val >= 1e9:

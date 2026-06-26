@@ -12,24 +12,20 @@ from pathlib import Path
 
 import plotly.graph_objects as go
 
-from _common import fmt_bytes, load_jsonl_df
+from _common import fmt_bytes, journal_layout, load_jsonl_df
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR / "data"
 OUTPUT_DIR = SCRIPT_DIR.parent / "figures"
 FORMATS = ["png", "pdf"]
 
-FIG_WIDTH = 700
-FIG_HEIGHT = 400
+FIG_WIDTH = 720
+FIG_HEIGHT = 272
 
 BAR_COLOR = "#0072B2"
 BAR_COLOR_ALT = "#56B4E9"
 
-LAYOUT_DEFAULTS = dict(
-    template="plotly_white",
-    font=dict(family="Helvetica, Arial, sans-serif", size=14),
-    margin=dict(l=110, r=60, t=40, b=60),
-)
+LAYOUT_DEFAULTS = journal_layout(margin=dict(l=110, r=60, t=20, b=55))
 
 
 def export_figure(fig: go.Figure, name: str) -> None:

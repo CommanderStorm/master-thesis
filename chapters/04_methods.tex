@@ -811,8 +811,8 @@ This pattern is common in practice.
 Road styles frequently define separate layers for \texttt{highway} = \{\texttt{motorway}, \texttt{trunk}, \texttt{primary}, \texttt{secondary}, \texttt{tertiary}\}.
 These layers commonly differ only in width, color and layering, and for casing major roads there are usually two such layers per class.
 
-\Cref{fig:layer_merge_example} works through exactly this case.
-Three adjacent \mlval{line} layers keyed on \mlval{class} collapse into a single layer whose filter, \mlprop{line-color}, \mlprop{line-width}, and synthesized \mlprop{line-sort-key} are all \mlop{match} expressions over the same discriminator, with Phase~\stepcirc{1} (mergeability) and Phase~\stepcirc{3} (identical zoom ranges) discharged trivially.
+\Cref{fig:layer_merge_example} works through a minimal instance.
+Two adjacent \mlval{line} layers keyed on \mlval{class} collapse into a single layer whose filter, differing paint property, and synthesized \mlprop{line-sort-key} are all \mlop{match} expressions over the same discriminator, with Phase~\stepcirc{1} (mergeability) and Phase~\stepcirc{3} (identical zoom ranges) discharged trivially.
 
 \emph{Phase}~\stepcirc{3} (zoom-tolerant merging) handles layers whose zoom ranges differ slightly.
 It wraps each sub-filter with zoom guards (\texttt{[\mlop{">="},\allowbreak~[\mlop{"zoom"}],\allowbreak~lo]}, \texttt{[\mlop{"<="},\allowbreak~[\mlop{"zoom"}],\allowbreak~hi]}) and unions the zoom ranges into the merged layer's bounds, trading a slightly more complex filter for one fewer layer.
@@ -828,68 +828,45 @@ Tighter source bounds allow the tile server (or client-side tile manager) to ski
 
 \begin{figure}[H]
     \centering
-    \resizebox{\linewidth}{!}{\hfuzz=50pt\begin{tikzpicture}[
-        node distance=0.35cm,
-        layer/.style={rectangle, draw, rounded corners=2pt, minimum width=3.2cm,
-                      minimum height=0.55cm, font=\scriptsize, align=left},
-        merged/.style={rectangle, draw, rounded corners=2pt, minimum width=4.8cm,
-                       font=\scriptsize, align=left, inner sep=4pt},
-        phase/.style={rectangle, draw, dashed, rounded corners=3pt, fill=gray!8,
-                      inner sep=5pt},
+    \begin{tikzpicture}[
+        node distance=0.7cm,
+        layer/.style={rectangle, draw, rounded corners=2pt, font=\footnotesize,
+                      align=left, inner sep=5pt},
+        input/.style={layer, fill=roleInput!15},
+        output/.style={layer, fill=roleInput!15},
+        phase/.style={font=\scriptsize, align=left, inner sep=6pt, text width=8.4cm},
         arrow/.style={-Stealth, thick},
-        label/.style={font=\scriptsize\itshape, text=black!90},
-        check/.style={font=\scriptsize, text=black!90},
     ]
-        \node[layer]   (l0) {\mlval{line}\\ \texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"motorway"}}\\\texttt{\mlprop{line-color}: \mlval{\#e892a2}}\\\texttt{\mlprop{line-width}: \mlval{3}}};
-        \node[layer, below=0.5cm of l0] (l1) {\mlval{line}\\\texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"primary"}}\\\texttt{\mlprop{line-color}: \mlval{\#fcd6a4}}\\\texttt{\mlprop{line-width}: \mlval{2}}};
-        \node[layer, below=0.5cm of l1] (l2) {\mlval{line}\\\texttt{\mlprop{filter}: [\mlop{"get"}, \mlval{"class"}] == \mlval{"secondary"}}\\\texttt{\mlprop{line-color}: \mlval{\#f7fabf}}\\\texttt{\mlprop{line-width}: \mlval{1.5}}};
+        % two input layers, side by side
+        \node[input] (l0) {%
+            \textbf{\mlval{line} layer}\\
+            \mlprop{filter}: \mlval{class} == \mlval{"motorway"}\\
+            \mlprop{line-color}: \mlval{\#e892a2}};
+        \node[input, right=1.4cm of l0] (l1) {%
+            \textbf{\mlval{line} layer}\\
+            \mlprop{filter}: \mlval{class} == \mlval{"primary"}\\
+            \mlprop{line-color}: \mlval{\#fcd6a4}};
+        % phase checks, centered below and between the two layers
+        \coordinate (mid) at ($(l0.south)!0.5!(l1.south)$);
+        \node[phase, below=0.45cm of mid] (ph) {%
+            \textbf{Mergeability checks}\\[2pt]
+            \stepcirc{1} differing properties are feature-driven, no existing sort-key\\
+            \stepcirc{2} filters share property \mlval{class} $\Rightarrow$ \mlop{match} pattern\\
+            \stepcirc{3} zoom ranges identical $\Rightarrow$ no zoom guards};
 
-        \node[above=0.15cm of l0, font=\small\bfseries] {Three adjacent line layers as input};
+        % merged output layer below the phase box
+        \node[output, below=0.55cm of ph] (out) {%
+            \textbf{Merged \mlval{line} layer}\\[1pt]
+            \mlprop{filter}: \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], [\mlval{"motorway"}, \mlval{"primary"}], \mlval{true}, \mlval{false}]}\\
+            \mlprop{line-color}: \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], \mlval{"motorway"}, \mlval{\#e892a2}, \mlval{\#fcd6a4}]}\\
+            \mlprop{line-sort-key}: \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], \mlval{"motorway"}, \mlval{0}, \mlval{1}]}};
 
-        \node[right=1.4cm of l0, check, text width=4.2cm] (p1) {%
-            \stepcirc{1}~\textbf{Candidate check}\\[2pt]
-            same type and source,
-            source-layer differing props are feature-driven,
-            no zoom ramps in diffs,
-            no existing sort-key};
-        \node[right=1.4cm of l1, check, text width=4.2cm] (p2) {%
-            \stepcirc{2}~\textbf{Match detection}\\[2pt]
-            all filters access the same property \mlval{"class"} with unique literals\\
-            $\Rightarrow$ use \mlop{match} pattern};
-        \node[right=1.4cm of l2, check, text width=4.2cm] (p3) {%
-            \stepcirc{3}~\textbf{Zoom check}\\[2pt]
-            all zoom ranges identical\\
-            $\Rightarrow$ no guards needed};
-
-        \node[merged, right=1.4cm of p2, text width=6.0cm] (out) {%
-            \textbf{Merged \mlval{line} layer}\\[3pt]
-            \texttt{\mlprop{filter}:}\\
-            \texttt{~~[\mlop{"match"},\,[\mlop{"get"},\,\mlval{"class"}],}\\
-            \texttt{~~~[\mlval{"motorway"},\mlval{"primary"},\mlval{"secondary"}],}\\
-            \texttt{~~~\mlval{true},\,\mlval{false}]}\\[3pt]
-            \texttt{\mlprop{line-color}:}\\
-            \texttt{~~[\mlop{"match"},\,[\mlop{"get"},\,\mlval{"class"}],}\\
-            \texttt{~~~\mlval{"motorway"},\,\mlval{"\#e892a2"},}\\
-            \texttt{~~~\mlval{"primary"},\,\mlval{"\#fcd6a4"},\,\mlval{"\#f7fabf"}]}\\[3pt]
-            \texttt{\mlprop{line-width}:}\\
-            \texttt{~~[\mlop{"match"},\,[\mlop{"get"},\,\mlval{"class"}],}\\
-            \texttt{~~~\mlval{"motorway"},\,\mlval{3},\,\mlval{"primary"},\,\mlval{2},\,\mlval{1.5}]}\\[3pt]
-            \texttt{\mlprop{line-sort-key}:}\\
-            \texttt{~~[\mlop{"match"},\,[\mlop{"get"},\,\mlval{"class"}],}\\
-            \texttt{~~~\mlval{"motorway"},\,\mlval{0},\,\mlval{"primary"},\,\mlval{1},\,\mlval{2}]}
-        };
-
-        \node[above=0.15cm of out, font=\small\bfseries] {One merged layer as output};
-
-        \draw[arrow] (l0.east) -- (p1.west);
-        \draw[arrow] (l1.east) -- (p2.west);
-        \draw[arrow] (l2.east) -- (p3.west);
-        \draw[arrow] (p1.east) -- (out.west |- p1.east);
-        \draw[arrow] (p2.east) -- (out.west);
-        \draw[arrow] (p3.east) -- (out.west |- p3.east);
-    \end{tikzpicture}}
+        \draw[arrow] (l0.south) -- (l0.south |- ph.north);
+        \draw[arrow] (l1.south) -- (l1.south |- ph.north);
+        \draw[arrow] (ph) -- (out);
+    \end{tikzpicture}
     \caption{
-Layer merging example.  Three adjacent line layers differing only in filter literal, color, and width are merged via the \mlop{match} pattern (Phase \stepcirc{2}).
+Layer merging example.  Two adjacent line layers differing only in filter literal and color are merged via the \mlop{match} pattern (Phase \stepcirc{2}).
     The merged layer uses \texttt{[\mlop{"match"}, [\mlop{"get"}, \mlval{"class"}], \ldots]} for the filter, each differing paint property, and a synthesized sort key that preserves the original draw order.
     Phase \stepcirc{1} validates that all differing properties support feature-driven expressions, and Phase \stepcirc{3} confirms identical zoom ranges, so no zoom guards are needed}
     \label{fig:layer_merge_example}
