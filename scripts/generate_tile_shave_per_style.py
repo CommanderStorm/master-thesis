@@ -20,7 +20,7 @@ OUTPUT_DIR = SCRIPT_DIR.parent / "figures"
 FORMATS = ["png", "pdf"]
 
 FIG_WIDTH = 720
-FIG_HEIGHT = 272
+FIG_HEIGHT = 300
 
 BAR_COLOR = "#0072B2"
 BAR_COLOR_ALT = "#56B4E9"

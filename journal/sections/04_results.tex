@@ -9,7 +9,7 @@ A second tier of \num{11} styles whose referenced tile data is fully available i
 The measurement harness is a Puppeteer-driven headless browser that loads MapLibre GL JS, replays each animation, and collects load time, frames per second (FPS), frame-time percentiles, and time to first tile through the browser \texttt{Performance} API with real GPU rendering (ANGLE/Vulkan).
 Each style and scenario cell is run \num{15} times and reported as the median.
 The pipeline itself is measured through a 19-step cumulative ablation in which each pass is added on top of all preceding passes, plus one plain-tile-shaving comparison configuration.
-Three styles using legacy \texttt{text-field} syntax that an upstream MapLibre migrator miscompiles are capped at the structural stage and excluded from the end-to-end pool of 10 styles.
+Three styles using legacy \mlprop{text-field} syntax that an upstream MapLibre migrator miscompiles are capped at the structural stage and excluded from the end-to-end pool of 10 styles.
 
 \subsection{Style-level optimization}\label{sec:results:style}
 The eight expression-level passes barely moved end-to-end load time on their own, reducing the per-style median by \qty{2.0}{\percent} (range \qtyrange{-58.8}{+12.3}{\percent} across styles), an effect not consistently distinguishable from per-style measurement noise.
@@ -19,7 +19,7 @@ The size reduction translated directly into a shorter style-parse step even wher
 
 The structural passes concentrated almost all of their gains in dead-layer elimination and layer merging, with the remaining passes negligible in isolation.
 The magnitude was style-dependent: Fiord's 48-layer style shed two layers (\qty{-4.2}{\percent}, \qty{-14.1}{\percent} gzip transfer, \qty{-36.8}{\percent} expression-tree nodes from \num{1610} to \num{1018}), while Liberty's 111-layer style shed four through layer merging (\qty{-3.6}{\percent}, \qty{-4.9}{\percent} gzip, nodes from \num{3537} to \num{3167}).
-Layer merging can increase raw byte count, because a merged layer replaces several short filters with wordier \texttt{match}-keyed expressions, yet still reduces per-frame draw calls and frame time.
+Layer merging can increase raw byte count, because a merged layer replaces several short filters with wordier \mlop{match}-keyed expressions, yet still reduces per-frame draw calls and frame time.
 Gzip absorbs the raw increase, leaving compressed size essentially unchanged.
 Symbol-heavy styles benefit less because symbol layers are excluded from merging on collision-soundness grounds.
 

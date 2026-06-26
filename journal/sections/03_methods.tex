@@ -143,11 +143,11 @@ The exhaustive rule list is given in the supplemental material.
 \toprule
 \textbf{Pass} & \textbf{Data} & \textbf{Description [analogy]} \\
 \midrule
-Unary simplification & none & Unwrap single-argument \texttt{any}/\texttt{all} wrappers [identity elimination] \\
+Unary simplification & none & Unwrap single-argument \mlop{any}/\mlop{all} wrappers [identity elimination] \\
 Kind normalization & none & Rewrite negated comparisons to their direct form [strength reduction] \\
 Constant folding & none & Evaluate statically determinable expressions, eliminate dead branches [constant folding, SCCP] \\
-Statistics-driven folding & scan & Fold \texttt{has}/\texttt{get}/\texttt{geometry-type} using tile statistics, prune unreachable arms [sparse conditional constant propagation] \\
-Simplification & none & De Morgan, boolean flattening, \texttt{case}$\to$\texttt{match}, \texttt{let}/\texttt{var} inlining, \texttt{any}$\to$\texttt{in} merging [algebraic simplification] \\
+Statistics-driven folding & scan & Fold \mlop{has}/\mlop{get}/\mlop{geometry-type} using tile statistics, prune unreachable arms [sparse conditional constant propagation] \\
+Simplification & none & De Morgan, boolean flattening, \mlop{case}$\to$\mlop{match}, \mlop{let}/\mlop{var} inlining, \mlop{any}$\to$\mlop{in} merging [algebraic simplification] \\
 Default stripping & none & Remove paint/layout properties equal to the specification default [dead store elimination] \\
 Color minification & none & Compress color literals to their shortest form [literal compression] \\
 Selectivity reordering & sampling & Reorder filter predicates by selectivity [predicate reordering] \\
@@ -158,15 +158,15 @@ Selectivity reordering & sampling & Reorder filter predicates by selectivity [pr
 \label{tab:expression_passes}
 \end{table}
 
-Constant folding performs the role of constant propagation and dead-code elimination, evaluating boolean algebra over \texttt{all} and \texttt{any} nodes, comparisons between literals, and dead-branch elimination on \texttt{case} and \texttt{match}.
+Constant folding performs the role of constant propagation and dead-code elimination, evaluating boolean algebra over \mlop{all} and \mlop{any} nodes, comparisons between literals, and dead-branch elimination on \mlop{case} and \mlop{match}.
 Boolean absorption is sound because MapLibre filter operators are pure, so dropping an operand discards no observable side effect, and the asymmetric form of Equation~\ref{eq:visual_equivalence} permits dropping an operand whose evaluation would have raised $\bot$.
-Contradiction detection rewrites mutually exclusive sibling predicates to \texttt{false}, which structural dead elimination later exploits to remove the enclosing layer.
-When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \texttt{match}/\texttt{in} arm pruning and frequency reordering, and ramp-stop pruning outside the observed range.
+Contradiction detection rewrites mutually exclusive sibling predicates to \mlval{false}, which structural dead elimination later exploits to remove the enclosing layer.
+When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \mlop{match}/\mlop{in} arm pruning and frequency reordering, and ramp-stop pruning outside the observed range.
 A cardinality threshold of 200 governs value tracking, separating the folding-useful categorical properties of the OMT schema from high-cardinality string columns without tuning for any specific style.
 Folds whose effect is irreversible are gated on a full-census sample rate, since an arm the statistics never observed may still be reached by features in the field.
 
 Selectivity reordering runs after the peephole table has stabilized.
-For \texttt{all} it sorts predicates by ascending selectivity so the predicate most likely to be false is evaluated first, and for \texttt{any} it sorts by descending selectivity.
+For \mlop{all} it sorts predicates by ascending selectivity so the predicate most likely to be false is evaluated first, and for \mlop{any} it sorts by descending selectivity.
 The estimates follow the independence assumption of \citet{selingerAccessPathSelection1979}.
 Only a reordering heuristic consumes the selectivity signal, not a cost-based plan chooser, so what matters is the relative ordering of predicates rather than their absolute values, and correlation between style predicates rarely inverts that ordering.
 
@@ -177,9 +177,9 @@ The system is not confluent, so different orderings may yield different but visu
 
 Structural passes consume the typed style model to perform cross-layer and cross-source reasoning.
 Table~\ref{tab:structural_passes} lists them.
-Dead layer elimination treats a layer as dead when its filter is literally \texttt{false}, when its source layer carries zero features, or when its geometry type does not match the available types, which is particularly effective on OMT, where one source layer carries mixed geometry.
-Metadata refinement extracts implicit zoom bounds from filter predicates and paint ramps and lifts them into explicit \texttt{minzoom}/\texttt{maxzoom} metadata, allowing the renderer to skip whole layers at zoom levels where they are invisible.
-Refinement is asymmetric to respect overzoom: \texttt{minzoom} may be raised to the first data-carrying zoom freely, but \texttt{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \texttt{maxzoom}, since otherwise the layer's tiles would be overzoomed beyond that level.
+Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available types, which is particularly effective on OMT, where one source layer carries mixed geometry.
+Metadata refinement extracts implicit zoom bounds from filter predicates and paint ramps and lifts them into explicit \mlprop{minzoom}/\mlprop{maxzoom} metadata, allowing the renderer to skip whole layers at zoom levels where they are invisible.
+Refinement is asymmetric to respect overzoom: \mlprop{minzoom} may be raised to the first data-carrying zoom freely, but \mlprop{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \mlprop{maxzoom}, since otherwise the layer's tiles would be overzoomed beyond that level.
 
 \begin{table}[htbp]
 \centering
@@ -190,9 +190,9 @@ Refinement is asymmetric to respect overzoom: \texttt{minzoom} may be raised to 
 \midrule
 Metadata stripping & none & Remove \texttt{metadata} fields at style and layer level [debug-info stripping] \\
 Dead layer/source elim. & none/scan & Remove always-false, geometry-mismatched, or empty layers, prune unreferenced sources [dead-code elimination] \\
-Metadata refinement & none/scan & Extract and tighten \texttt{minzoom}/\texttt{maxzoom} bounds from filters, ramps, and coverage [range analysis] \\
+Metadata refinement & none/scan & Extract and tighten \mlprop{minzoom}/\mlprop{maxzoom} bounds from filters, ramps, and coverage [range analysis] \\
 Cleanup & none & Remove empty sections, invisible layers, trivial filters, default root properties [dead-code elimination] \\
-Layer merging & none & Merge identical adjacent layers via synthesized \texttt{case}/\texttt{match} [basic-block merging] \\
+Layer merging & none & Merge identical adjacent layers via synthesized \mlop{case}/\mlop{match} [basic-block merging] \\
 Source zoom tightening & none & Tighten source zoom bounds to referencing layers [liveness analysis] \\
 \bottomrule
 \end{tabular}
@@ -201,7 +201,7 @@ Passes marked \emph{none/scan} run unconditionally but gain precision with tile 
 \label{tab:structural_passes}
 \end{table}
 
-Layer merging combines adjacent layers of the same type whose differing properties are all mergeable, synthesizing a \texttt{case} or \texttt{match} expression over the filter discriminator so that fewer layers mean fewer render passes.
+Layer merging combines adjacent layers of the same type whose differing properties are all mergeable, synthesizing a \mlop{case} or \mlop{match} expression over the filter discriminator so that fewer layers mean fewer render passes.
 A property is mergeable only when the specification metadata marks it as feature-driven and it is not a zoom ramp.
 Three invariants together witness visual equivalence: coverage, because the merged filter is the disjunction of the originals and the merged expression selects each original per-layer value; painter order, via a synthesized sort key assigning each original layer an ascending integer in declaration order, with any candidate that already carries an explicit sort key refused; and layer scope, by excluding symbol layers, whose per-layer collision placement would be widened by a merge.
 A cross-phase filter-to-property constant propagation substitutes equality constraints extracted from a layer's filter into that same layer's paint and layout expressions, sound because MapLibre evaluates the filter first; propagation is strictly intra-layer.
@@ -261,10 +261,10 @@ The ordering matters because dead layer elimination, metadata refinement, and la
 This makes shaving a projection-pushdown plan over the tile data, advised by the optimized style rather than by the original one.
 
 The advisory captures five categories of information per source-layer.
-\emph{Property usage} records each property name appearing in a \texttt{get} or \texttt{has} expression in any live layer, together with the zoom range over which it is referenced.
+\emph{Property usage} records each property name appearing in a \mlop{get} or \mlop{has} expression in any live layer, together with the zoom range over which it is referenced.
 \emph{Geometry usage} records the geometry types required at each zoom level, inferred from the live layers targeting the source-layer.
 \emph{Zoom-level coverage} records the zoom levels for which at least one live layer references the source-layer.
-\emph{Categorical-value usage} records property values referenced by equality filters and \texttt{match} expressions, with their applicable zoom ranges.
+\emph{Categorical-value usage} records property values referenced by equality filters and \mlop{match} expressions, with their applicable zoom ranges.
 \emph{Feature-identifier usage} records whether any live layer references the feature identifier or feature state.
 Properties, values, geometry types, and identifiers absent from the advisory are candidates for removal.
 
@@ -286,10 +286,10 @@ Because the advisory is recomputed from the post-structural style, dead-layer el
     ]
         \node[style] (sopt) {Style optimizations};
 
-        \node[both, right=3cm of sopt] (adv) {Tile pruning advisory};
+        \node[both, right=2.4cm of sopt] (adv) {Tile pruning advisory};
         \draw[arrow] (sopt) -- node[above, lbl] {optimized style} (adv);
 
-        \node[data, right=3cm of adv] (stats) {Tile statistics};
+        \node[data, right=2.4cm of adv] (stats) {Tile statistics};
         \draw[arrow] (stats) -- node[above, lbl] {property/\\geom distribution} (adv);
 
         \node[data, below=0.55cm of adv] (prune) {Prune \& transform};
@@ -352,7 +352,7 @@ String columns compete across four strategies spanning the two orthogonal dimens
 A viability probe attempts FSST only when its symbol-table overhead is likely to be recouped, and trained compressors are cached by column name and reused across sort trials.
 Where the reference encoder groups dictionary-sharing columns by naming prefix, our encoder replaces prefix matching with MinHash-based similarity clustering \citep{broderResemblanceContainmentDocuments1998}.
 For each column it computes two 128-permutation sketches, one over exact values and one over byte trigrams, and unifies columns whose estimated Jaccard similarity exceeds 7.5 percent via union-find.
-The exact sketch catches columns sharing literal values (\texttt{class} and \texttt{subclass} in OMT) and the trigram sketch catches cross-language morphological variants (\texttt{name:de} and \texttt{name:fr}), both of which prefix matching misses.
+The exact sketch catches columns sharing literal values (\mlval{class} and \mlval{subclass} in OMT) and the trigram sketch catches cross-language morphological variants (\mlval{name:de} and \mlval{name:fr}), both of which prefix matching misses.
 
 Figure~\ref{fig:sort_competition} shows how the two competitions nest into a single control flow, with shared string-dictionary groups computed once and reused while each surviving sort candidate is fully encoded and only the smallest output is retained.
 
