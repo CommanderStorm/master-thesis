@@ -97,8 +97,7 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \includegraphics[width=\linewidth]{time_breakdown.pdf}
     \caption{Load time decomposed into first frame, first tile, and remaining load across the ablation steps.
     First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied.
-    Style parse stays under \qty{2}{\milli\second} throughout and is folded into the first-frame leg.
-    Steps that use tile-derived statistics are marked with a star.}
+    Style parse stays under \qty{2}{\milli\second} throughout and is folded into the first-frame leg.}
     \label{fig:time_breakdown}
 \end{figure}
 
@@ -106,8 +105,7 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \centering
     \includegraphics[width=\linewidth]{memory_ablation.pdf}
     \caption{Mean browser heap usage across all scenarios and benchmark styles by ablation step.
-    Style-level passes trim a few megabytes, but the bulk of the \qty{-35.5}{\percent} reduction comes from the data-level passes, where the in-memory tile payload itself shrinks after shaving.
-    Steps that use tile-derived statistics are marked with a star.}
+    Style-level passes trim a few megabytes, but the bulk of the \qty{-35.5}{\percent} reduction comes from the data-level passes, where the in-memory tile payload itself shrinks after shaving.}
     \label{fig:memory_ablation}
 \end{figure}
 
@@ -127,18 +125,17 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
         \label{fig:box_fps}
     \end{subfigure}
     \caption{Per-run distribution of load time and FPS across all scenarios and styles, by ablation step.
-    Load-time variance compresses sharply at \texttt{tile\_shave}, while the FPS spread widens past the same step as per-style headroom diverges.
-    Steps that use tile-derived statistics are marked with a star.}
+    Load-time variance compresses sharply at \texttt{tile\_shave}, while the FPS spread widens past the same step as per-style headroom diverges.}
     \label{fig:box}
 \end{figure}
 
 \begin{figure}[tb]
     \centering
     \includegraphics[width=\linewidth]{waterfall_gzip_bytes.pdf}
-    \caption{Cumulative ablation of mean style gzip bytes across all 19 steps.
-    Most of the wire-size win lands by metadata stripping.
-    The \texttt{tile\_shave\_only} spike is the unoptimized-style comparison configuration, which the subsequent steps recover and surpass.
-    Steps that use tile-derived statistics are marked with a star.}
+    \caption{Marginal-contribution waterfall of mean style gzip size, as a percentage of each style's baseline, averaged across the ten full-pipeline styles.
+    Each bar is one pass's contribution given all preceding passes, and the bars sum to the final \qty{14}{\percent} reduction.
+    About \qty{80}{\percent} of the total is banked by metadata stripping.
+    \texttt{tile\_shave\_only} is drawn as a separate reference (dotted line) rather than an inline step, because for style size it coincides with the baseline: tile shaving alters tile data, not the style.}
     \label{fig:waterfall}
 \end{figure}
 

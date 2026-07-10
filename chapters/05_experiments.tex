@@ -735,18 +735,18 @@ $\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions not
 \end{figure}
 
 \cref{fig:waterfall_gzip_bytes} traces mean style gzip bytes across the same 19 cumulative steps, complementing the load-time waterfall of \cref{fig:waterfall_loadMs} on the wire-size axis.
-Almost all of the style-size win landed by \texttt{strip\_metadata} (step~8), and the structural and refinement passes left the curve flat because their gains were concentrated in layer count rather than serialized bytes.
-The brief uptick at \texttt{tile\_shave\_only} corresponds to Configuration~3 of \cref{sub:mlt_evaluation} (shaving applied to the unoptimized style), and the subsequent \texttt{tile\_shave} and \texttt{tile\_rewrite} steps restored the optimized style and pushed the curve to the pipeline's overall minimum.
+Most of the style-size win (about \qty{80}{\percent} of the final \qty{14}{\percent} reduction) landed by \texttt{strip\_metadata} (step~8), and the structural and refinement passes left the waterfall flat because their gains were concentrated in layer count rather than serialized bytes.
+Tile shaving alters tile data rather than the style, so \texttt{tile\_shave} contributes essentially nothing to gzip size, and the last drop to the pipeline minimum comes from \texttt{tile\_rewrite}.
+\texttt{tile\_shave\_only} (Configuration~3 of \cref{sub:mlt_evaluation}, shaving applied to the unoptimized style) is shown as a separate reference rather than an inline step, because for style size it coincides with the baseline.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{figures/waterfall_gzip_bytes.pdf}
     \caption{
-Cumulative ablation of mean style gzip bytes across all 19 steps.
-The orange line is the mean across scenarios, and thin gray lines bound the per-scenario distribution.
-Most of the wire-size win lands by \texttt{strip\_metadata}.
-The \texttt{tile\_shave\_only} spike is the unoptimized-style baseline of Configuration~3, which \texttt{tile\_shave} and \texttt{tile\_rewrite} recover and surpass.
-$\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
+Marginal-contribution waterfall of mean style gzip size, expressed as a percentage of each style's baseline and averaged across the ten full-pipeline styles.
+Each bar is one pass's contribution given all preceding passes, and the bars sum to the final \qty{14}{\percent} reduction.
+About \qty{80}{\percent} of the total is banked by \texttt{strip\_metadata} (step~8), after which the curve stays flat until \texttt{tile\_rewrite}.
+\texttt{tile\_shave\_only} is drawn as a separate reference (dotted line) rather than an inline step, because for style size it coincides with the baseline: tile shaving alters tile data, not the style.}
     \label{fig:waterfall_gzip_bytes}
 \end{figure}
 
