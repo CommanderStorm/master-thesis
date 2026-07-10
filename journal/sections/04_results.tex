@@ -4,16 +4,15 @@
 
 \subsection{Experimental setup and corpora}\label{sec:results:setup}
 We evaluate the pipeline across three tiers of breadth.
-A benchmarking corpus of 13 MapLibre styles is rendered end-to-end against the Germany OpenMapTiles (OMT) tileset (zoom levels 0 to 14, \qty{256.5}{\kilo tiles}) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
-The subset of \num{11} styles whose referenced tile data is fully available is evaluated at the tile-shaving size level on the same tileset, and a third generalization corpus of \num{13} additional unseen styles drawn from the Maputnik gallery is evaluated with static analysis only.
+A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the Germany OpenMapTiles (OMT) tileset (zoom levels 0 to 14, \qty{256.5}{\kilo tiles}) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
+The same \num{10} styles are also evaluated at the tile-shaving size level on the same tileset, and a third generalization corpus of \num{12} additional unseen styles drawn from the Maputnik gallery is evaluated with static analysis only.
 The measurement harness is a Puppeteer-driven headless browser that loads MapLibre GL JS, replays each animation, and collects load time, frame-times, and time to first tile through the browser \texttt{Performance} API under Vulkan based rendering.
 Each style and scenario cell is run \num{15} times and reported as the median.
 The pipeline itself is measured through a 19-step cumulative ablation in which each pass is added on top of all preceding passes, plus one plain-tile-shaving comparison configuration.
-Three styles using legacy \mlprop{text-field} syntax that an upstream MapLibre migrator miscompiles are capped at the structural stage and excluded from the end-to-end pool of 10 styles.
 
 \subsection{Style-level optimization}\label{sec:results:style}
-The eight expression-level passes barely moved end-to-end load time on their own, reducing the per-style median by \qty{2.0}{\percent} (range \qtyrange{-58.8}{+12.3}{\percent} across styles), an effect not consistently distinguishable from per-style measurement noise.
-Their effect on serialized style size was clearer: default stripping was the single largest marginal contributor at \qty{-4.3}{\percent} of raw style size (\qty{-2.9}{\percent} under gzip), followed by stats-driven folding (\qty{-1.6}{\percent}) and expression simplification (\qty{-1.4}{\percent}).
+The eight expression-level passes barely moved end-to-end load time on their own, reducing the per-style median by \qty{1.6}{\percent} (range \qtyrange{-7.3}{+12.3}{\percent} across styles), an effect not consistently distinguishable from per-style measurement noise.
+Their effect on serialized style size was clearer: default stripping was the single largest marginal contributor at \qty{-3.4}{\percent} of raw style size (\qty{-2.5}{\percent} under gzip), followed by stats-driven folding (\qty{-1.5}{\percent}) and expression simplification (\qty{-1.1}{\percent}).
 Raw style size fell by up to \qty{20.3}{\percent} on Fiord (\num{22.2} to \qty{17.7}{\kilo\byte}) and \qty{7.0}{\percent} on Liberty, narrowing to \qty{8.3}{\percent} and \qty{5.9}{\percent} respectively under gzip as the compressor absorbed part of the raw savings.
 The size reduction translated directly into a shorter style-parse step even where end-to-end load time was unchanged.
 
@@ -26,12 +25,12 @@ Symbol-heavy styles benefit less because symbol layers are excluded from merging
 \subsection{Tile shaving and columnar re-encoding}\label{sec:results:data}
 Tile shaving dominates the improvements.
 Pooled across the \num{10} deep-corpus styles, shaving alone cut the median load time from \qty{390}{\milli\second} to \qty{135}{\milli\second} (\qty{-65.5}{\percent}) and roughly doubled median FPS (\num{2.1}$\times$), whereas style-only optimization contributed a modest \qty{-4.0}{\percent} (Figure~\ref{fig:box}).
-Across the \num{11} styles with available tile data, style-driven on-wire reductions on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{29.0}{\percent} (Figure~\ref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
+Across the \num{10} styles with available tile data, style-driven on-wire reductions on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{28.6}{\percent} (Figure~\ref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
 
 \begin{figure}[tb]
     \centering
     \includegraphics[width=\linewidth]{tile_shave_per_style.pdf}
-    \caption{On-wire data reduction from style-driven MVT shaving across the \num{11} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.
+    \caption{On-wire data reduction from style-driven MVT shaving across the \num{10} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.
     Styles that reference fewer source-layers and property columns achieve larger reductions.}
     \label{fig:tile_shave_per_style}
 \end{figure}
@@ -90,7 +89,7 @@ Style-level passes therefore act as enablers that simplify the advisory, and for
 The 19-step ablation confirms this (Figures~\ref{fig:box} and~\ref{fig:waterfall}). Load-time variance compresses only when tile shaving fires, the FPS spread widens past the same step, and almost all of the style-size win lands by metadata stripping.
 The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split. Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against a load budget of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately. The first-tile and remaining-load legs move only once tile shaving fires.
 Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
-Browser heap fell \qty{35.7}{\percent}, from \qty{86.0}{\mega\byte} to \qty{55.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
+Browser heap fell \qty{35.5}{\percent}, from \qty{84.2}{\mega\byte} to \qty{54.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
 Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline load-time reductions were tight (Fiord \qty{370.9}{\milli\second} to \qty{120.5}{\milli\second}, Liberty \qty{466.5}{\milli\second} to \qty{133.7}{\milli\second}, both $p < 10^{-45}$, Wilcoxon).
 
 \begin{figure}[tb]
@@ -98,7 +97,8 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \includegraphics[width=\linewidth]{time_breakdown.pdf}
     \caption{Load time decomposed into first frame, first tile, and remaining load across the ablation steps.
     First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied.
-    Style parse stays under \qty{2}{\milli\second} throughout and is folded into the first-frame leg.}
+    Style parse stays under \qty{2}{\milli\second} throughout and is folded into the first-frame leg.
+    Steps that use tile-derived statistics are marked with a star.}
     \label{fig:time_breakdown}
 \end{figure}
 
@@ -106,7 +106,8 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \centering
     \includegraphics[width=\linewidth]{memory_ablation.pdf}
     \caption{Mean browser heap usage across all scenarios and benchmark styles by ablation step.
-    Style-level passes trim a few megabytes, but the bulk of the \qty{-35.7}{\percent} reduction comes from the data-level passes, where the in-memory tile payload itself shrinks after shaving.}
+    Style-level passes trim a few megabytes, but the bulk of the \qty{-35.5}{\percent} reduction comes from the data-level passes, where the in-memory tile payload itself shrinks after shaving.
+    Steps that use tile-derived statistics are marked with a star.}
     \label{fig:memory_ablation}
 \end{figure}
 
@@ -126,7 +127,8 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
         \label{fig:box_fps}
     \end{subfigure}
     \caption{Per-run distribution of load time and FPS across all scenarios and styles, by ablation step.
-    Load-time variance compresses sharply at \texttt{tile\_shave}, while the FPS spread widens past the same step as per-style headroom diverges.}
+    Load-time variance compresses sharply at \texttt{tile\_shave}, while the FPS spread widens past the same step as per-style headroom diverges.
+    Steps that use tile-derived statistics are marked with a star.}
     \label{fig:box}
 \end{figure}
 
@@ -135,27 +137,28 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \includegraphics[width=\linewidth]{waterfall_gzip_bytes.pdf}
     \caption{Cumulative ablation of mean style gzip bytes across all 19 steps.
     Most of the wire-size win lands by metadata stripping.
-    The \texttt{tile\_shave\_only} spike is the unoptimized-style comparison configuration, which the subsequent steps recover and surpass.}
+    The \texttt{tile\_shave\_only} spike is the unoptimized-style comparison configuration, which the subsequent steps recover and surpass.
+    Steps that use tile-derived statistics are marked with a star.}
     \label{fig:waterfall}
 \end{figure}
 
 \subsection{Cross-style generalization}\label{sec:results:generalization}
-Applied with static passes only to the \num{13} unseen Maputnik styles, the optimizer delivered a median raw style-size reduction of \qty{31.4}{\percent} (range \qtyrange{3.2}{67.7}{\percent}), narrowing to a median of \qty{11.4}{\percent} under gzip (range \qtyrange{3.9}{22.4}{\percent}), with no style regressing (Figure~\ref{fig:cross_style}).
-The top reducers were styles with verbose filter logic or repetitive property structures (LocationIQ Streets at \qty{67.7}{\percent}, Americana at \qty{59.2}{\percent}, MapTiler Toner at \qty{57.5}{\percent}), while already-minified basemaps such as Stadia Outdoors (\qty{3.2}{\percent}) and the AWS pair (\qty{10.6}{\percent}) left little to remove.
-Initial style complexity did not reliably predict achievable reduction (Pearson $r = 0.35$, $n = 13$, $p = 0.24$), a relationship dominated by a single high-leverage point such that dropping Americana flips the sign to $r = -0.54$.
+Applied with static passes only to the \num{12} unseen Maputnik styles, the optimizer delivered a median raw style-size reduction of \qty{30.8}{\percent} (range \qtyrange{3.2}{67.7}{\percent}), narrowing to a median of \qty{10.8}{\percent} under gzip (range \qtyrange{3.9}{22.4}{\percent}), with no style regressing (Figure~\ref{fig:cross_style}).
+The top reducers were styles with verbose filter logic or repetitive property structures (LocationIQ Streets at \qty{67.7}{\percent} and MapTiler Toner at \qty{57.5}{\percent}), while already-minified basemaps such as Stadia Outdoors (\qty{3.2}{\percent}) and the AWS pair (\qty{10.6}{\percent}) left little to remove.
+Initial style complexity did not reliably predict achievable reduction (Pearson $r = -0.54$, $n = 12$, $p = 0.07$).
 Because the generalization corpus carries no tile data, stats-driven and data-level passes were not applied, so these figures are a lower bound on the full potential.
 
 \begin{figure}[tb]
     \centering
     \includegraphics[width=\linewidth]{cross_style_reduction.pdf}
-    \caption{Per-style raw, gzip, and brotli style-size reduction across the \num{13} unseen Maputnik styles, sorted by raw reduction.
+    \caption{Per-style raw, gzip, and brotli style-size reduction across the \num{12} unseen Maputnik styles, sorted by raw reduction.
     Raw reductions range from \qty{3.2}{\percent} to \qty{67.7}{\percent}, with no style regressing.}
     \label{fig:cross_style}
 \end{figure}
 
 \subsection{Threats to validity}\label{sec:results:threats}
 All rendering benchmarks ran on a single hardware and browser configuration with ANGLE/Vulkan, so results may differ on other hardware or graphics backends, and the 15-run median may not capture rare events such as thermal throttling.
-The evaluation is limited to MapLibre GL JS and the OMT schema, and the 13 benchmark styles, though diverse, may not cover all authoring patterns.
+The evaluation is limited to MapLibre GL JS and the OMT schema, and the 10 benchmark styles, though diverse, may not cover all authoring patterns.
 Network conditions were simulated through a fixed bandwidth throttle and a caching proxy rather than real content delivery network latency, which also masks real-world cache behavior.
 The cumulative ablation design means each pass's reported marginal contribution depends on the order of preceding passes, and tail metrics (p99 frame time, jank count) carry higher variance than central-tendency metrics.
 Because the \num{18} scenarios share hardware, tile data, and styles, they are not fully independent, so we read the reported $p$-values as descriptive evidence of large effect sizes rather than strict inferential tests, and apply no multiple-comparisons correction across the full ablation grid.
