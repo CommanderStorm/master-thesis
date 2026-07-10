@@ -12,7 +12,7 @@ When a request exceeds the source's \mlprop{maxzoom}, the renderer \emph{overzoo
 A vector tile encodes map data in a compact binary form.
 Each tile holds \emph{source layers} (for example roads, buildings, water), and each source layer holds \emph{features}.
 A feature carries geometry (point, linestring, or polygon as integer coordinates relative to the tile extent), an optional set of key-value \emph{properties} (such as \mlval{class}=\mlval{"motorway"}), and metadata.
-The dominant wire format is Mapbox Vector Tiles (MVT), a Protocol Buffers encoding with a \emph{row-oriented} layout in which each feature stores its own property tags, so accessing a single property requires parsing past all others and compression operates on an interleaved byte stream rather than homogeneous columns.
+The dominant wire format is Mapbox Vector Tiles (MVT), a Protocol Buffer encoding with a \emph{row-oriented} layout in which each feature stores its own property tags, so accessing a single property requires parsing past all others and compression operates on an interleaved byte stream rather than homogeneous columns.
 \citet{tremmelMapLibreTileNext2025b} introduced MapLibre Tiles (MLT), a columnar alternative that stores each property as an independent column with type-specific encoding, which enables per-column compression and removes the per-feature tag overhead.
 
 The visual appearance is governed by a separate \emph{style} document.
@@ -28,13 +28,13 @@ Some also read MapLibre's per-feature \emph{feature state} and map-wide \emph{gl
 The literature relevant to joint style and data optimization is uneven, and no prior tool composes style rewriting with data-level pruning into a single open pipeline.
 
 \subsubsection{Tile data pruning}
-Several open-source tools attack data pruning directly.
-Mapbox's \texttt{vtshaver} strips layers, features, and properties a style never references, but operates only on the data side and cannot rewrite the style.
-\texttt{vt-optimizer} drops invisible layers and fields in both style and data, yet limits itself to visibility-based pruning.
-Tippecanoe builds tilesets with density-budget feature dropping, polygon coalescing, and line simplification, the latter drawing on the cartographic generalization tradition of Douglas-Peucker \citep{douglasALGORITHMSREDUCTIONNUMBER1973} and Visvalingam-Whyatt \citep{visvalingamLineGeneralisationRepeated1993}.
+Several tools attack data pruning directly.
+Mapbox's \texttt{vtshaver}\footnote{\url{https://github.com/mapbox/vtshaver}, last accessed 2026-06-26} strips layers, features, and properties a style never references, but operates only on the data side and cannot rewrite the style.
+\texttt{vt-optimizer}\footnote{\url{https://github.com/ibesora/vt-optimizer}, last accessed 2026-06-26} drops invisible layers and fields in both style and data, yet limits itself to visibility-based pruning.
+Tippecanoe\footnote{\url{https://github.com/felt/tippecanoe}, last accessed 2026-06-26} builds tilesets with density-budget feature dropping, polygon coalescing, and line simplification, the latter drawing on the cartographic generalization tradition of Douglas-Peucker \citep{douglasALGORITHMSREDUCTIONNUMBER1973} and Visvalingam-Whyatt \citep{visvalingamLineGeneralisationRepeated1993}.
 These heuristics are purely data-driven and have no knowledge of the rendering workload.
 Mapbox's proprietary style-optimized vector tiles\footnote{\url{https://docs.mapbox.com/help/glossary/style-optimized-vector-tiles}, last accessed 26.5.26} is the closest commercial precedent that couples style and data, but it is closed-source, API-only, and its terms of service preclude independent evaluation.
-Schema-aware generators such as Planetiler\footnote{\url{https://github.com/onthegomap/planetiler}, last accessed 2026-06-26}, Tilemaker\footnote{\url{https://tilemaker.org/}, last accessed 2026-06-26}, and Protomaps\footnote{\url{https://protomaps.com}, last accessed 2026-06-26} \citep{wallnerOpenSourceVector2022} fix column selection at build time, upstream of where our optimizations operate.
+Generators such as Planetiler\footnote{\url{https://github.com/onthegomap/planetiler}, last accessed 2026-06-26}, Tilemaker\footnote{\url{https://tilemaker.org/}, last accessed 2026-06-26}, and Protomaps\footnote{\url{https://protomaps.com}, last accessed 2026-06-26} \citep{wallnerOpenSourceVector2022} fix column selection at build time, upstream of where our optimizations operate.
 
 \subsubsection{Tile encoding}
 A style is a declarative specification over a tabular feature set, which casts style-driven pruning as the projection and predicate pushdown long studied by query optimizers \citep{piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993,armbrustSparkSQLRelational2015}.
@@ -45,9 +45,9 @@ GeoParquet shares the same per-page encodings but its row-group metadata dominat
 
 \subsubsection{Style optimization}
 Style-level work is scarce.
-The MapLibre validators and the \texttt{gl-style-migrate} tool transform but do not simplify, and migration often leaves redundant \mlop{case} chains and trivially true guards.
+The MapLibre validators and the \texttt{gl-style-migrate} tool transform but do not simplify, and migration often leaves redundant \mlop{case} chains and trivially \mlval{true}/\mlval{false} guards.
 Stamen's default-stripping utility covers one pass in isolation.
-The closest academic analogue lies outside the map domain: \citet{hagueCSSMinificationConstraint2019} formalize CSS rule merging as a constrained optimization, and rule-based rewriting \citep{piraheshExtensibleRuleBased1992} and equality saturation \citep{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} supply the compiler-side vocabulary.
+The closest academic analogue lies outside the map domain. \citet{hagueCSSMinificationConstraint2019} formalize CSS rule merging as a constrained optimization, and rule-based rewriting \citep{piraheshExtensibleRuleBased1992} and equality saturation \citep{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} supply the compiler-side vocabulary.
 Our expression passes apply peephole rewriting, constant folding, and fixpoint iteration over a term-rewriting system \citep{ahoCompilersPrinciplesTechniques2007,baaderTermRewritingAll1999}, while structural passes draw on selectivity estimation \citep{selingerAccessPathSelection1979} and partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
 
 \subsubsection{Benchmarking}

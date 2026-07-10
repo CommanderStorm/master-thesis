@@ -953,7 +953,7 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
         both/.style={box, fill=roleBoth!20, minimum width=2.8cm},
         arrow/.style={-Stealth, thick},
         lbl/.style={font=\scriptsize\itshape, text=darkgray, align=center},
-        steps/.style={rectangle, draw, dashed, rounded corners=2pt, font=\small,
+        steps/.style={rectangle, rounded corners=2pt, font=\small,
                       align=left, inner sep=6pt, text=black!80},
     ]
         \node[style] (sopt) {Style optimizations\\{\scriptsize (\cref{sub:expression_optimizations,sub:structural_optimizations})}};
@@ -973,7 +973,7 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
         \draw[arrow] (prune) -- node[above, lbl] {re-encode} (mlt);
 
         \node[steps, below=0.5cm of prune] (ops) {%
-            \textbf{Pruning operations (in order):}\\[2pt]
+            \hfil\textbf{Pruning operations (in order):}\hfil\\[2pt]
             1.\;Remove entire source-layers not referenced by any style layer.\\
             2.\;For each remaining layer:\\
             \quad a.\;Filter features by geometry type at current zoom.\\
