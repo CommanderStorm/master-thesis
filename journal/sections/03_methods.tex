@@ -17,24 +17,27 @@ It pays a one-off preprocessing cost to improve the deployment metrics (load tim
 The deployment cost is not formalized as a single closed-form function. It depends on hardware, camera scenario, and tile cache state, and several passes trade a small load-time regression for a larger frames-per-second gain.
 We therefore characterize each pass in an ablation study whose per-axis breakdown lets an operator compose the pass set suiting the deployment priorities.
 
-The optimizer must satisfy two formal constraints.
-The first is \emph{visual equivalence}.
-Writing $\equiv$ for pixel-identity on $\mathcal{I}$:
+The optimizer must satisfy two constraints. The first is
+\begin{definition}[Visual equivalence]\label{def:visual_equivalence}
+Writing $\equiv$ for pixel-identity on $\mathcal{I}$, the optimized pair $(S', T')$ is visually equivalent to $(S, T)$ when
 \begin{equation}\label{eq:visual_equivalence}
     \forall v \in \mathcal{V}:\; R(S, T, v) \neq \bot \;\Rightarrow\; R(S', T', v) \equiv R(S, T, v).
 \end{equation}
+\end{definition}
 The constraint is asymmetric in $\bot$.
 An optimization may suppress a runtime evaluation error that the original style would have raised, but it must never introduce one that the original would not have raised.
 Every rule is thus semantics-preserving, so on an identical draw stream the deterministic renderer reproduces $R(S, T, v)$ exactly.
 The oracle is deliberately weaker than bit-identity: structural changes such as re-batched draw calls and re-encoded tile coordinates perturb edge antialiasing and floating-point rasterization without altering what is drawn.
 We sample $v$ on a discrete grid of zooms and viewports and accept a rendering as equivalent when it matches the reference under MapLibre's own render-test oracle: at most a fraction \num{0.00025} of the \num{262144} pixels exceed a per-pixel YIQ perceptual distance of \num{0.1285}, with antialiased-only pixels excluded.
 Both bounds are the renderer's published render-test defaults rather than parameters we tuned, so the residual disagreement is a few dozen sub-perceptual edge pixels, not a semantic divergence.
-The second constraint is \emph{strict idempotency}:
+The second is
+\begin{definition}[Strict idempotency]\label{def:idempotency}
+The optimizer $\mathcal{O}$ is strictly idempotent when
 \begin{equation}\label{eq:idempotency}
     \forall (s, t) \in \mathcal{S} \times \mathcal{T}: \mathcal{O}(\mathcal{O}(s, t)) = \mathcal{O}(s, t).
 \end{equation}
-Feeding the optimizer's output back as input yields the same pair, which rules out unbounded chained improvement by construction.
-The expression-pass fixpoint enforces idempotency on the style half, and the deterministic, statistics-driven encoding choices enforce it on the tile half.
+\end{definition}
+Feeding the optimizer's output back as input yields the same pair, which means that the expression-pass run to a fixpoint, and the deterministic, statistics-driven encoding choices enforce it on the tile half.
 Both halves are exercised by a round-trip property test on the style level and a property-test plus fuzzing harness on the tile level.
 
 The system under test is MapLibre GL JS, the reference open-source web renderer.
@@ -46,7 +49,7 @@ The optimizer is an offline, one-shot rebuild over a $(\mathcal{S}, \mathcal{T})
 Figure~\ref{fig:system_architecture} sketches the optimizer as a whole.
 At the center sits a pipeline of passes at three levels of abstraction.
 Around it are three supporting components.
-A code-generation front end produces Rust types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
+A code-generation front end produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
 A tile-statistics scanner profiles Mapbox Vector Tile (MVT) tiles for the statistics-driven and data-level passes.
 A validation harness checks the visual-equivalence guarantee of Equation~\ref{eq:visual_equivalence}, comparing optimized and unoptimized renderings of a curated style corpus pixel-for-pixel against MapLibre GL JS's software rasterizer.
 

@@ -11,7 +11,7 @@ The third level leaves the style behind and reaches into the tile data.
 A pruning advisory derived from the optimized style removes unused properties, geometry types, and feature values, and the surviving content is re-encoded into the columnar MapLibre Tiles format with automatic encoding strategy selection.
 
 We evaluated across a 13-style deep corpus and 18~scenarios, running 19~cumulative ablation steps and one plain-tile-shaving comparison.
-Tile shaving dominates load-time improvements, achieving load-time reductions of \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and \ac{FPS} gains of \qtyrange{100}{200}{\percent} (median \qty{152}{\percent}) across the ten deep-corpus styles we benchmarked end-to-end.
+Tile shaving dominates load-time improvements, achieving load-time reductions of \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and \ac{FPS} raised to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$) across the ten deep-corpus styles we benchmarked end-to-end.
 For the broader 11-style shaving cohort (the ten end-to-end styles plus Americana), tile-shaving effectiveness measured at the tile-data layer alone varied \qtyrange{19.8}{46.3}{\percent}.
 Our new \ac{MLT} encoder reduces total tile volume by \qty{28}{\percent} over the uncompressed reference encoder and \qty{12}{\percent} over gzip-compressed \ac{MVT} on the Germany \ac{OMT} tileset.
 Style-level optimizations cut style transfer size and parse time. Compact basemaps benefit little, while verbose institutional styles shrink by tens of percent. The effect on sustained rendering is indirect, working through the pruning advisory.

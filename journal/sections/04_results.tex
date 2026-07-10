@@ -24,8 +24,8 @@ Gzip absorbs the raw increase, leaving compressed size essentially unchanged.
 Symbol-heavy styles benefit less because symbol layers are excluded from merging on collision-soundness grounds.
 
 \subsection{Tile shaving and columnar re-encoding}\label{sec:results:data}
-Tile shaving was the dominant data-level lever.
-Pooled across the \num{10} deep-corpus styles, shaving alone cut the median load time from \qty{390}{\milli\second} to \qty{135}{\milli\second} (\qty{-65.5}{\percent}) and roughly doubled median FPS (\qty{+113.2}{\percent}), whereas style-only optimization contributed a modest \qty{-4.0}{\percent} (Figure~\ref{fig:box}).
+Tile shaving dominates the improvements.
+Pooled across the \num{10} deep-corpus styles, shaving alone cut the median load time from \qty{390}{\milli\second} to \qty{135}{\milli\second} (\qty{-65.5}{\percent}) and roughly doubled median FPS (\num{2.1}$\times$), whereas style-only optimization contributed a modest \qty{-4.0}{\percent} (Figure~\ref{fig:box}).
 Across the \num{11} styles with available tile data, style-driven on-wire reductions on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{29.0}{\percent} (Figure~\ref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
 
 \begin{figure}[tb]
@@ -89,7 +89,7 @@ Style-level passes therefore act as enablers that simplify the advisory, and for
 
 The 19-step ablation confirms this (Figures~\ref{fig:box} and~\ref{fig:waterfall}). Load-time variance compresses only when tile shaving fires, the FPS spread widens past the same step, and almost all of the style-size win lands by metadata stripping.
 The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split. The style-parse leg shrinks with each expression pass, while the first-tile and remaining-load legs move only once tile shaving fires.
-Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS by \qtyrange{100}{200}{\percent} (median \qty{152}{\percent}).
+Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
 Browser heap fell \qty{35.7}{\percent}, from \qty{86.0}{\mega\byte} to \qty{55.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
 Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline load-time reductions were tight (Fiord \qty{370.9}{\milli\second} to \qty{120.5}{\milli\second}, Liberty \qty{466.5}{\milli\second} to \qty{133.7}{\milli\second}, both $p < 10^{-45}$, Wilcoxon).
 
