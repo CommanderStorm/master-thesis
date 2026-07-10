@@ -66,7 +66,7 @@ Fiord's raw style shrank by \qty{20.3}{\percent} (\num{22.2}$\to$\qty{17.7}{\kil
 Under gzip the reductions were \qty{8.3}{\percent} and \qty{5.9}{\percent} respectively, so some of the raw-byte savings were absorbed by the compressor.
 
 Where load time barely moved, the style-parse component did: \cref{fig:marginal_styleParseMs} isolates the per-pass effect on \texttt{styleParseMs} and shows that the size-reducing passes (in particular default stripping) translated directly into a shorter parse step, even when their effect on end-to-end load time was within noise.
-This is the mechanism behind the parse-time leg of the time breakdown shown later in \cref{fig:time_breakdown}.
+This parse-time saving is real but small in absolute terms, well below the scale of the end-to-end load time in \cref{fig:time_breakdown}.
 
 \begin{figure}[htbp]
     \centering
@@ -88,7 +88,7 @@ $\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions not
 Marginal contribution of each expression pass to parse the style in miliseconds.
 Variance is relatively high, because parsing a style is a one time event that is not amortized across multiple frames, so the signal is more sensitive to noise than the sustained rendering time.
 The size-reducing passes (metadata and default stripping in particular) shorten the parse step, even where their end-to-end load-time effect is within noise.
-This is the proximate mechanism behind the style-parse leg of the time breakdown in \cref{fig:time_breakdown}.
+This is the proximate mechanism behind the style-parse saving noted for the time breakdown in \cref{fig:time_breakdown}.
 $\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:marginal_styleParseMs}
 \end{figure}
@@ -705,7 +705,8 @@ $\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions not
 \end{figure}
 
 \cref{fig:time_breakdown} decomposes load time across ablation steps.
-The style-parse component shrank monotonically with each expression pass, while first-tile and remaining-load were unchanged by style-only steps and dropped only once tile shaving fired at steps~17-19.
+First-tile and remaining-load were unchanged by style-only steps and dropped only once tile shaving fired at steps~17-19.
+The style-parse component also shrank with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against the load budget, so it is folded into the first-frame leg rather than drawn separately.
 
 \cref{fig:memory_ablation} tracks browser heap memory.
 Style-level passes drifted the resident JS heap from a baseline of \qty{86.0}{\mega\byte} to \qty{82.9}{\mega\byte} by step~15 (\qty{-3.6}{\percent}), with no single pass dominating.
@@ -715,9 +716,9 @@ Data-level passes drove the bulk of the reduction: tile shaving (step~17) alone 
     \centering
     \includegraphics[width=\linewidth]{figures/time_breakdown.pdf}
     \caption{
-Time breakdown across ablation steps: style parse, first tile, first frame, and remaining load time.
-Style-parse time shrinks monotonically with each expression pass.
+Time breakdown across ablation steps: first frame, first tile, and remaining load time.
 First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied (steps~17-19).
+Style parse (under \qty{2}{\milli\second}, see \cref{fig:marginal_styleParseMs}) is folded into the first-frame leg.
 $\dagger$, $\ast$ see the \hyperref[box:corpus_exclusions]{corpus-exclusions note} at the start of the chapter.}
     \label{fig:time_breakdown}
 \end{figure}

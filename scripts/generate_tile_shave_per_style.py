@@ -45,6 +45,7 @@ def main() -> None:
     args = parser.parse_args()
 
     df = load_jsonl_df(args.input)
+    df = df[df["style_id"] != "americana"]
     df = df.sort_values("reduction_pct", ascending=True)
 
     print(f"Loaded {len(df)} styles")

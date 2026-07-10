@@ -12,12 +12,12 @@ Tile shaving removes only what a style never references, so its headroom is boun
 There is thus no single optimal tile. The optimal encoding is a function of the rendering style, so the same source data yields different ideal tiles for different consumers.
 
 \subsection{The levels compose additively}
-The most consequential result, running against our prior expectation, is how the three families compose.
+Against our prior expectations, the three families compose additively.
 We expected them to compound, reasoning that style-level dead elimination would narrow the references feeding the tile-shaving advisory.
-The data refutes this: shaving an optimized style removed essentially the same bytes as shaving the unoptimized one, the style passes adding at most half a percent (Section~\ref{sec:results:combined}).
+The data refutes this.
+Shaving an optimized style removed essentially the same bytes as shaving the unoptimized one, the style passes adding at most half a percent (Section~\ref{sec:results:combined}).
 The advisory is governed by which source-layers and columns a style references, not by how its expressions are written, so simplification leaves the shave target untouched, and on data volume and load time the families are simply additive.
 Within a single level the picture is genuinely synergistic, since dead elimination removes the gaps between otherwise-mergeable layers.
-The upshot is that the three families are independently useful and can be applied or skipped one at a time.
 
 \subsection{Which level dominates depends on the bottleneck}
 Because the levels target distinct costs, dominance depends on the bottleneck.

@@ -88,7 +88,7 @@ Because style optimization leaves tile volume unchanged, this residual synergy i
 Style-level passes therefore act as enablers that simplify the advisory, and for some styles modestly improve render timing, rather than as co-equal synergistic partners.
 
 The 19-step ablation confirms this (Figures~\ref{fig:box} and~\ref{fig:waterfall}). Load-time variance compresses only when tile shaving fires, the FPS spread widens past the same step, and almost all of the style-size win lands by metadata stripping.
-The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split. The style-parse leg shrinks with each expression pass, while the first-tile and remaining-load legs move only once tile shaving fires.
+The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split. Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against a load budget of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately. The first-tile and remaining-load legs move only once tile shaving fires.
 Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
 Browser heap fell \qty{35.7}{\percent}, from \qty{86.0}{\mega\byte} to \qty{55.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
 Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline load-time reductions were tight (Fiord \qty{370.9}{\milli\second} to \qty{120.5}{\milli\second}, Liberty \qty{466.5}{\milli\second} to \qty{133.7}{\milli\second}, both $p < 10^{-45}$, Wilcoxon).
@@ -96,8 +96,9 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
 \begin{figure}[tb]
     \centering
     \includegraphics[width=\linewidth]{time_breakdown.pdf}
-    \caption{Load time decomposed into style parse, first tile, first frame, and remaining load across the ablation steps.
-    Style-parse time shrinks monotonically with each expression pass, while first-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied.}
+    \caption{Load time decomposed into first frame, first tile, and remaining load across the ablation steps.
+    First-tile and remaining-load times are unchanged by style-only steps and decrease only when tile shaving is applied.
+    Style parse stays under \qty{2}{\milli\second} throughout and is folded into the first-frame leg.}
     \label{fig:time_breakdown}
 \end{figure}
 

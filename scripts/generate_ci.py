@@ -24,7 +24,7 @@ ROOT = THESIS_DIR.parent
 INPUT_DIR = ROOT / "maplibre-optimiser" / "tests" / "bench" / "results"
 OUTPUT_DIR = SCRIPT_DIR / "data"
 
-EXCLUDED_STYLES: set[str] = set()
+EXCLUDED_STYLES: set[str] = {"americana", "icgc-fosc", "icgc-gris"}
 
 _STEP_RE = re.compile(r"^step-(\d+)-(.+)$")
 
