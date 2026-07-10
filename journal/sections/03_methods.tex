@@ -312,81 +312,23 @@ Because interned tiles encode style-specific integers rather than self-describin
 
 \subsection{Adaptive multi-strategy MLT encoding}\label{sec:methods:encoding}
 
-The encoder re-encodes the pruned and transformed data into the MLT columnar format through a multi-strategy competition over per-column encodings.
-Rather than committing to a single (learned/static) encoding plan, it uses each tile's data distribution to try multiple strategies, measure each output size, and select the smallest.
-The competition nests at two levels: an outer loop over feature sort orderings and an inner loop over each per-stream integer encodings.
-The inner criterion is single-objective (smallest encoded size) and we report the multi-axis deployment trade-offs separately in the ablation rather than resolving them inside the encoder.
-A no-copy alternatives mechanism lets each candidate write into the encoder's buffers and rolls losing candidates back, so the two competitions nest without redundant allocation.
-Combined with warm-start caching of trained string compressors and vertex-strategy decisions across sort trials, this keeps the cost near-additive rather than multiplicative.
+The encoder re-encodes the pruned and transformed data into the MLT columnar format.
+Rather than committing to a single fixed or learned encoding plan, it competes several strategies against each tile's data distribution and keeps the smallest output.
+Two competitions nest.
+The outer loop ranges over feature sort orderings and the inner loop over per-stream integer encodings.
 
-The \emph{sort competition} is the outer loop.
-Reordering features within a layer permutes every parallel column simultaneously, and different orderings favor different encodings.
-Spatial orderings cluster nearby geometries and their correlated properties, improving run lengths, whereas identifier ordering produces sequential integers amenable to delta-run-length encoding.
-Because no single ordering dominates across layers, zoom levels, and tilesets, the encoder tries four strategies and retains the smallest output.
-The \emph{unsorted} strategy preserves the original feature order.
-The \emph{spatial (Morton)} strategy sorts by the Z-order index of the first vertex via bit-interleaving, which is fast and gives reasonable locality.
-The \emph{spatial (Hilbert)} strategy sorts by the Hilbert index, which is slower but achieves superior locality because the Hilbert curve avoids the long jumps of the Z-order curve \citep{moonAnalysisClusteringProperties2001}.
-The \emph{identifier} strategy sorts by ascending feature identifier.
-A bounding-box heuristic skips spatial sorting on large layers too dispersed for clustering to help.
-For layers with more than 512 features, spatial trials are pruned when the first-vertex bounding box covers more than 80\% of the tile extent on both axes.
+Reordering features within a layer permutes every column at once, and different orderings favor different encodings.
+Spatial clustering lengthens runs on correlated property columns, whereas identifier ordering yields sequential integers amenable to delta-run-length encoding.
+Because no ordering dominates across layers and zoom levels, the encoder tries four (unsorted, Morton, Hilbert, and identifier) and retains the smallest.
+Morton sorts by the bit-interleaved Z-order index and is fast, while Hilbert is slower but achieves better locality by avoiding the Z-order curve's long jumps \citep{moonAnalysisClusteringProperties2001}.
 
-The \emph{per-stream competition} is the inner loop.
-Each candidate pairs a logical encoding (plain, delta, run-length, or delta-run-length) with a physical encoding (variable-length integers or FastPFOR \citep{lemireDecodingBillionsIntegers2015}).
-To avoid encoding every combination, a data profiler samples a contiguous mid-stream block and prunes candidates in a single pass before any full encoding: run-length is excluded when the average run length falls below 2.0, delta when the zigzag-encoded deltas exceed the raw values in summed bit width, and FastPFOR is offered only for 32-bit types whose block structure it requires.
-The encoder then encodes the surviving candidates, typically two to four, and commits the smallest.
-The same profiler also drives feature-identifier encoding. Geometry vertices use a separate path competing componentwise deltas against Morton- and Hilbert-code dictionaries.
+The inner competition pairs each logical encoding (plain, delta, run-length, or delta-run-length) with a physical one (variable-length integers or FastPFOR).
+A data profiler prunes candidates in a single pass before any full encoding, and the encoder commits the smallest of the surviving two to four.
+Geometry vertices, roughly 70\% of MVT bytes on a planet OMT run, use a dedicated path competing componentwise deltas against Morton- and Hilbert-code dictionaries.
 
-String columns compete across four strategies spanning deduplication and byte-level compression. \textit{Plain} bytes with length prefixes, a \textit{dictionary} with offset indices, \textit{FSST} compression \citep{bonczFSSTFastRandom2020} that learns a symbol table of frequent byte sequences and stays scannable without decompression, and \textit{FSST over a dictionary}.
-A viability probe attempts FSST only when its symbol-table overhead is likely to be recouped, and trained compressors are cached by column name and reused across sort trials.
-Where the reference encoder groups dictionary-sharing columns by naming prefix, our encoder replaces prefix matching with MinHash-based similarity clustering \citep{broderResemblanceContainmentDocuments1998}.
-For each column it computes two 128-permutation sketches, one over exact values and one over byte trigrams, and unifies columns whose estimated Jaccard similarity exceeds 7.5 percent via union-find.
-The exact sketch catches columns sharing literal values (\mlval{class} and \mlval{subclass} in OMT) and the trigram sketch catches cross-language morphological variants (\mlval{name:de} and \mlval{name:fr}), both of which prefix matching misses.
+String columns compete plain bytes, a dictionary, FSST, and FSST over a dictionary.
+For shared dictionaries, our encoder replaces the reference encoder's naming-prefix matching with MinHash similarity clustering \citep{broderResemblanceContainmentDocuments1998}.
+It computes two sketches per column, one over exact values and one over byte trigrams.
+These catch columns sharing literal values (\mlval{class} and \mlval{subclass} in OMT) and cross-language variants (\mlval{name:de} and \mlval{name:fr}) that prefix matching misses.
 
-Figure~\ref{fig:sort_competition} shows how the two competitions nest into a single control flow.
-
-\begin{figure}[tb]
-    \centering
-    \begin{tikzpicture}[
-        node distance=0.55cm and 0.7cm,
-        box/.style={rectangle, draw, rounded corners=2pt, minimum width=2.9cm,
-            minimum height=0.6cm, font=\small, align=center},
-        input/.style={box, fill=roleInput!40},
-        prep/.style={box, fill=roleMir!30},
-        stage/.style={box, fill=roleStyle!20},
-        encoder/.style={box, fill=roleData!25},
-        decision/.style={diamond, draw, fill=roleDecision!35, aspect=2.6,
-            font=\small, inner sep=1pt},
-        output/.style={box, fill=roleOutput!25},
-        arrow/.style={-Stealth, thick},
-        label/.style={font=\scriptsize\itshape, text=darkgray},
-        ]
-        % --- loop body row (bottom) ---
-        \node[decision] (cmp) {size $<$ best?};
-        \node[encoder, left=0.7cm of cmp] (merged)
-        {Sort, columnarize,\\ \& encode};
-        \node[stage, right=0.7cm of cmp] (upd) {Update best};
-
-        % --- central guard hub ---
-        \node[decision, above=0.9cm of cmp] (more) {more strategies?};
-
-        % --- preamble feeding the hub from the top ---
-        \node[prep, above=0.8cm of more] (grp) {Group string properties};
-        \node[input, left=of grp] (layer) {Tile layer};
-
-        % --- terminal ---
-        \node[output, right=0.7cm of more] (best) {Emit smallest};
-
-        \draw[arrow] (layer) -- (grp);
-        \draw[arrow] (grp) -- (more);
-        \draw[arrow] (more.west) -| node[pos=0.28, above, label] {yes}
-            (merged.north);
-        \draw[arrow] (merged.east) -- (cmp.west);
-        \draw[arrow] (cmp.east) -- node[above, label] {yes} (upd.west);
-        \draw[arrow] (more.east) -- node[above, label] {no} (best.west);
-        \draw[arrow] (cmp.north) -- node[right, label] {no} (more.south);
-        \draw[arrow] (upd.north) -- ++(0,0.4) -| (more.south);
-    \end{tikzpicture}
-    \caption{Multi-strategy sort competition.
-Shared-dictionary string groups are computed once and reused across trials. Each surviving sort candidate is cloned, sorted, columnarized, and encoded with per-stream integer competitions, and the smallest encoded output is retained.}
-    \label{fig:sort_competition}
-\end{figure}
+No-copy candidate buffers and warm-start caching of trained compressors keep the multi-strategy cost near-additive rather than multiplicative.
