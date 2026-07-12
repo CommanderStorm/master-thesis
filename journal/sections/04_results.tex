@@ -4,7 +4,7 @@
 
 \subsection{Experimental setup and corpora}\label{sec:results:setup}
 We evaluate the pipeline across three tiers of breadth.
-A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the Germany OpenMapTiles (OMT) tileset (zoom levels 0 to 14, \qty{256.5}{\kilo tiles}) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
+A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the Germany \ac{OMT} tileset (zoom levels 0 to 14, \qty{256.5}{\kilo tiles}) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
 The same \num{10} styles are also evaluated at the tile-shaving size level on the same tileset, and a third generalization corpus of \num{12} additional unseen styles drawn from the Maputnik gallery is evaluated with static analysis only.
 The measurement harness is a Puppeteer-driven headless browser that loads MapLibre GL JS, replays each animation, and collects load time, frame-times, and time to first tile through the browser \texttt{Performance} API under Vulkan based rendering.
 Each style and scenario cell is run \num{15} times and reported as the median.
@@ -27,27 +27,47 @@ Tile shaving dominates the improvements.
 Pooled across the \num{10} deep-corpus styles, shaving alone cut the median load time from \qty{390}{\milli\second} to \qty{135}{\milli\second} (\qty{-65.5}{\percent}) and roughly doubled median FPS (\num{2.1}$\times$), whereas style-only optimization contributed a modest \qty{-4.0}{\percent} (Figure~\ref{fig:box}).
 Across the \num{10} styles with available tile data, style-driven on-wire reductions on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{28.6}{\percent} (Figure~\ref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
 
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{tile_shave_per_style.pdf}
-    \caption{On-wire data reduction from style-driven MVT shaving across the \num{10} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.
+    \caption{On-wire data reduction from style-driven \acs{MVT} shaving across the \num{10} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.
     Styles that reference fewer source-layers and property columns achieve larger reductions.}
     \label{fig:tile_shave_per_style}
 \end{figure}
 
-Our MLT encoder alone did not have a large impact on performance, but noticably impacted transfer size.
-Table~\ref{tab:encoder} reports encoded size and full-decode latency for the Germany OMT tileset under three encoders.
-Once both are gzipped, the reference MLT encoder is larger than MVT, because general-purpose compressors already exploit most of the row-level redundancy a fixed-plan columnar encoder cannot match.
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{box_loadMs.pdf}
+        \caption{Load time per ablation step.}
+        \label{fig:box_loadMs}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{box_fps.pdf}
+        \caption{Frames per second per ablation step.}
+        \label{fig:box_fps}
+    \end{subfigure}
+    \caption{Per-run distribution of load time and FPS across all scenarios and styles, by ablation step.
+    Load-time variance compresses sharply at \texttt{tile\_shave}, while the FPS spread widens past the same step as per-style headroom diverges.}
+    \label{fig:box}
+\end{figure}
+
+Our \ac{MLT} encoder alone did not have a large impact on performance, but noticably impacted transfer size.
+Table~\ref{tab:encoder} reports encoded size and full-decode latency for the Germany \ac{OMT} tileset under three encoders.
+Once both are gzipped, the reference \ac{MLT} encoder is larger than \ac{MVT}, because general-purpose compressors already exploit most of the row-level redundancy a fixed-plan columnar encoder cannot match.
 Adding sort-strategy competition, per-stream profiling, and shared-dictionary clustering reverses this.
-Our encoder falls below MVT+gzip even uncompressed and stays \qty{12.3}{\percent} smaller once both are gzipped, holding its edge even against zstd-22, the strongest general-purpose compressor tested.
-Our native Rust decoder is \numrange{4.6}{8.3}$\times$ faster than MVT+gzip across zoom levels 4, 7, and 13, but this advantage does not reach the browser load-time numbers, which use the existing JavaScript MLT decoder rather than the Rust path.
+Our encoder falls below \ac{MVT}+gzip even uncompressed and stays \qty{12.3}{\percent} smaller once both are gzipped, holding its edge even against zstd-22, the strongest general-purpose compressor tested.
+Our native Rust decoder is \numrange{4.6}{8.3}$\times$ faster than \ac{MVT}+gzip across zoom levels 4, 7, and 13, but this advantage does not reach the browser load-time numbers, which use the existing JavaScript MLT decoder rather than the Rust path.
 Decomposing the on-wire savings by zoom level (Figure~\ref{fig:shaving}) separates the two effects.
-The gap between each format and its shaved counterpart is the payload removed by the pruning advisory, which dominates at the dense mid-zoom levels, while the residual gap between shaved MVT and shaved MLT is the additional contribution of columnar encoding.
+The gap between each format and its shaved counterpart is the payload removed by the pruning advisory, which dominates at the dense mid-zoom levels, while the residual gap between shaved \ac{MVT} and shaved \ac{MLT} is the additional contribution of columnar encoding.
 
 \begin{table}
-\tbl{Encoded size and full-decode latency for the Germany OMT tileset (\qty{256.5}{\kilo tiles}).
-The reference MLT column carries our backported encoding fixes, isolating the gain from automatic strategy selection.
-Latency is Criterion full-decode time of our Rust decoder versus MVT+gzip, gzip decompression included (uncompressed MVT: \qtylist{44.2;90.6;16.5}{\milli\second}).}
+\tbl{Encoded size and full-decode latency for the Germany \acs{OMT} tileset (\qty{256.5}{\kilo tiles}).
+The reference \acs{MLT} column carries our backported encoding fixes, isolating the gain from automatic strategy selection.
+Latency is Criterion full-decode time of our Rust decoder versus \acs{MVT}+gzip, gzip decompression included (uncompressed \acs{MVT}: \qtylist{44.2;90.6;16.5}{\milli\second}).}
 {\setlength{\tabcolsep}{4.5pt}%
 \begin{tabular}{l rrrr rrr}
 \toprule
@@ -66,11 +86,11 @@ vs.\ MVT & \num{-28.2}\% & \num{-12.3}\% & \num{-13.1}\% & \num{-13.0}\% & $8.3\
 \label{tab:encoder}
 \end{table}
 
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\linewidth]{shaving_effectiveness_per_zoom}
-    \caption{Total tile size per zoom level for unshaved and shaved variants of both MVT and our MLT encoder, using the Liberty advisory.
-    The gap between each format and its shaved counterpart is the data removed by the pruning advisory, and the gap between shaved MVT and shaved MLT is the additional contribution of columnar encoding.}
+    \caption{Total tile size per zoom level for unshaved and shaved variants of both \acs{MVT} and our \acs{MLT} encoder, using the Liberty advisory.
+    The gap between each format and its shaved counterpart is the data removed by the pruning advisory, and the gap between shaved \acs{MVT} and shaved \acs{MLT} is the additional contribution of columnar encoding.}
     \label{fig:shaving}
 \end{figure}
 
@@ -92,7 +112,7 @@ Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cu
 Browser heap fell \qty{35.5}{\percent}, from \qty{84.2}{\mega\byte} to \qty{54.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
 Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline load-time reductions were tight (Fiord \qty{370.9}{\milli\second} to \qty{120.5}{\milli\second}, Liberty \qty{466.5}{\milli\second} to \qty{133.7}{\milli\second}, both $p < 10^{-45}$, Wilcoxon).
 
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{time_breakdown.pdf}
     \caption{Load time decomposed into first frame, first tile, and remaining load across the ablation steps.
@@ -101,7 +121,7 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \label{fig:time_breakdown}
 \end{figure}
 
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{memory_ablation.pdf}
     \caption{Mean browser heap usage across all scenarios and benchmark styles by ablation step.
@@ -109,27 +129,7 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \label{fig:memory_ablation}
 \end{figure}
 
-\begin{figure}[tb]
-    \centering
-    \begin{subfigure}[t]{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{box_loadMs.pdf}
-        \caption{Load time per ablation step.}
-        \label{fig:box_loadMs}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.49\linewidth}
-        \centering
-        \includegraphics[width=\linewidth]{box_fps.pdf}
-        \caption{Frames per second per ablation step.}
-        \label{fig:box_fps}
-    \end{subfigure}
-    \caption{Per-run distribution of load time and FPS across all scenarios and styles, by ablation step.
-    Load-time variance compresses sharply at \texttt{tile\_shave}, while the FPS spread widens past the same step as per-style headroom diverges.}
-    \label{fig:box}
-\end{figure}
-
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{waterfall_gzip_bytes.pdf}
     \caption{Marginal-contribution waterfall of mean style gzip size, as a percentage of each style's baseline, averaged across the ten full-pipeline styles.
@@ -144,7 +144,7 @@ The top reducers were styles with verbose filter logic or repetitive property st
 Initial style complexity did not reliably predict achievable reduction (Pearson $r = -0.54$, $n = 12$, $p = 0.07$).
 Because the generalization corpus carries no tile data, stats-driven and data-level passes were not applied, so these figures are a lower bound on the full potential.
 
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{cross_style_reduction.pdf}
     \caption{Per-style raw, gzip, and brotli style-size reduction across the \num{12} unseen Maputnik styles, sorted by raw reduction.
@@ -154,7 +154,7 @@ Because the generalization corpus carries no tile data, stats-driven and data-le
 
 \subsection{Threats to validity}\label{sec:results:threats}
 All rendering benchmarks ran on a single hardware and browser configuration with ANGLE/Vulkan, so results may differ on other hardware or graphics backends, and the 15-run median may not capture rare events such as thermal throttling.
-The evaluation is limited to MapLibre GL JS and the OMT schema, and the 10 benchmark styles, though diverse, may not cover all authoring patterns.
+The evaluation is limited to MapLibre GL JS and the \ac{OMT} schema, and the 10 benchmark styles, though diverse, may not cover all authoring patterns.
 Network conditions were simulated through a fixed bandwidth throttle and a caching proxy rather than real content delivery network latency, which also masks real-world cache behavior.
 The cumulative ablation design means each pass's reported marginal contribution depends on the order of preceding passes, and tail metrics (p99 frame time, jank count) carry higher variance than central-tendency metrics.
 Because the \num{18} scenarios share hardware, tile data, and styles, they are not fully independent, so we read the reported $p$-values as descriptive evidence of large effect sizes rather than strict inferential tests, and apply no multiple-comparisons correction across the full ablation grid.

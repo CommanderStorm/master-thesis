@@ -20,12 +20,12 @@ OUTPUT_DIR = SCRIPT_DIR.parent / "figures"
 FORMATS = ["png", "pdf"]
 
 FIG_WIDTH = 720
-FIG_HEIGHT = 300
+FIG_HEIGHT = 240
 
 BAR_COLOR = "#0072B2"
 BAR_COLOR_ALT = "#56B4E9"
 
-LAYOUT_DEFAULTS = journal_layout(margin=dict(l=110, r=60, t=20, b=55))
+LAYOUT_DEFAULTS = journal_layout(margin=dict(l=70, r=20, t=45, b=90))
 
 
 def export_figure(fig: go.Figure, name: str) -> None:
@@ -46,7 +46,7 @@ def main() -> None:
 
     df = load_jsonl_df(args.input)
     df = df[df["style_id"] != "americana"]
-    df = df.sort_values("reduction_pct", ascending=True)
+    df = df.sort_values("reduction_pct", ascending=False)
 
     print(f"Loaded {len(df)} styles")
     print(f"  Reduction range: {df['reduction_pct'].min():.1f}% - {df['reduction_pct'].max():.1f}%")
@@ -57,9 +57,8 @@ def main() -> None:
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
-        y=df["style_id"],
-        x=df["reduction_pct"],
-        orientation="h",
+        x=df["style_id"],
+        y=df["reduction_pct"],
         marker_color=BAR_COLOR,
         text=[f"{v:.1f}%" for v in df["reduction_pct"]],
         textposition="outside",
@@ -68,9 +67,10 @@ def main() -> None:
 
     fig.update_layout(
         **LAYOUT_DEFAULTS,
-        xaxis_title="Tile data reduction (%)",
-        xaxis=dict(range=[0, max(df["reduction_pct"]) * 1.15]),
-        yaxis_title=None,
+        yaxis_title="Tile data reduction (%)",
+        yaxis=dict(range=[0, max(df["reduction_pct"]) * 1.3]),
+        xaxis_title=None,
+        xaxis=dict(tickangle=-45),
         showlegend=False,
     )
 

@@ -5,11 +5,11 @@
 Vector map styles and the tiles they reference are authored and shipped independently, yet they are consumed together.
 A style references only a fraction of the layers, properties, and values present in its tiles, and it carries declarative redundancy that a renderer must process on every frame.
 We treated this gap as an optimization problem and formalized the joint optimization of style and tile as a transformation $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ that preserves visual equivalence and is strictly idempotent.
-Borrowing the rewrite-rule algebra of compiler construction, we built a three-level pipeline: expression-level simplification, structural restructuring of the layer graph, and data-level passes that shave unreferenced tile content and re-encode it with the columnar MLT format.
+Borrowing the rewrite-rule algebra of compiler construction, we built a three-level pipeline: expression-level simplification, structural restructuring of the layer graph, and data-level passes that shave unreferenced tile content and re-encode it with the columnar \ac{MLT} format.
 
 The central outcome is that these optimizations preserve visual equivalence while delivering substantial reductions.
 The constraint pair held empirically: our round-trip property tests and fuzzing harness reported no soundness regressions across the corpus.
-On the Germany OMT tileset, the data-level passes cut tile volume along two separately measured axes relative to gzip-compressed MVT: the MLT encoder alone yields tiles \qty{12}{\percent} smaller, while style-driven shaving removes a median of \qty{29}{\percent} of on-wire bytes per style.
+On the Germany \ac{OMT} tileset, the data-level passes cut tile volume along two separately measured axes relative to gzip-compressed \ac{MVT}: the \ac{MLT} encoder alone yields tiles \qty{12}{\percent} smaller, while style-driven shaving removes a median of \qty{29}{\percent} of on-wire bytes per style.
 Composed end-to-end across the deep-corpus styles benchmarked with tile data, the full pipeline improves load times by a median of \qty{71}{\percent}.
 
 Three contributions support this result.
@@ -22,7 +22,7 @@ The rules are semantics-preserving and expressions are compositional, so iterati
 Several directions remain open.
 The most operationally significant concern moving work out of the offline batch stage.
 The style optimizer already depends only on the style and can run at deployment time, and the pruning advisory could plausibly run as a lightweight serving-time filter in the spirit of adaptive query processing \citep{deshpandeAdaptiveQueryProcessing2006}.
-Encoding strategy competition is inherently batch, but its decisions could be cached per schema, and edge-side MVT-to-MLT re-encoding or a WebAssembly decoder shipped alongside tiles \citep{gienieczkoAnyBloxFrameworkSelfDecoding2025} would expose the format's gains without a full rebuild.
+Encoding strategy competition is inherently batch, but its decisions could be cached per schema, and edge-side \ac{MVT}-to-\ac{MLT} re-encoding or a WebAssembly decoder shipped alongside tiles \citep{gienieczkoAnyBloxFrameworkSelfDecoding2025} would expose the format's gains without a full rebuild.
 On the decode side, selective column decoding driven by the style's property references would make decode cost scale with the columns actually used, composing naturally with tile shaving.
 On the rewrite engine itself, an equality saturation approach \citep{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} would remove the ordering dependence and could even infer rules from examples \citep{nandiRewriteRuleInference2021}, while a learned predictor \citep{kraskaCaseLearnedIndex2018} could replace exhaustive sort-strategy competition.
 Closing the remaining coverage gaps, symbol-layer merging and cross-tileset threshold sensitivity, would extend the guarantees we report on open-source styles toward the broader and partly proprietary ecosystem.

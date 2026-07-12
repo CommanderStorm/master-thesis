@@ -12,11 +12,11 @@ When a request exceeds the source's \mlprop{maxzoom}, the renderer \emph{overzoo
 A vector tile encodes map data in a compact binary form.
 Each tile holds \emph{source layers} (for example roads, buildings, water), and each source layer holds \emph{features}.
 A feature carries geometry (point, linestring, or polygon as integer coordinates relative to the tile extent), an optional set of key-value \emph{properties} (such as \mlval{class}=\mlval{"motorway"}), and metadata.
-The dominant wire format is Mapbox Vector Tiles (MVT), a Protocol Buffer encoding with a \emph{row-oriented} layout in which each feature stores its own property tags, so accessing a single property requires parsing past all others and compression operates on an interleaved byte stream rather than homogeneous columns.
-\citet{tremmelMapLibreTileNext2025b} introduced MapLibre Tiles (MLT), a columnar alternative that stores each property as an independent column with type-specific encoding, which enables per-column compression and removes the per-feature tag overhead.
+The dominant wire format is \ac{MVT}, a Protocol Buffer encoding with a \emph{row-oriented} layout in which each feature stores its own property tags, so accessing a single property requires parsing past all others and compression operates on an interleaved byte stream rather than homogeneous columns.
+\citet{tremmelMapLibreTileNext2025b} introduced \ac{MLT}, a columnar alternative that stores each property as an independent column with type-specific encoding, which enables per-column compression and removes the per-feature tag overhead.
 
 The visual appearance is governed by a separate \emph{style} document.
-We target the MapLibre style specification, a client-side declarative format whose JSON structure is amenable to static analysis.
+We target the MapLibre style specification, a client-side declarative format whose \ac{JSON} structure is amenable to static analysis.
 A style declares \emph{sources}, which name where tile data comes from and at which zoom levels it is available, and an ordered list of \emph{layers}, the central rendering unit.
 Each layer references a source and source-layer, fixes a type (\mlval{fill}, \mlval{line}, \mlval{circle}, \mlval{symbol}, and others), and carries paint and layout properties together with a boolean \emph{filter} that selects which features render.
 Filters and properties may be literal constants, zoom-dependent expressions (via \mlop{interpolate} or \mlop{step}), data-driven expressions (via \mlop{match}, \mlop{case}, or \mlop{get}), or combinations.
@@ -38,7 +38,7 @@ Generators such as Planetiler\footnote{\url{https://github.com/onthegomap/planet
 
 \subsubsection{Tile encoding}
 A style is a declarative specification over a tabular feature set, which casts style-driven pruning as the projection and predicate pushdown long studied by query optimizers \citep{piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993,armbrustSparkSQLRelational2015}.
-The columnar MLT format draws on database compression: SIMD integer codecs \citep{lemireDecodingBillionsIntegers2015}, the FSST string compressor \citep{bonczFSSTFastRandom2020}, and cascaded per-block strategy selection \citep{kuschewskiBtrBlocksEfficientColumnar2023}.
+The columnar \ac{MLT} format draws on database compression: SIMD integer codecs \citep{lemireDecodingBillionsIntegers2015}, the FSST string compressor \citep{bonczFSSTFastRandom2020}, and cascaded per-block strategy selection \citep{kuschewskiBtrBlocksEfficientColumnar2023}.
 The recurring finding is that no single encoding is universally optimal and data-driven selection is necessary \citep{abadiIntegratingCompressionExecution2006,dammeComprehensiveExperimentalSurvey2019,zengEmpiricalEvaluationColumnar2023}, which motivates an instance-optimized \citep{dingSageDBInstanceOptimizedData2022,dingInstanceOptimizedDataLayouts2021} trial-based encoding competition at tile granularity.
 \citet{tremmelMapLibreTileNext2025b} and the COMTiles archive format \citep{tremmelCOMTILESCASESTUDY2023} advance the encoding layer but pick strategies without consulting the style, even though pruning changes column cardinalities and value distributions and so shifts the optimal encoding.
 GeoParquet shares the same per-page encodings but its row-group metadata dominates at the \qtyrange{10}{100}{\kilo\byte} tile sizes we care about.

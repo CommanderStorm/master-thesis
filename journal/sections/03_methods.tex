@@ -5,7 +5,7 @@
 \subsection{Problem statement}\label{sec:methods:problem}
 
 We frame the optimizer as a function over (style, tile set) pairs and constrain it by a correctness contract rather than by a single objective.
-Let $\mathcal{S}$ be the set of syntactically valid MapLibre style JavaScript Object Notation (JSON) documents, let $\mathcal{T}$ be the set of tile sets, and let $\mathcal{V}$ be the set of viewing states (six camera degrees of freedom plus the viewport).
+Let $\mathcal{S}$ be the set of syntactically valid MapLibre style \ac{JSON} documents, let $\mathcal{T}$ be the set of tile sets, and let $\mathcal{V}$ be the set of viewing states (six camera degrees of freedom plus the viewport).
 MapLibre's deterministic renderer is a function
 \begin{equation}\label{eq:render_function}
     R : \mathcal{S} \times \mathcal{T} \times \mathcal{V} \to \mathcal{I} \cup \{\bot\},
@@ -41,7 +41,7 @@ Feeding the optimizer's output back as input yields the same pair, which means t
 Both halves are exercised by a round-trip property test on the style level and a property-test plus fuzzing harness on the tile level.
 
 The system under test is MapLibre GL JS, the reference open-source web renderer.
-Lossy geometry transformations, symbol-layer merging, energy measurement, non-OpenMapTiles (OMT) tile schemas, and online serving are out of scope.
+Lossy geometry transformations, symbol-layer merging, energy measurement, non-\ac{OMT} tile schemas, and online serving are out of scope.
 The optimizer is an offline, one-shot rebuild over a $(\mathcal{S}, \mathcal{T})$ pair whose artifacts can be served by standard geodata infrastructure.
 
 \subsection{A three-level optimization pipeline}\label{sec:methods:pipeline}
@@ -50,14 +50,14 @@ Figure~\ref{fig:system_architecture} sketches the optimizer as a whole.
 At the center sits a pipeline of passes at three levels of abstraction.
 Around it are three supporting components.
 A code-generation front end produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
-A tile-statistics scanner profiles Mapbox Vector Tile (MVT) tiles for the statistics-driven and data-level passes.
+A tile-statistics scanner profiles \ac{MVT} tiles for the statistics-driven and data-level passes.
 A validation harness checks the visual-equivalence guarantee of Equation~\ref{eq:visual_equivalence}, comparing optimized and unoptimized renderings of a curated style corpus pixel-for-pixel against MapLibre GL JS's software rasterizer.
 
 The three pass levels are the following.
 \emph{Expression passes} operate directly on the JSON representation of style expressions, applying peephole rewrites, constant folding, and algebraic simplifications without deserializing the style into typed structures.
 They run to a fixpoint with a hard cap of eight iterations.
 \emph{Structural passes} deserialize the style into the typed specification produced by the code-generation front end and apply transformations that require cross-layer or cross-source reasoning, such as dead-layer elimination, metadata refinement, and layer merging.
-\emph{Data passes} transform the served tile payload via a style-driven pruning advisory and the conversion from MVT to MapLibre Tile (MLT).
+\emph{Data passes} transform the served tile payload via a style-driven pruning advisory and the conversion from \ac{MVT} to \ac{MLT}.
 
 This ordering addresses the phase-ordering problem \citep{clickCombiningAnalysesCombining1995}.
 Expression passes run first, allowing subsequent structural passes to operate on simplified expressions.
@@ -158,7 +158,7 @@ Constant folding evaluates boolean algebra over \mlop{all} and \mlop{any} nodes,
 Boolean absorption is sound because MapLibre filter operators are pure, so dropping an operand discards no observable side effect, and Equation~\ref{eq:visual_equivalence}'s asymmetry permits dropping an operand that would have raised $\bot$.
 Contradiction detection rewrites mutually exclusive sibling predicates to \mlval{false}, which structural dead elimination later exploits to remove the enclosing layer.
 When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \mlop{match}/\mlop{in} arm pruning and frequency reordering, and ramp-stop pruning outside the observed range.
-A cardinality threshold of 200 governs value tracking, separating the folding-useful categorical properties of the OMT schema from high-cardinality string columns without tuning for any specific style.
+A cardinality threshold of 200 governs value tracking, separating the folding-useful categorical properties of the \ac{OMT} schema from high-cardinality string columns without tuning for any specific style.
 Folds whose effect is irreversible are gated on a full-census sample rate, since a rare arm the statistics never observed may still be reable.
 
 Selectivity reordering runs after the peephole table has stabilized.
@@ -167,7 +167,7 @@ The estimates follow the independence assumption of \citet{selingerAccessPathSel
 Only a reordering heuristic consumes the selectivity signal, not a cost-based plan chooser, so what matters is the relative ordering of predicates rather than their absolute values, which correlation between style predicates rarely inverts.
 
 The expression phase applies the full rule set until the style JSON stops changing, with a hard cap of eight iterations.
-Most rules strictly decrease a lexicographic measure over abstract syntax tree (AST) node count, maximum nesting depth, and non-literal node count.
+Most rules strictly decrease a lexicographic measure over \ac{AST} node count, maximum nesting depth, and non-literal node count.
 Two rules can temporarily increase the node count, so the measure alone is not a termination proof, but all benchmark styles converge within three iterations. The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
 Structural passes consume the style model to perform cross-layer and cross-source reasoning.
 Table~\ref{tab:structural_passes} lists them.
@@ -200,7 +200,7 @@ Three invariants together witness visual equivalence: coverage, because the merg
 A cross-phase filter-to-property constant propagation substitutes equality constraints from a layer's filter into that same layer's paint and layout expressions, sound because MapLibre evaluates the filter first, and strictly intra-layer.
 A final source-zoom-tightening pass narrows each source's zoom bounds to the range of the layers that reference it to reduce overfetching.
 
-\begin{figure}[tb]
+\begin{figure}[htbp]
     \centering
     \begin{tikzpicture}[
         node distance=0.7cm,
@@ -259,7 +259,7 @@ The advisory captures five categories of information per source-layer.
 \emph{Feature-identifier usage} records which live layer references the features \mlop{id} or \mlop{feature-state}.
 Properties, values, geometry types, and identifiers absent from the advisory are candidates for removal.
 
-The pipeline applies the advisory to each MVT tile before encoding, as shown in Figure~\ref{fig:tile_shaving_pipeline}.
+The pipeline applies the advisory to each \ac{MVT} tile before encoding, as shown in Figure~\ref{fig:tile_shaving_pipeline}.
 It removes source-layers no style layer references, then filters each remaining layer by geometry type and unused categorical values and strips unused properties and feature identifiers.
 
 \begin{figure}[htbp]
@@ -283,8 +283,8 @@ It removes source-layers no style layer references, then filters each remaining 
         \draw[arrow] (stats) -- node[above, lbl] {property/\\geom distribution} (adv);
 
         \node[data, below=0.55cm of adv] (prune) {Prune \& transform};
-        \node[data] at ($(sopt |- prune)$) (mvt) {\ac{MVT} tile};
-        \node[data] at ($(stats |- prune)$) (mlt) {\ac{MLT} tile};
+        \node[data] at ($(sopt |- prune)$) (mvt) {\acs{MVT} tile};
+        \node[data] at ($(stats |- prune)$) (mlt) {\acs{MLT} tile};
 
         \draw[arrow] (adv) -- (prune);
         \draw[arrow] (mvt) -- (prune);
@@ -299,7 +299,7 @@ It removes source-layers no style layer references, then filters each remaining 
     \end{tikzpicture}
     \caption{
 Style-driven tile shaving pipeline.
-The optimized style and tile statistics jointly produce a pruning advisory. Each \ac{MVT} tile used to prune, transformed, and re-encoded as \ac{MLT}.}
+The optimized style and tile statistics jointly produce a pruning advisory. Each \acs{MVT} tile used to prune, transformed, and re-encoded as \acs{MLT}.}
     \label{fig:tile_shaving_pipeline}
 \end{figure}
 
@@ -312,7 +312,7 @@ Because interned tiles encode style-specific integers rather than self-describin
 
 \subsection{Adaptive multi-strategy MLT encoding}\label{sec:methods:encoding}
 
-The encoder re-encodes the pruned and transformed data into the MLT columnar format.
+The encoder re-encodes the pruned and transformed data into the \ac{MLT} columnar format.
 Rather than committing to a single fixed or learned encoding plan, it competes several strategies against each tile's data distribution and keeps the smallest output.
 Two competitions nest.
 The outer loop ranges over feature sort orderings and the inner loop over per-stream integer encodings.
@@ -324,11 +324,11 @@ Morton sorts by the bit-interleaved Z-order index and is fast, while Hilbert is 
 
 The inner competition pairs each logical encoding (plain, delta, run-length, or delta-run-length) with a physical one (variable-length integers or FastPFOR).
 A data profiler prunes candidates in a single pass before any full encoding, and the encoder commits the smallest of the surviving two to four.
-Geometry vertices, roughly 70\% of MVT bytes on a planet OMT run, use a dedicated path competing componentwise deltas against Morton- and Hilbert-code dictionaries.
+Geometry vertices, roughly 70\% of \ac{MVT} bytes on a planet \ac{OMT} run, use a dedicated path competing componentwise deltas against Morton- and Hilbert-code dictionaries.
 
 String columns compete plain bytes, a dictionary, FSST, and FSST over a dictionary.
 For shared dictionaries, our encoder replaces the reference encoder's naming-prefix matching with MinHash similarity clustering \citep{broderResemblanceContainmentDocuments1998}.
 It computes two sketches per column, one over exact values and one over byte trigrams.
-These catch columns sharing literal values (\mlval{class} and \mlval{subclass} in OMT) and cross-language variants (\mlval{name:de} and \mlval{name:fr}) that prefix matching misses.
+These catch columns sharing literal values (\mlval{class} and \mlval{subclass} in \ac{OMT}) and cross-language variants (\mlval{name:de} and \mlval{name:fr}) that prefix matching misses.
 
 No-copy candidate buffers and warm-start caching of trained compressors keep the multi-strategy cost near-additive rather than multiplicative.
