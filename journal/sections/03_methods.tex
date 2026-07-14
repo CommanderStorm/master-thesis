@@ -161,13 +161,15 @@ Constant folding evaluates boolean algebra over \mlop{all} and \mlop{any} nodes,
 Boolean absorption is sound because MapLibre filter operators are pure, so dropping an operand discards no observable side effect, and Equation~\ref{eq:visual_equivalence}'s asymmetry permits dropping an operand that would have raised $\bot$.
 Contradiction detection rewrites mutually exclusive sibling predicates to \mlval{false}, which structural dead elimination later exploits to remove the enclosing layer.
 When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \mlop{match}/\mlop{in} arm pruning and frequency reordering, and ramp-stop pruning outside the observed range.
-A cardinality threshold of 200 governs value tracking, separating the folding-useful categorical properties of the \ac{OMT} schema from high-cardinality string columns without tuning for any specific style.
-Folds whose effect is irreversible are gated on a full-census sample rate, since a rare arm the statistics never observed may still be reable.
+Value tracking is governed by a cardinality threshold of 200, so the optimizer records a property's observed value set only when that property has at most 200 distinct values.
+This keeps the folding-useful categorical properties of the \ac{OMT} schema apart from high-cardinality string columns, using one fixed threshold rather than a value tuned to any specific style.
+Irreversible folds carry an additional guard, a full-census sample rate, because a rare arm that the statistics never observed may still be reachable at render time.
 
 Selectivity reordering runs after the peephole table has stabilized.
 For \mlop{all} it sorts predicates by ascending selectivity so the predicate most likely to be false is evaluated first, and for \mlop{any} it sorts by descending selectivity.
 The estimates follow the independence assumption of \citet{selingerAccessPathSelection1979}.
-Only a reordering heuristic consumes the selectivity signal, not a cost-based plan chooser, so what matters is the relative ordering of predicates rather than their absolute values, which correlation between style predicates rarely inverts.
+Only a reordering heuristic consumes the selectivity signal, not a cost-based plan chooser, so what matters is the relative ordering of predicates rather than their absolute values.
+The correlation between style predicates rarely inverts that ordering.
 
 The expression phase applies the full rule set until the style JSON stops changing, with a hard cap of eight iterations.
 Most rules strictly decrease a lexicographic measure over \ac{AST} node count, maximum nesting depth, and non-literal node count.
@@ -245,7 +247,7 @@ A final source-zoom-tightening pass narrows each source's zoom bounds to the ran
     \end{tikzpicture}
     \caption{Layer merging example.
 Two adjacent line layers differing only in filter literal and color are merged into one whose differing paint property and synthesized sort key become \mlop{match} expressions keyed on \mlval{"class"}.
-Phases \stepcirc{1}--\stepcirc{3} are the candidate, match-detection, and zoom checks described in the text.}
+Phases \stepcirc{1}--\stepcirc{3} are the candidate, match-detection and zoom checks.}
     \label{fig:layer_merge_example}
 \end{figure}
 
@@ -304,7 +306,7 @@ It removes source-layers no style layer references, then filters each remaining 
     \caption{
 Style-driven tile shaving pipeline.
 The optimized style and tile statistics jointly produce a pruning advisory.
-Each \acs{MVT} tile used to prune, transformed, and re-encoded as \acs{MLT}.}
+Each \acs{MVT} tile is pruned, transformed, and re-encoded to the \acs{MLT} format.}
     \label{fig:tile_shaving_pipeline}
 \end{figure}
 

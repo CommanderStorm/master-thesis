@@ -46,8 +46,10 @@ Sustained frame rates above 2000\,\ac{FPS} expose small \ac{GC}-pauses as propor
 The metric is doing what it should but reading a regime the renderer was never expected to enter.
 
 Beyond these surprises, the compiler-optimization framing of \cref{ch:theoretical_background} applies directly to the map-style domain through its rewrite-rule algebra.
-Our rewrite rules (\cref{tab:all_rewrite_rules}) are individually simple, yet their composition through fixpoint iteration achieves globally significant simplification across styles of widely varying complexity (raw reductions of \qtyrange{3.2}{67.7}{\percent} across the 13-style Maputnik generalization corpus).
-Expressions are compositional and the rules are individually semantics-preserving, so iterating until no rule fires is sound for any order, even though the system is not confluent and different orders may reach different but visually equivalent normal forms (\cref{sub:fixpoint}).
+Our rewrite rules (\cref{tab:all_rewrite_rules}) are individually simple.
+Composed through fixpoint iteration, they still achieve globally significant simplification across styles of widely varying complexity, with raw reductions of \qtyrange{3.2}{67.7}{\percent} across the 13-style Maputnik generalization corpus.
+Expressions are compositional and the rules are individually semantics-preserving, so iterating until no rule fires is sound for any order.
+The system is not confluent, and different orders may reach different but visually equivalent normal forms (\cref{sub:fixpoint}).
 
 \section{Research Questions Revisited}\label{sec:rq_revisited}
 
@@ -87,38 +89,40 @@ We do not measure energy consumption directly (our benchmark host is a desktop w
 \section{Future Work}\label{sec:conclusion_future_work}
 
 Several directions remain open.
-We group them by how much they would change the deployment model rather than by which level of the pipeline they touch, since the most operationally significant gaps cut across multiple levels.
+We group them by how much they would change the deployment model rather than by which level they touch, since the most significant gaps span multiple levels.
 
 \paragraph{Online and Incremental Deployment}
 The biggest open question is how much of the pipeline can leave the offline batch stage.
-The current pipeline assumes a one-shot tile rebuild, which is acceptable for static \ac{OMT} deliveries but impractical for PostGIS-backed servers whose data changes frequently.
+The current pipeline assumes a one-shot tile rebuild, acceptable for static \ac{OMT} deliveries but impractical for PostGIS-backed servers whose data changes frequently.
 The style optimizer already depends only on the style and can run at deployment time.
-The pruning advisory could plausibly run as a lightweight serving-time filter built on column selection and predicate evaluation, in the spirit of adaptive query processing~\cite{deshpandeAdaptiveQueryProcessing2006}.
-Encoding strategy competition is the inherently batch part because it has to profile whole columns, but its decisions could be cached per schema, and on-the-fly \ac{MVT}-to-\ac{MLT} re-encoding at the tile server or \ac{CDN} edge would expose the encoding gains without a full tile rebuild.
+The pruning advisory could plausibly run as a serving-time filter over column selection and predicate evaluation, in the spirit of adaptive query processing~\cite{deshpandeAdaptiveQueryProcessing2006}.
+Encoding strategy competition is inherently batch, since it profiles whole columns.
+Its decisions could still be cached per schema, and on-the-fly \ac{MVT}-to-\ac{MLT} re-encoding at the tile server or \ac{CDN} edge would expose the encoding gains without a full rebuild.
 The AnyBlox framework~\cite{gienieczkoAnyBloxFrameworkSelfDecoding2025}, which bundles lightweight WebAssembly decoders with the datasets they read, suggests a third path.
 Shipping the \ac{MLT} decoder as a \ac{WASM} module along the tiles would decouple format evolution from client updates entirely.
-The end-point of this trajectory is direct integration of the optimized \ac{MLT} decoder into MapLibre GL~JS, which would deliver the decode-throughput gains to existing deployments without requiring a separate client.
+The end point is direct integration of the optimized \ac{MLT} decoder into MapLibre GL~JS, delivering the decode-throughput gains to existing deployments without a separate client.
 
 \paragraph{Selective Column Decoding}
 A complement on the decode side is selective column decoding.
 The \ac{MLT} columnar layout permits skipping unreferenced columns entirely, a form of \emph{late materialization}~\cite{abadiMaterializationStrategiesColumnOriented2007} applied at the tile level rather than at the analytical-query level.
-Augmenting the decoder with a column projection derived from the style's property references would make decode cost scale with the number of columns actually used rather than with the total schema width.
+A column projection derived from the style's property references would make decode cost scale with the columns actually used rather than the full schema width.
 This composes with tile shaving rather than competing with it.
 Shaving removes columns at encoding time (early materialization), selective decoding skips them at decode time (late materialization), and the two are most valuable when they run together.
 
 \paragraph{Rewrite Engine and Encoder Improvements}
 On the rewrite engine itself, two improvements are worth flagging.
 The engine currently applies rules in a fixed priority order and is not confluent (\cref{sub:fixpoint}).
-Swapping it for an equality saturation engine~\cite{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} would explore equivalent forms simultaneously and pick the globally optimal one, removing the ordering dependence at the cost of substantially more implementation work.
-Nandi et~al.~\cite{nandiRewriteRuleInference2021} also showed that equality saturation can be used to \emph{infer} rewrite rules from input/output examples, which could complement or replace the manually-authored set we present here.
+Swapping it for an equality saturation engine~\cite{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} would explore equivalent forms simultaneously and pick the globally optimal one, removing the ordering dependence at substantial implementation cost.
+Nandi et~al.~\cite{nandiRewriteRuleInference2021} also showed that equality saturation can \emph{infer} rewrite rules from input/output examples, which could complement or replace our manually authored set.
 We would only reach for this if the rule set grew large enough that ordering sensitivity became a measured rather than a hypothetical problem.
-A simpler engine-side improvement would be to replace the encoder's exhaustive sort-strategy competition (\cref{sub:data_optimizations}) with a learned predictor in the manner of Kraska et~al.'s~\cite{kraskaCaseLearnedIndex2018} learned indexes.
+A simpler improvement would replace the encoder's exhaustive sort-strategy competition (\cref{sub:data_optimizations}) with a learned predictor, in the manner of Kraska et~al.'s~\cite{kraskaCaseLearnedIndex2018} learned indexes.
 A model trained on layer-level statistics (cardinality, spatial spread, value distribution) could pick a sort order without running every trial, trading a little compression for a substantial cut in preprocessing cost.
 
 \paragraph{Coverage Gaps}
-Finally, the coverage gaps we would have closed, given more time.
+Finally, two coverage gaps remain that we would have closed given more time.
 Symbol layers are currently excluded from merging because the pass cannot reason about glyph-level collision.
-Even a restricted variant that merges symbol layers sharing identical text-field expressions would recover most of the unmerged headroom, and label-heavy styles (where this restriction bites the hardest) have the most layers left on the table after the structural pass.
+Even a restricted variant merging symbol layers with identical text-field expressions would recover most of the unmerged headroom.
+Label-heavy styles, where the restriction bites hardest, have the most layers left on the table after the structural pass.
 The MinHash similarity threshold ($\tau = 7.5\%$) was tuned on the Germany \ac{OMT} tileset (\cref{fig:minhash_sweep}).
-We have not characterized sensitivity across tilesets with different vocabulary distributions, because the legal and data-availability constraints around non-\ac{OSM} schemas made this hard to attempt in the time available.
-Proprietary styles such as Mapbox Streets and Esri's vector basemaps are similarly closed off by their terms of service, so the per-pass marginal contributions we report should be read as confirmed on open-source styles rather than universally claimed.
+We have not characterized its sensitivity across tilesets with different vocabulary distributions, since legal and data-availability constraints around non-\ac{OSM} schemas made this hard to attempt in the time available.
+Proprietary styles such as Mapbox Streets and Esri's vector basemaps are similarly closed off by their terms of service, so our per-pass marginal contributions should be read as confirmed on open-source styles rather than universally claimed.
