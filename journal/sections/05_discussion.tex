@@ -6,10 +6,12 @@ The results in Section~\ref{sec:results} bear out the contributions of Section~\
 What matters is less the headline numbers than what they reveal about how style-level and data-level optimizations relate: whether they compound, when each dominates, what they imply for infrastructure, and where they must be qualified.
 
 \subsection{Co-optimization is meaningful but uneven}
-Jointly optimizing style and tiles improves transfer size and rendering substantially, but unevenly. Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview scenarios more than street-level panning.
+Jointly optimizing style and tiles improves transfer size and rendering substantially, but unevenly.
+Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview scenarios more than street-level panning.
 The reason is structural.
 Tile shaving removes only what a style never references, so its headroom is bounded by how much of the source schema the style ignores, lean styles such as Toner shaving the most and broad ones such as OSM~Bright the least (Section~\ref{sec:results:combined}).
-There is thus no single optimal tile. The optimal encoding is a function of the rendering style, so the same source data yields different ideal tiles for different consumers.
+There is thus no single optimal tile.
+The optimal encoding is a function of the rendering style, so the same source data yields different ideal tiles for different consumers.
 
 \subsection{The levels compose additively}
 Against our prior expectations, the three families compose additively.

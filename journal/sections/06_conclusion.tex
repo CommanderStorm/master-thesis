@@ -14,7 +14,8 @@ Composed end-to-end across the deep-corpus styles benchmarked with tile data, th
 
 Three contributions support this result.
 First, the formalization itself, which casts style and tile co-optimization as a semantics-preserving rewrite system.
-Second, the three-level strategy, whose levels turn out to be complementary rather than redundant. Each addresses a different bottleneck, and across the ten end-to-end styles the combined style-plus-shaving reduction in aggregate is approximately the sum of the individual reductions rather than a compounded gain, with only small, style-dependent per-scenario synergy that averages out.
+Second, the three-level strategy, whose levels turn out to be complementary rather than redundant.
+Each addresses a different bottleneck, and across the ten end-to-end styles the combined style-plus-shaving reduction in aggregate is approximately the sum of the individual reductions rather than a compounded gain, with only small, style-dependent per-scenario synergy that averages out.
 This additivity is practically useful, because a deployment can apply or skip any one level without forfeiting the benefit of the others.
 Third, the end-to-end implementation and its evaluation across a 10-style corpus and a 12-style generalization corpus, demonstrating that individually simple rewrite rules compose through fixpoint iteration into globally significant simplification across styles of widely varying complexity.
 The rules are semantics-preserving and expressions are compositional, so iterating to a fixpoint is sound for any application order, even though the system is not confluent and different orders may reach distinct but visually equivalent normal forms.

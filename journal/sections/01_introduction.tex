@@ -25,9 +25,16 @@ This paper investigates automatic, style- and data-driven co-optimization for Ma
 \begin{itemize}
     \item A \textbf{formalization of joint style and tile co-optimization} as a transformation $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ constrained by visual equivalence and strict idempotency.
     Prior work on compiler optimization and on columnar encoding has addressed one side in isolation, but neither has treated both jointly under a soundness criterion.
-    \item A \textbf{three-level co-optimization strategy} combining expression-level peephole rewrites iterated to a fixpoint, structural passes over a style model (dead layer elimination, metadata refinement, layer merging), and two tile-level techniques whose combination is to our knowledge novel: \emph{style-driven tile shaving}, which derives a pruning advisory from the optimized style and removes unused properties, geometry types, values, and feature identifiers, and \emph{adaptive multi-strategy encoding}, which competes sort orderings, integer encodings, and string compression at encode time for the \ac{MLT} columnar format.
+    \item A \textbf{three-level co-optimization strategy}.
+    The expression level iterates peephole rewrites to a fixpoint.
+    The structural level runs passes over a style model, namely dead layer elimination, metadata refinement, and layer merging.
+    The tile level adds two techniques whose combination is to our knowledge novel.
+    \emph{Style-driven tile shaving} derives a pruning advisory from the optimized style and removes unused properties, geometry types, values, and feature identifiers.
+    \emph{Adaptive multi-strategy encoding} competes sort orderings, integer encodings, and string compression at encode time for the \ac{MLT} columnar format.
     \item An \textbf{end-to-end implementation} integrating the MapLibre style runtime and the \ac{MLT} tile pipeline.
     \item An \textbf{empirical evaluation} across four corpora spanning 18 scenarios and a cumulative ablation, quantifying load-time, tile-volume, and frame-rate effects and resolving the additive-versus-synergistic question at both the aggregate and per-scenario levels.
 \end{itemize}
 
-Section~\ref{sec:background} gives a short overview of the background which section~\ref{sec:methods} uses formalize the problem and details the three levels. Section~\ref{sec:results} reports the results, and Section~\ref{sec:discussion} interprets the findings.
+Section~\ref{sec:background} gives a short overview of the background.
+Section~\ref{sec:methods} builds on it to formalize the problem and detail the three levels.
+Section~\ref{sec:results} reports the results, and Section~\ref{sec:discussion} interprets the findings.

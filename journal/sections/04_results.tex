@@ -96,18 +96,25 @@ vs.\ MVT & \num{-28.2}\% & \num{-12.3}\% & \num{-13.1}\% & \num{-13.0}\% & $8.3\
 
 \subsection{Combined pipeline: additive or synergistic?}\label{sec:results:combined}
 Whether the two levels interact synergistically depends on the metric and the style.
-On data volume they are additive for every style. Shaving the optimized style removed essentially the same bytes as shaving the unoptimized one, the optimized advisory adding \qtyrange{0.0}{0.5}{\percent} (median \qty{0.08}{\percent}).
+On data volume they are additive for every style.
+Shaving the optimized style removed essentially the same bytes as shaving the unoptimized one, the optimized advisory adding \qtyrange{0.0}{0.5}{\percent} (median \qty{0.08}{\percent}).
 The advisory depends only on which source-layers and property columns a style references, which simplification leaves intact.
 
-On load time the levels are additive in aggregate. Pooled across the \num{10} styles, the combined reduction (\qty{66.4}{\percent}) matches the sum of the style-only (\qty{4.0}{\percent}) and shaving-only (\qty{65.5}{\percent}) reductions to within a \qty{-3.1}{\percent} interaction term.
-Per scenario, small super-additive interactions are common. Combined load time beat the sum of the parts in \num{103} of \num{180} style-scenario pairs (\qty{57}{\percent}).
-They concentrate in a few styles (Bright \num{15} of \num{18} pairs, median \qty{+7.1}{\percent}; OSM~Bright and OSM~Liberty \num{15} of \num{18}; Stadia~Outdoors \num{14}; Liberty \num{13}) and are largely absent in others (Fiord \num{4} of \num{18}, Positron \num{5}, Dark~Matter \num{6}, Klokan-Basic \num{8}, Toner \num{8}), independently of how much each style shaves. Toner shaves the most yet stays additive, while OSM~Bright shaves the least yet synergizes the most.
+On load time the levels are additive in aggregate.
+Pooled across the \num{10} styles, the combined reduction (\qty{66.4}{\percent}) matches the sum of the style-only (\qty{4.0}{\percent}) and shaving-only (\qty{65.5}{\percent}) reductions to within a \qty{-3.1}{\percent} interaction term.
+Per scenario, small super-additive interactions are common.
+Combined load time beat the sum of the parts in \num{103} of \num{180} style-scenario pairs (\qty{57}{\percent}).
+They concentrate in a few styles (Bright \num{15} of \num{18} pairs, median \qty{+7.1}{\percent}; OSM~Bright and OSM~Liberty \num{15} of \num{18}; Stadia~Outdoors \num{14}; Liberty \num{13}) and are largely absent in others (Fiord \num{4} of \num{18}, Positron \num{5}, Dark~Matter \num{6}, Klokan-Basic \num{8}, Toner \num{8}), independently of how much each style shaves.
+Toner shaves the most yet stays additive, while OSM~Bright shaves the least yet synergizes the most.
 The interactions are small (median \qty{+0.64}{\percent} across all pairs) and offset one another, so they do not lift the aggregate.
 Because style optimization leaves tile volume unchanged, this residual synergy is a second-order rendering and decode timing effect, not a data-volume effect.
 Style-level passes therefore act as enablers that simplify the advisory, and for some styles modestly improve render timing, rather than as co-equal synergistic partners.
 
-The 19-step ablation confirms this (Figures~\ref{fig:box} and~\ref{fig:waterfall}). Load-time variance compresses only when tile shaving fires, the FPS spread widens past the same step, and almost all of the style-size win lands by metadata stripping.
-The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split. Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against a load budget of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately. The first-tile and remaining-load legs move only once tile shaving fires.
+The 19-step ablation confirms this (Figures~\ref{fig:box} and~\ref{fig:waterfall}).
+Load-time variance compresses only when tile shaving fires, the FPS spread widens past the same step, and almost all of the style-size win lands by metadata stripping.
+The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split.
+Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against a load budget of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately.
+The first-tile and remaining-load legs move only once tile shaving fires.
 Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
 Browser heap fell \qty{35.5}{\percent}, from \qty{84.2}{\mega\byte} to \qty{54.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
 Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline load-time reductions were tight (Fiord \qty{370.9}{\milli\second} to \qty{120.5}{\milli\second}, Liberty \qty{466.5}{\milli\second} to \qty{133.7}{\milli\second}, both $p < 10^{-45}$, Wilcoxon).

@@ -47,7 +47,8 @@ GeoParquet shares the same per-page encodings but its row-group metadata dominat
 Style-level work is scarce.
 The MapLibre validators and the \texttt{gl-style-migrate} tool transform but do not simplify, and migration often leaves redundant \mlop{case} chains and trivially \mlval{true}/\mlval{false} guards.
 Stamen's default-stripping utility covers one pass in isolation.
-The closest academic analogue lies outside the map domain. \citet{hagueCSSMinificationConstraint2019} formalize CSS rule merging as a constrained optimization, and rule-based rewriting \citep{piraheshExtensibleRuleBased1992} and equality saturation \citep{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} supply the compiler-side vocabulary.
+The closest academic analogue lies outside the map domain.
+\citet{hagueCSSMinificationConstraint2019} formalize CSS rule merging as a constrained optimization, and rule-based rewriting \citep{piraheshExtensibleRuleBased1992} and equality saturation \citep{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} supply the compiler-side vocabulary.
 Our expression passes apply peephole rewriting, constant folding, and fixpoint iteration over a term-rewriting system \citep{ahoCompilersPrinciplesTechniques2007,baaderTermRewritingAll1999}, while structural passes draw on selectivity estimation \citep{selingerAccessPathSelection1979} and partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
 
 \subsubsection{Benchmarking}

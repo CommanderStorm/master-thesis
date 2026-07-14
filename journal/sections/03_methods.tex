@@ -14,10 +14,12 @@ where $\mathcal{I}$ is the set of rasterized images and $\bot \notin \mathcal{I}
 The optimizer is a function $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ with $(S', T') = \mathcal{O}(S, T)$.
 It pays a one-off preprocessing cost to improve the deployment metrics (load time, heap memory, frames per second) of every subsequent rendering session served from $(S', T')$.
 
-The deployment cost is not formalized as a single closed-form function. It depends on hardware, camera scenario, and tile cache state, and several passes trade a small load-time regression for a larger frames-per-second gain.
+The deployment cost is not formalized as a single closed-form function.
+It depends on hardware, camera scenario, and tile cache state, and several passes trade a small load-time regression for a larger frames-per-second gain.
 We therefore characterize each pass in an ablation study whose per-axis breakdown lets an operator compose the pass set suiting the deployment priorities.
 
-The optimizer must satisfy two constraints. The first is
+The optimizer must satisfy two constraints.
+The first is
 \begin{definition}[Visual equivalence]\label{def:visual_equivalence}
 Writing $\equiv$ for pixel-identity on $\mathcal{I}$, the optimized pair $(S', T')$ is visually equivalent to $(S, T)$ when
 \begin{equation}\label{eq:visual_equivalence}
@@ -120,7 +122,8 @@ Finally, the data phase processes the fully optimized style so pruning recommend
 System architecture.
     The \emph{codegen pipeline} (top) transforms the upstream \texttt{v8.json} through three stages into generated Rust types (\texttt{SerialSpec}) for typed style manipulation, with the MIR supplying spec metadata to the optimizer.
     The \emph{data pipeline} (bottom) decodes \acs{MVT} tiles and scans them into the statistics that feed data-driven passes.
-Render tests validate round-trip correctness. The style corpus validates the codegen and evaluates the optimizer.}
+Render tests validate round-trip correctness.
+The style corpus validates the codegen and evaluates the optimizer.}
     \label{fig:system_architecture}
 \end{figure}
 
@@ -168,7 +171,8 @@ Only a reordering heuristic consumes the selectivity signal, not a cost-based pl
 
 The expression phase applies the full rule set until the style JSON stops changing, with a hard cap of eight iterations.
 Most rules strictly decrease a lexicographic measure over \ac{AST} node count, maximum nesting depth, and non-literal node count.
-Two rules can temporarily increase the node count, so the measure alone is not a termination proof, but all benchmark styles converge within three iterations. The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
+Two rules can temporarily increase the node count, so the measure alone is not a termination proof, but all benchmark styles converge within three iterations.
+The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
 Structural passes consume the style model to perform cross-layer and cross-source reasoning.
 Table~\ref{tab:structural_passes} lists them.
 Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available types.
@@ -299,7 +303,8 @@ It removes source-layers no style layer references, then filters each remaining 
     \end{tikzpicture}
     \caption{
 Style-driven tile shaving pipeline.
-The optimized style and tile statistics jointly produce a pruning advisory. Each \acs{MVT} tile used to prune, transformed, and re-encoded as \acs{MLT}.}
+The optimized style and tile statistics jointly produce a pruning advisory.
+Each \acs{MVT} tile used to prune, transformed, and re-encoded as \acs{MLT}.}
     \label{fig:tile_shaving_pipeline}
 \end{figure}
 
