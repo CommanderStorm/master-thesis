@@ -19,9 +19,10 @@ The size reduction translated directly into a shorter style-parse step even wher
 
 The structural passes concentrated almost all of their gains in dead-layer elimination and layer merging, with the remaining passes negligible in isolation.
 The magnitude was style-dependent.
-Fiord's 48-layer style shed two layers (\qty{-4.2}{\percent}, \qty{-14.1}{\percent} gzip transfer, \qty{-36.8}{\percent} expression-tree nodes from \num{1610} to \num{1018}), while Liberty's 111-layer style shed four through layer merging (\qty{-3.6}{\percent}, \qty{-4.9}{\percent} gzip, nodes from \num{3537} to \num{3167}).
-Layer merging can increase raw byte count, because a merged layer replaces several short filters with wordier \mlop{match}-keyed expressions, yet still reduces per-frame draw calls and frame time.
-Gzip absorbs the raw increase, leaving compressed size essentially unchanged.
+Fiord's 48-layer style shed two layers (\qty{-4.2}{\percent}, \qty{-14.1}{\percent} gzip transfer, \qty{-36.8}{\percent} expression-tree nodes from \num{1610} to \num{1018}), while Liberty's 111-layer style shed four in the layer-merge step (\qty{-3.6}{\percent}, nodes from \num{3537} to \num{3167}), bringing its cumulative style-level reduction to \qty{-4.9}{\percent} gzip.
+Layer merging moves raw byte count in either direction (\qty{-372}{\byte} on Liberty, \qty{+201}{\byte} on Bright) because a merged layer replaces several short filters with wordier \mlop{match}-keyed expressions.
+Compressed size grows slightly in both cases (\qty{+36}{\byte} and \qty{+47}{\byte} gzip) because the merged expressions compress less well than the repetitive originals they replace.
+The step still pays off at render time, cutting per-frame draw calls and raising FPS on both styles (Liberty \num{642} to \num{664}, Bright \num{621} to \num{632}).
 Symbol-heavy styles benefit less because symbol layers are excluded from merging on collision-soundness grounds.
 
 \subsection{Tile shaving and columnar re-encoding}\label{sec:results:data}
@@ -117,7 +118,7 @@ Load-time variance compresses only when tile shaving fires, the FPS spread widen
 The load-time budget breakdown (Figure~\ref{fig:time_breakdown}) shows the same split.
 Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against a load budget of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately.
 The first-tile and remaining-load legs move only once tile shaving fires.
-Composed end-to-end across the \num{10} deep-corpus styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
+Composed end-to-end across the \num{10} styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
 Browser heap fell \qty{35.5}{\percent}, from \qty{84.2}{\mega\byte} to \qty{54.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (Figure~\ref{fig:memory_ablation}).
 Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline load-time reductions were tight (Fiord \qty{370.9}{\milli\second} to \qty{120.5}{\milli\second}, Liberty \qty{466.5}{\milli\second} to \qty{133.7}{\milli\second}, both $p < 10^{-45}$, Wilcoxon).
 

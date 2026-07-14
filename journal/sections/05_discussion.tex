@@ -40,9 +40,12 @@ We found no significant correlation between a style's initial complexity and its
 We read these figures as a lower bound, since the stats-driven and data-level passes need tile access the generalization corpus lacks.
 
 \subsection{Limitations on interpretation}
-Several caveats bound these conclusions.
-Coverage is the most important.
-Three deep-corpus styles were excluded from end-to-end rendering by an upstream MapLibre bug, and the proprietary styles that dominate commercial serving (Mapbox Streets, Esri's vector basemaps) are closed off by their terms of service, so the per-pass contributions hold for open-source styles rather than universally.
-Our tiles use a single schema, so other property distributions may shave differently.
-We left geometry simplification out of scope, since it risks the pixel-identity criterion our soundness argument depends on, so our reductions understate the headroom a production pipeline could reach by composing with an upstream simplifier.
-Finally, the jank metric worsens as the pipeline gets faster, but only because rates above two thousand frames per second turn small garbage-collection pauses into proportionally large outliers, a regime no real consumer device would enter.
+These conclusions are subject to four limitations beyond the measurement threats of Section~\ref{sec:results:threats}.
+First, the per-pass contributions are established on open-source styles only.
+Three styles were excluded from end-to-end rendering by an upstream bug in MapLibre's style-migration tooling regarding mixed legacy and non-legacy expressions, and proprietary styles such as Mapbox Streets and Esri's vector basemaps could not be evaluated because their terms of service forbid it.
+Second, all tile-level results use the \ac{OMT} schema.
+Schemas with other property distributions may yield different shaving gains.
+Third, geometry simplification was excluded from the optimizer because lossy vertex removal would violate the visual-equivalence criterion of Definition~\ref{def:visual_equivalence}.
+The reported reductions therefore understate what a production pipeline could reach by composing the optimizer with an upstream simplifier.
+Fourth, the jank-count metric worsened across the ablation only at sustained frame rates above \num{2000} \ac{FPS}, where garbage-collection pauses of fixed duration register as proportionally large frame-time outliers.
+Consumer hardware caps frame rates well below this regime, so we do not read the worsening as a rendering regression.
