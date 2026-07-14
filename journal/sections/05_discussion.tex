@@ -27,10 +27,11 @@ The structural style passes dominate sustained frame rate, since once tiles are 
 The axes meet only at overview zoom, where shaving entire source-layers reduces the features rendered per frame.
 
 \subsection{Implications for map-serving infrastructure}
-Style-dependent tiles also fragment edge caches: two styles that once shared identical \ac{MVT} tiles now fetch distinct shaved variants, so a CDN must key its cache on (tile, style) pairs.
+Style-dependent tiles also fragment edge caches.
+Two styles that once shared identical \ac{MVT} tiles now fetch distinct shaved variants, so a CDN must key its cache on (tile, style) pairs.
 Our cache-fragmentation model (Section~\ref{sec:results:combined}) shows the decision to shave turns on a style's share of pooled traffic, not on the number of styles served.
 A dominant style already warms most of the pool, so any positive per-tile saving justifies shaving it, whereas a thin long-tail style cannot keep a private cache warm and reverts to cold-start behavior.
-The recommendation is hybrid: shave the one or two canonical styles and leave the long tail on raw \ac{MVT}.
+The recommendation is hybrid, shaving the one or two canonical styles and leaving the long tail on raw \ac{MVT}.
 
 \subsection{Generalization to unseen styles}
 The cross-style evaluation argues these gains are not artifacts of our corpus.
@@ -40,7 +41,8 @@ We read these figures as a lower bound, since the stats-driven and data-level pa
 
 \subsection{Limitations on interpretation}
 Several caveats bound these conclusions.
-Coverage is the most important: three deep-corpus styles were excluded from end-to-end rendering by an upstream MapLibre bug, and the proprietary styles that dominate commercial serving (Mapbox Streets, Esri's vector basemaps) are closed off by their terms of service, so the per-pass contributions hold for open-source styles rather than universally.
+Coverage is the most important.
+Three deep-corpus styles were excluded from end-to-end rendering by an upstream MapLibre bug, and the proprietary styles that dominate commercial serving (Mapbox Streets, Esri's vector basemaps) are closed off by their terms of service, so the per-pass contributions hold for open-source styles rather than universally.
 Our tiles use a single schema, so other property distributions may shave differently.
 We left geometry simplification out of scope, since it risks the pixel-identity criterion our soundness argument depends on, so our reductions understate the headroom a production pipeline could reach by composing with an upstream simplifier.
 Finally, the jank metric worsens as the pipeline gets faster, but only because rates above two thousand frames per second turn small garbage-collection pauses into proportionally large outliers, a regime no real consumer device would enter.

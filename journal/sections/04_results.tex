@@ -4,20 +4,22 @@
 
 \subsection{Experimental setup and corpora}\label{sec:results:setup}
 We evaluate the pipeline across three tiers of breadth.
-A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the Germany \ac{OMT} tileset (zoom levels 0 to 14, \qty{256.5}{\kilo tiles}) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
+A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the \ac{OMT} tileset (zoom levels 0 to 14) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
 The same \num{10} styles are also evaluated at the tile-shaving size level on the same tileset, and a third generalization corpus of \num{12} additional unseen styles drawn from the Maputnik gallery is evaluated with static analysis only.
-The measurement harness is a Puppeteer-driven headless browser that loads MapLibre GL JS, replays each animation, and collects load time, frame-times, and time to first tile through the browser \texttt{Performance} API under Vulkan based rendering.
-Each style and scenario cell is run \num{15} times and reported as the median.
+The measurement harness is a Puppeteer-driven headless browser that loads MapLibre GL JS, replays each animation, and collects load-, first tile and per-frame-times through the browser \texttt{Performance} API under Vulkan based rendering.
+Each style and scenario cell is run \num{15} times to account for per-run variance.
 The pipeline itself is measured through a 19-step cumulative ablation in which each pass is added on top of all preceding passes, plus one plain-tile-shaving comparison configuration.
 
 \subsection{Style-level optimization}\label{sec:results:style}
 The eight expression-level passes barely moved end-to-end load time on their own, reducing the per-style median by \qty{1.6}{\percent} (range \qtyrange{-7.3}{+12.3}{\percent} across styles), an effect not consistently distinguishable from per-style measurement noise.
-Their effect on serialized style size was clearer: default stripping was the single largest marginal contributor at \qty{-3.4}{\percent} of raw style size (\qty{-2.5}{\percent} under gzip), followed by stats-driven folding (\qty{-1.5}{\percent}) and expression simplification (\qty{-1.1}{\percent}).
+Their effect on serialized style size was clearer.
+Default stripping was the single largest marginal contributor at \qty{-3.4}{\percent} of raw style size (\qty{-2.5}{\percent} under gzip), followed by stats-driven folding (\qty{-1.5}{\percent}) and expression simplification (\qty{-1.1}{\percent}).
 Raw style size fell by up to \qty{20.3}{\percent} on Fiord (\num{22.2} to \qty{17.7}{\kilo\byte}) and \qty{7.0}{\percent} on Liberty, narrowing to \qty{8.3}{\percent} and \qty{5.9}{\percent} respectively under gzip as the compressor absorbed part of the raw savings.
 The size reduction translated directly into a shorter style-parse step even where end-to-end load time was unchanged.
 
 The structural passes concentrated almost all of their gains in dead-layer elimination and layer merging, with the remaining passes negligible in isolation.
-The magnitude was style-dependent: Fiord's 48-layer style shed two layers (\qty{-4.2}{\percent}, \qty{-14.1}{\percent} gzip transfer, \qty{-36.8}{\percent} expression-tree nodes from \num{1610} to \num{1018}), while Liberty's 111-layer style shed four through layer merging (\qty{-3.6}{\percent}, \qty{-4.9}{\percent} gzip, nodes from \num{3537} to \num{3167}).
+The magnitude was style-dependent.
+Fiord's 48-layer style shed two layers (\qty{-4.2}{\percent}, \qty{-14.1}{\percent} gzip transfer, \qty{-36.8}{\percent} expression-tree nodes from \num{1610} to \num{1018}), while Liberty's 111-layer style shed four through layer merging (\qty{-3.6}{\percent}, \qty{-4.9}{\percent} gzip, nodes from \num{3537} to \num{3167}).
 Layer merging can increase raw byte count, because a merged layer replaces several short filters with wordier \mlop{match}-keyed expressions, yet still reduces per-frame draw calls and frame time.
 Gzip absorbs the raw increase, leaving compressed size essentially unchanged.
 Symbol-heavy styles benefit less because symbol layers are excluded from merging on collision-soundness grounds.
@@ -104,7 +106,7 @@ On load time the levels are additive in aggregate.
 Pooled across the \num{10} styles, the combined reduction (\qty{66.4}{\percent}) matches the sum of the style-only (\qty{4.0}{\percent}) and shaving-only (\qty{65.5}{\percent}) reductions to within a \qty{-3.1}{\percent} interaction term.
 Per scenario, small super-additive interactions are common.
 Combined load time beat the sum of the parts in \num{103} of \num{180} style-scenario pairs (\qty{57}{\percent}).
-They concentrate in a few styles (Bright \num{15} of \num{18} pairs, median \qty{+7.1}{\percent}; OSM~Bright and OSM~Liberty \num{15} of \num{18}; Stadia~Outdoors \num{14}; Liberty \num{13}) and are largely absent in others (Fiord \num{4} of \num{18}, Positron \num{5}, Dark~Matter \num{6}, Klokan-Basic \num{8}, Toner \num{8}), independently of how much each style shaves.
+They concentrate in a few styles (Bright \num{15} of \num{18} pairs at a median of \qty{+7.1}{\percent}, OSM~Bright and OSM~Liberty \num{15} of \num{18}, Stadia~Outdoors \num{14}, Liberty \num{13}) and are largely absent in others (Fiord \num{4} of \num{18}, Positron \num{5}, Dark~Matter \num{6}, Klokan-Basic \num{8}, Toner \num{8}), independently of how much each style shaves.
 Toner shaves the most yet stays additive, while OSM~Bright shaves the least yet synergizes the most.
 The interactions are small (median \qty{+0.64}{\percent} across all pairs) and offset one another, so they do not lift the aggregate.
 Because style optimization leaves tile volume unchanged, this residual synergy is a second-order rendering and decode timing effect, not a data-volume effect.

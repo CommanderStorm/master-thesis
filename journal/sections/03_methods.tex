@@ -134,7 +134,8 @@ The style corpus validates the codegen and evaluates the optimizer.}
 Expression passes act on the raw JSON representation of style expressions.
 We organize the engine as a table of rewrite rules, each gated by a pass flag and scoped to filters, paint and layout properties, or both.
 A post-order visitor walks every expression node, tests all applicable peephole rules, and fires the first matching rule.
-We modeled this on production-compiler peephole optimizers: individual rules are simple and local, but their composition through fixpoint iteration achieves global simplification.
+We modeled this on production-compiler peephole optimizers.
+Individual rules are simple and local, but their composition through fixpoint iteration achieves global simplification.
 Table~\ref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency.
 
 \begin{table}
@@ -178,9 +179,11 @@ Two rules can temporarily increase the node count, so the measure alone is not a
 The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
 Structural passes consume the style model to perform cross-layer and cross-source reasoning.
 Table~\ref{tab:structural_passes} lists them.
+
 Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available types.
 Metadata refinement extracts implicit zoom bounds from filter predicates and paint ramps and lifts them into explicit \mlprop{minzoom}/\mlprop{maxzoom} metadata, allowing the renderer to skip whole layers at zoom levels where they are invisible.
-Refinement is asymmetric to respect overzoom: \mlprop{minzoom} may be raised to the first data-carrying zoom freely, but \mlprop{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \mlprop{maxzoom}, since otherwise the layer's tiles would be overzoomed.
+Refinement is asymmetric to respect overzoom.
+\mlprop{minzoom} may be raised to the first data-carrying zoom freely, but \mlprop{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \mlprop{maxzoom}, since otherwise the layer's tiles would be overzoomed.
 
 \begin{table}
 \tbl{Structural optimization passes operating on the style representation.}
@@ -203,7 +206,11 @@ Source zoom tightening & none & Tighten source zoom bounds to referencing layers
 
 Layer merging (as shown in figure~\ref{fig:layer_merge_example}) combines adjacent layers of the same type whose differing properties are all mergeable, synthesizing a \mlop{case} or \mlop{match} expression over the filter discriminator so fewer layers mean fewer render passes.
 A property is mergeable only when the specification metadata marks it as feature-driven and it is not a zoom ramp.
-Three invariants together witness visual equivalence: coverage, because the merged filter is the disjunction of the originals and the merged expression selects each original per-layer value; painter order, via a synthesized sort key assigning each original layer an ascending integer in declaration order, with any candidate that already carries an explicit sort key refused; and layer scope, by excluding symbol layers, whose per-layer collision placement would be widened by a merge.
+Three conditions ensure that the merge preserves the visual equivalence of Equation~\ref{eq:visual_equivalence}.
+The merged filter is the disjunction of the original filters and the merged expression selects each original layer's value, so every feature is drawn with the same paint and layout properties as before.
+A synthesized sort key assigns the features of each original layer an ascending integer in declaration order, which preserves the painter order, and candidates that already carry an explicit sort key are not merged.
+Symbol layers are excluded entirely, since merging them would widen the scope of their per-layer collision placement.
+
 A cross-phase filter-to-property constant propagation substitutes equality constraints from a layer's filter into that same layer's paint and layout expressions, sound because MapLibre evaluates the filter first, and strictly intra-layer.
 A final source-zoom-tightening pass narrows each source's zoom bounds to the range of the layers that reference it to reduce overfetching.
 
@@ -264,7 +271,7 @@ The advisory captures five categories of information per source-layer.
 \emph{Zoom-level coverage} records the zoom levels for which at least one live layer references the source-layer.
 \emph{Categorical-value usage} records property values referenced by equality filters and \mlop{match} expressions, with their applicable zoom ranges.
 \emph{Feature-identifier usage} records which live layer references the features \mlop{id} or \mlop{feature-state}.
-Properties, values, geometry types, and identifiers absent from the advisory are candidates for removal.
+Anything absent from the advisory can be removed.
 
 The pipeline applies the advisory to each \ac{MVT} tile before encoding, as shown in Figure~\ref{fig:tile_shaving_pipeline}.
 It removes source-layers no style layer references, then filters each remaining layer by geometry type and unused categorical values and strips unused properties and feature identifiers.
@@ -300,7 +307,7 @@ It removes source-layers no style layer references, then filters each remaining 
         \node[steps, below=0.55cm of prune, text width=11.5cm] (ops) {%
             \hfil\textbf{Pruning operations:}\hfil\\[2pt]
             1.\;Remove source-layers no style layer references.\\
-            2.\;For each remaining layer: filter features by geometry type and unused categorical values, then strip unused properties and feature IDs.%
+            2.\;In each remaining layer, filter features by geometry type and unused categorical values, then strip unused properties and feature IDs.%
         };
         \draw[dashed, gray] (prune) -- (ops);
     \end{tikzpicture}

@@ -5,7 +5,8 @@ Interactive web maps built on vector tiles face tight performance budgets.
 Every frame fetches tiles over the network, decodes them, evaluates style expressions per feature, and submits draw calls.
 Yet style authoring and tile data preparation have traditionally been treated as independent concerns.
 We investigate joint, automatic style and data optimization for MapLibre rendering pipelines, asking whether style-level and data-level transformations compose additively or synergistically.
-We design and implement a standalone optimizer operating at three levels: peephole expression rewrites over style JSON via fixpoint iteration, structural passes, and a data-level pruning stripping unused properties, geometry types, and feature values before re-encoding tiles into the columnar \ac{MLT} format.
+We design and implement a standalone optimizer operating at three levels.
+It applies peephole expression rewrites over style JSON via fixpoint iteration, structural passes, and a data-level pruning stripping unused properties, geometry types, and feature values before re-encoding tiles into the columnar \ac{MLT} format.
 Across a corpus of styles and scenarios, tile shaving dominated the load-time improvements.
 End-to-end, the full pipeline reduced load time by a median of 71\% and raised frame rate to a median of \num{2.5}$\times$.
 Our \ac{MLT} encoder cut total tile volume by 28\% over the uncompressed reference and 12\% over gzip-compressed Mapbox Vector Tiles.
