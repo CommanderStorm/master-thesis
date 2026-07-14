@@ -4,7 +4,7 @@
 
 \subsection{Problem statement}\label{sec:methods:problem}
 
-We frame the optimizer as a function over (style, tile set) pairs and constrain it by a correctness contract rather than by a single objective.
+We frame the optimizer as a function over (style, tile set) pairs and constrain it by a correctness contract.
 Let $\mathcal{S}$ be the set of syntactically valid MapLibre style \ac{JSON} documents, let $\mathcal{T}$ be the set of tile sets, and let $\mathcal{V}$ be the set of viewing states (six camera degrees of freedom plus the viewport).
 MapLibre's deterministic renderer is a function
 \begin{equation}\label{eq:render_function}
@@ -15,7 +15,7 @@ The optimizer is a function $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \ma
 It pays a one-off preprocessing cost to improve the deployment metrics (load time, heap memory, frames per second) of every subsequent rendering session served from $(S', T')$.
 
 The deployment cost is not formalized as a single closed-form function.
-It depends on hardware, camera scenario, and tile cache state, and several passes trade a small load-time regression for a larger frames-per-second gain.
+It depends on hardware, camera scenario, and tile cache state, and several of our passes trade a small load-time regression for a larger frames-per-second gain.
 We therefore characterize each pass in an ablation study whose per-axis breakdown lets an operator compose the pass set suiting the deployment priorities.
 
 The optimizer must satisfy two constraints.
@@ -29,9 +29,10 @@ Writing $\equiv$ for pixel-identity on $\mathcal{I}$, the optimized pair $(S', T
 The constraint is asymmetric in $\bot$.
 An optimization may suppress a runtime evaluation error that the original style would have raised, but it must never introduce one that the original would not have raised.
 Every rule is thus semantics-preserving, so on an identical draw stream the deterministic renderer reproduces $R(S, T, v)$ exactly.
-The oracle is deliberately weaker than bit-identity: structural changes such as re-batched draw calls and re-encoded tile coordinates perturb edge antialiasing and floating-point rasterization without altering what is drawn.
-We sample $v$ on a discrete grid of zooms and viewports and accept a rendering as equivalent when it matches the reference under MapLibre's own render-test oracle: at most a fraction \num{0.00025} of the \num{262144} pixels exceed a per-pixel YIQ perceptual distance of \num{0.1285}, with antialiased-only pixels excluded.
-Both bounds are the renderer's published render-test defaults rather than parameters we tuned, so the residual disagreement is a few dozen sub-perceptual edge pixels, not a semantic divergence.
+This is deliberately weaker than bit-identity as structural changes such as re-batched draw calls and re-encoded tile coordinates change edge antialiasing and floating-point rasterization without altering what is drawn.
+We sample $v$ on a discrete grid of zooms and viewports and accept a rendering as equivalent when it matches the reference under MapLibre's own render-test oracle.
+At most a fraction \num{0.00025} of the \num{262144} pixels exceed a per-pixel YIQ perceptual distance of \num{0.1285}, with antialiased-only pixels excluded.
+Both bounds are the renderer's published render-test defaults rather than parameters we tuned, so the residual disagreement is a few dozen sub-perceptual pixels, not a semantic divergence.
 The second is
 \begin{definition}[Strict idempotency]\label{def:idempotency}
 The optimizer $\mathcal{O}$ is strictly idempotent when
@@ -39,7 +40,8 @@ The optimizer $\mathcal{O}$ is strictly idempotent when
     \forall (s, t) \in \mathcal{S} \times \mathcal{T}: \mathcal{O}(\mathcal{O}(s, t)) = \mathcal{O}(s, t).
 \end{equation}
 \end{definition}
-Feeding the optimizer's output back as input yields the same pair, which means that the expression-pass run to a fixpoint, and the deterministic, statistics-driven encoding choices enforce it on the tile half.
+Feeding the optimizer's output back as input yields the same pair.
+This means that the expression-passes run to a fixpoint and the statistics-driven encoding choices are stable.
 Both halves are exercised by a round-trip property test on the style level and a property-test plus fuzzing harness on the tile level.
 
 The system under test is MapLibre GL JS, the reference open-source web renderer.
@@ -53,7 +55,7 @@ At the center sits a pipeline of passes at three levels of abstraction.
 Around it are three supporting components.
 A code-generation front end produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
 A tile-statistics scanner profiles \ac{MVT} tiles for the statistics-driven and data-level passes.
-A validation harness checks the visual-equivalence guarantee of Equation~\ref{eq:visual_equivalence}, comparing optimized and unoptimized renderings of a curated style corpus pixel-for-pixel against MapLibre GL JS's software rasterizer.
+A validation harness checks the guarantee of Equation~\ref{eq:visual_equivalence}.
 
 The three pass levels are the following.
 \emph{Expression passes} operate directly on the JSON representation of style expressions, applying peephole rewrites, constant folding, and algebraic simplifications without deserializing the style into typed structures.
@@ -134,7 +136,6 @@ We organize the engine as a table of rewrite rules, each gated by a pass flag an
 A post-order visitor walks every expression node, tests all applicable peephole rules, and fires the first matching rule.
 We modeled this on production-compiler peephole optimizers: individual rules are simple and local, but their composition through fixpoint iteration achieves global simplification.
 Table~\ref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency.
-The exhaustive rule list is given in the supplemental material.
 
 \begin{table}
 \tbl{Expression-level optimization passes.}
@@ -160,7 +161,7 @@ Selectivity reordering & sampling & Reorder filter predicates by selectivity \\
 Constant folding evaluates boolean algebra over \mlop{all} and \mlop{any} nodes, comparisons between literals, and dead-branch elimination on \mlop{case} and \mlop{match}.
 Boolean absorption is sound because MapLibre filter operators are pure, so dropping an operand discards no observable side effect, and Equation~\ref{eq:visual_equivalence}'s asymmetry permits dropping an operand that would have raised $\bot$.
 Contradiction detection rewrites mutually exclusive sibling predicates to \mlval{false}, which structural dead elimination later exploits to remove the enclosing layer.
-When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \mlop{match}/\mlop{in} arm pruning and frequency reordering, and ramp-stop pruning outside the observed range.
+When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \mlop{match}/\mlop{in} arm pruning, frequency reordering, and ramp-stop pruning outside the observed range.
 Value tracking is governed by a cardinality threshold of 200, so the optimizer records a property's observed value set only when that property has at most 200 distinct values.
 This keeps the folding-useful categorical properties of the \ac{OMT} schema apart from high-cardinality string columns, using one fixed threshold rather than a value tuned to any specific style.
 Irreversible folds carry an additional guard, a full-census sample rate, because a rare arm that the statistics never observed may still be reachable at render time.

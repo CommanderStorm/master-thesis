@@ -11,21 +11,22 @@ When a request exceeds the source's \mlprop{maxzoom}, the renderer \emph{overzoo
 
 A vector tile encodes map data in a compact binary form.
 Each tile holds \emph{source layers} (for example roads, buildings, water), and each source layer holds \emph{features}.
-A feature carries geometry (point, linestring, or polygon as integer coordinates relative to the tile extent), an optional set of key-value \emph{properties} (such as \mlval{class}=\mlval{"motorway"}), and metadata.
+A feature carries geometry (point, linestring, or polygon as integer coordinates relative to the tile extent), an optional set of key-value \emph{properties} (such as \mlval{class}=\mlval{motorway}), and metadata.
 The dominant wire format is \ac{MVT}, a Protocol Buffer encoding with a \emph{row-oriented} layout in which each feature stores its own property tags, so accessing a single property requires parsing past all others and compression operates on an interleaved byte stream rather than homogeneous columns.
 \citet{tremmelMapLibreTileNext2025b} introduced \ac{MLT}, a columnar alternative that stores each property as an independent column with type-specific encoding, which enables per-column compression and removes the per-feature tag overhead.
 
 The visual appearance is governed by a separate \emph{style} document.
 We target the MapLibre style specification, a client-side declarative format whose \ac{JSON} structure is amenable to static analysis.
-A style declares \emph{sources}, which name where tile data comes from and at which zoom levels it is available, and an ordered list of \emph{layers}, the central rendering unit.
+A style declares \emph{sources} (WHAT to show), which name where tile data comes from, the source-layers that are avaliable within a source and metadata such as which zoom levels it is available at.
+It also contains an ordered list of \emph{layers} (HOW to draw it).
 Each layer references a source and source-layer, fixes a type (\mlval{fill}, \mlval{line}, \mlval{circle}, \mlval{symbol}, and others), and carries paint and layout properties together with a boolean \emph{filter} that selects which features render.
 Filters and properties may be literal constants, zoom-dependent expressions (via \mlop{interpolate} or \mlop{step}), data-driven expressions (via \mlop{match}, \mlop{case}, or \mlop{get}), or combinations.
 These expression trees are small programs in a domain-specific language and can be deeply nested with redundant or unreachable branches.
-Some also read MapLibre's per-feature \emph{feature state} and map-wide \emph{global state}, runtime stores mutated by the host application at render time, so they cannot be folded to constants ahead of time.
+Some also read MapLibre's per-feature \emph{feature state} and map-wide \emph{global state}, which are runtime stores mutated by the host application at render time, so they cannot be folded to constants ahead of time.
 
 \subsection{Related work}\label{sec:background_rw}
 
-The literature relevant to joint style and data optimization is uneven, and no prior tool composes style rewriting with data-level pruning into a single open pipeline.
+The literature relevant to joint style and data optimization is uneven, and no prior tool composes style rewriting with data-level pruning into a pipeline.
 
 \subsubsection{Tile data pruning}
 Several tools attack data pruning directly.
@@ -38,10 +39,10 @@ Generators such as Planetiler\footnote{\url{https://github.com/onthegomap/planet
 
 \subsubsection{Tile encoding}
 A style is a declarative specification over a tabular feature set, which casts style-driven pruning as the projection and predicate pushdown long studied by query optimizers \citep{piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993,armbrustSparkSQLRelational2015}.
-The columnar \ac{MLT} format draws on database compression: SIMD integer codecs \citep{lemireDecodingBillionsIntegers2015}, the FSST string compressor \citep{bonczFSSTFastRandom2020}, and cascaded per-block strategy selection \citep{kuschewskiBtrBlocksEfficientColumnar2023}.
-The recurring finding is that no single encoding is universally optimal and data-driven selection is necessary \citep{abadiIntegratingCompressionExecution2006,dammeComprehensiveExperimentalSurvey2019,zengEmpiricalEvaluationColumnar2023}, which motivates an instance-optimized \citep{dingSageDBInstanceOptimizedData2022,dingInstanceOptimizedDataLayouts2021} trial-based encoding competition at tile granularity.
+The columnar \ac{MLT} format draws on database compression via SIMD integer codecs \citep{lemireDecodingBillionsIntegers2015}, the FSST strings \citep{bonczFSSTFastRandom2020}, and cascaded per-block strategy selection \citep{kuschewskiBtrBlocksEfficientColumnar2023}.
+The finding from databases is that no single encoding is universally optimal and data-driven selection is necessary \citep{abadiIntegratingCompressionExecution2006,dammeComprehensiveExperimentalSurvey2019,zengEmpiricalEvaluationColumnar2023}, which motivates an instance-optimized \citep{dingSageDBInstanceOptimizedData2022,dingInstanceOptimizedDataLayouts2021} trial-based encoding competition at tile granularity.
 \citet{tremmelMapLibreTileNext2025b} and the COMTiles archive format \citep{tremmelCOMTILESCASESTUDY2023} advance the encoding layer but pick strategies without consulting the style, even though pruning changes column cardinalities and value distributions and so shifts the optimal encoding.
-GeoParquet shares the same per-page encodings but its row-group metadata dominates at the \qtyrange{10}{100}{\kilo\byte} tile sizes we care about.
+GeoParquet shares the similar per-page encodings but its row-group metadata and analytics focused data model is dominated at the comparitavely small \qtyrange{10}{100}{\kilo\byte} tile sizes we care about.
 
 \subsubsection{Style optimization}
 Style-level work is scarce.
@@ -52,5 +53,6 @@ The closest academic analogue lies outside the map domain.
 Our expression passes apply peephole rewriting, constant folding, and fixpoint iteration over a term-rewriting system \citep{ahoCompilersPrinciplesTechniques2007,baaderTermRewritingAll1999}, while structural passes draw on selectivity estimation \citep{selingerAccessPathSelection1979} and partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
 
 \subsubsection{Benchmarking}
-Prior rendering benchmarks compare \emph{systems} rather than \emph{optimization passes}: vector against raster delivery \citep{netekPerformanceTestingVector2020}, renderer families across feature counts \citep{ballaVectorDataRendering2025}, and tile-server implementations \citep{rechsteinerPerformancevergleichOpenSourceVectorTilesServerloesungenZur2024}.
+Prior rendering benchmarks compare \emph{systems} rather than \emph{optimization passes}.
+Vector against raster delivery \citep{netekPerformanceTestingVector2020}, renderer families across feature counts \citep{ballaVectorDataRendering2025}, and tile-server implementations \citep{rechsteinerPerformancevergleichOpenSourceVectorTilesServerloesungenZur2024}.
 We adopt their statistical methodology, bootstrap confidence intervals, warm-up handling, and metric separation \citep{georgesStatisticallyRigorousJava2007,hoeflerScientificBenchmarkingParallel2015}, rather than extending it, and complement it with a cumulative ablation that isolates each pass within a single renderer.
