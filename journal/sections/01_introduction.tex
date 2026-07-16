@@ -2,37 +2,38 @@
 
 \section{Introduction}\label{sec:intro}
 
-Interactive vector maps on the web run two performance-critical paths.
-The per-tile path fetches, decodes, and binds a client-side style to each tile's features at load time.
-The per-frame path re-evaluates view-dependent expressions and submits draw calls to the GPU.
-A slow network stalls the first, while a battery- or thermally-bound device stalls the second.
-Libraries such as MapLibre GL~JS and Mapbox GL~JS deliver these maps by streaming tiled geometry to the browser and driving a WebGL or WebGPU rendering pipeline from a style document.
-This architecture is what makes panning, zooming, and rotation smooth when it works, and stutter when it does not.
+Web maps rendered from vector tiles divide their work across two timelines.
+When a tile arrives, the client decodes it and binds the active style to every feature it holds.
+On each rendered frame, the client re-evaluates the view-dependent parts of that style and issues draw calls to the GPU.
+Network and decode cost bound the first timeline, and the graphics device bounds the second.
+MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document.
+While both timelines stay inside budget the map pans and zooms smoothly, and once either exceeds it the interaction stutters.
 
-As deployments scale from personal projects to platforms serving millions, the cost of suboptimal performance compounds.
-Larger tiles increase transfer time and bandwidth cost, redundant style layers waste rendering cycles, and unnecessary properties inflate decoding overhead.
-On mobile devices these inefficiencies translate into battery drain and thermal throttling, and on unstable connections such as trains or aircraft they degrade the user experience directly.
+The penalty grows with reach.
+A tileset served to millions of sessions pays for every redundant byte many times over.
+Oversized tiles lengthen transfer, layers that never draw waste frame time, and attributes no client reads inflate decode cost.
+On phones the same waste surfaces as heat and battery drain, and over the intermittent links found on trains and aircraft it surfaces as visible stalls.
 
-Despite this, the map rendering community has largely treated style authoring and data preparation as independent concerns.
-Styles are hand-tuned for visual appearance, while tiles are encoded with general-purpose content and compression.
-The interaction between the two is left unexploited.
-A style filter that matches on a property value may, after constant folding against tile-level statistics, simplify to a form that no longer references that property.
-This in turn should allow an encoder to drop the corresponding column from every tile, a saving that neither style simplification nor data pruning could achieve alone.
-We ask if these interactions yield synergestic or merely additive gains.
+Map production keeps styling and tiling apart.
+Cartographers tune a style for appearance against a tileset that was encoded for general use, and no stage inspects the two together.
+That separation leaves an opening.
+Suppose a filter tests a feature property and constant folding against per-tile statistics collapses that filter into a form that no longer names the property.
+An encoder aware of this could drop the property's column from every tile, a reduction that neither style rewriting nor blind data pruning reaches on its own.
+Whether such couplings deliver gains beyond the sum of their parts is the question this paper sets out to answer.
 
-We investigate this automatic, style- and data-driven co-optimization resulting in these contributions:
+We study this style- and data-driven co-optimization and make the following contributions.
 
 \begin{itemize}
-    \item A \textbf{formalization of joint style and tile co-optimization} as a transformation $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ constrained by visual equivalence and strict idempotency.
-    Prior work on compiler optimization and on columnar encoding has addressed one side in isolation, but neither has treated both jointly under a soundness criterion.
-    \item A \textbf{three-level co-optimization strategy}.
-    We first apply expression level peephole rewrites to a fixpoint.
-    Then structural level runs (dead layer elimination, metadata refinement, and layer merging) pass over a style model.
-    And finally, tile level optimisations employs \emph{style-driven tile shaving} (pruning unused properties/values/geometry types and feature ids) and an \emph{adaptive multi-strategy encoding} for the \ac{MLT} columnar format.
-    \item An \textbf{end-to-end implementation} integrating the MapLibre style runtime and the \ac{MLT} tile pipeline.
-    \item An \textbf{evaluation across four corpora} spanning 18 scenarios and a cumulative ablation, quantifying load-time, tile-volume, and frame-rate effects and resolving the additive-versus-synergistic question at both the aggregate and per-scenario levels.
+    \item A \textbf{formalization of joint style and tile co-optimization} as a transformation $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ held to visual equivalence and strict idempotency.
+    Compiler optimization and columnar encoding each cover one half of this space, and we are aware of no prior treatment that couples both under a single soundness criterion.
+    \item A \textbf{three-level optimizer}.
+    Expression-level peephole rewrites run to a fixpoint.
+    Structural passes then rewrite a typed style model through dead layer elimination, metadata refinement, and layer merging.
+    A tile level closes the pipeline with \emph{style-driven tile shaving}, which removes unused properties, values, geometry types, and feature ids, followed by \emph{adaptive multi-strategy encoding} into the \ac{MLT} columnar format.
+    \item An \textbf{implementation} that connects the MapLibre style runtime to the \ac{MLT} tile pipeline end to end.
+    \item An \textbf{evaluation} over multiple style corpora and 18 scenarios with a cumulative ablation, reporting load-time, tile-volume, and frame-rate effects and settling the additive-versus-synergistic question at both aggregate and per-scenario granularity.
 \end{itemize}
 
-Section~\ref{sec:background} gives a short overview of the background.
-Section~\ref{sec:methods} builds on it to formalize the problem and detail the three levels.
-Section~\ref{sec:results} reports the results, and Section~\ref{sec:discussion} interprets the findings.
+Section~\ref{sec:background} sketches the background.
+Section~\ref{sec:methods} formalizes the problem and lays out the three levels.
+Section~\ref{sec:results} presents the measurements, and Section~\ref{sec:discussion} interprets them.

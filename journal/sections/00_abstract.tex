@@ -1,18 +1,13 @@
 %% source: 00_abstract (402w) -> target 200w
 
 \begin{abstract}
-Interactive web maps built on vector tiles face tight performance budgets.
-Every frame fetches tiles over the network, decodes them, evaluates style expressions per feature, and submits draw calls.
-Yet style authoring and tile data preparation have traditionally been treated as independent concerns.
-We investigate joint, automatic style and data optimization for MapLibre rendering pipelines, asking whether style-level and data-level transformations compose additively or synergistically.
-We design and implement a standalone optimizer operating at three levels.
-It applies peephole expression rewrites over style JSON via fixpoint iteration, structural passes, and a data-level pruning stripping unused properties, geometry types, and feature values before re-encoding tiles into the columnar \ac{MLT} format.
-Across a corpus of styles and scenarios, tile shaving dominated the load-time improvements.
-End-to-end, the full pipeline reduced load time by a median of 71\% and raised frame rate to a median of \num{2.5}$\times$.
-Our \ac{MLT} encoder cut total tile volume by 28\% over the uncompressed reference and 12\% over gzip-compressed Mapbox Vector Tiles.
-Style-level passes yielded a median 30.8\% size reduction on unseen styles with visually equivalent output.
-In aggregate the two levels compose additively rather than synergistically, and on data volume this holds for every style.
-Per-scenario load-time synergy is common but small and style-dependent, averaging out without lifting overall gains significantly.
+Vector tiles are the dominant delivery format for interactive web cartography, and the client redraws each visible tile inside a per-frame budget that covers network transfer, decoding, per-feature style evaluation, and draw submission.
+Cartographic styling and tile production are normally handled by separate tools, so the coupling between what a style actually reads and what a tile actually carries stays unexploited.
+This article treats styling and tile encoding as a single optimization problem for MapLibre rendering pipelines.
+We build an optimizer that rewrites style expressions to a fixpoint, restructures the typed style document, and then derives from the optimized style a pruning advisory that removes unused attributes, geometry types, and feature values before re-encoding each tile in the columnar \ac{MLT} format.
+Measured over a corpus of production and institutional styles under interactive navigation scenarios, discarding tile content the style never consumes accounts for most of the benefit, lowering median load time by 71\% and raising sustained frame rate to a median of \num{2.5}$\times$.
+The columnar encoder alone shrinks tile volume by 28\% against the uncompressed reference and 12\% against gzip-compressed Mapbox Vector Tiles, and style rewriting shrinks unseen styles by a median of 30.8\% with visually equivalent output.
+Quantifying how the two levels interact, we find their combined effect is additive rather than synergistic, with per-scenario synergy present but too sparse to raise the aggregate.
 \end{abstract}
 
 \begin{keywords}

@@ -2,10 +2,9 @@
 
 \section{Conclusion}\label{sec:conclusion}
 
-Vector map styles are developed separately from the tilesets they reference.
-As a result, tiles carry data that a given style never reads, and styles carry logic that a renderer re-evaluates on every frame even though it could be resolved ahead of time.
-We formalized the joint optimization of style and tile as a rewrite system that preserves visual equivalence and is idempotent, and implemented it in three levels.
-Expression rules simplify the style, a second level reorganizes the layer graph, and data passes remove unreferenced tile content and re-encode the rest as \ac{MLT}.
+Styling and tiling are authored in isolation, so tiles ship data no style reads and styles carry logic a renderer resolves anew on every frame.
+Treating the pair as one problem, we cast joint style and tile optimization as a rewrite system that preserves visual equivalence and stays idempotent, then realized it across three levels.
+Expression rules simplify the style, a structural level reorganizes the layer graph, and data passes strip unreferenced tile content and re-encode the remainder as \ac{MLT}.
 
 On the Germany \ac{OMT} tileset, \ac{MLT} encoding alone makes tiles \qty{12}{\percent} smaller than gzip-compressed \ac{MVT}, and style-driven shaving removes a median of \qty{29}{\percent} of bytes per style.
 Together, the pipeline improves load times by a median of \qty{71}{\percent}, with no soundness regressions across the 10-style evaluation corpus and the 12-style generalization corpus.
