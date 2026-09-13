@@ -2,6 +2,9 @@
 
 \section{Background and Related Work}\label{sec:background}
 
+This section first fixes the terminology of vector-tile rendering that the remainder of the paper relies on (Section~\ref{sec:background_prelim}), covering the tiling scheme, the tile and style data models, and the expression language whose structure our optimizations exploit.
+It then situates our contribution in prior work on tile pruning, tile encoding, style optimization, and rendering benchmarks (Section~\ref{sec:background_rw}).
+
 \subsection{Preliminaries}\label{sec:background_prelim}
 
 Modern interactive web maps render client-side from vector tiles, partitioning the world into a regular grid of square tiles at discrete zoom levels following the XYZ tiling scheme.
@@ -13,11 +16,11 @@ A vector tile encodes map data in a compact binary form.
 Each tile holds \emph{source layers} (for example roads, buildings, water), and each source layer holds \emph{features}.
 A feature carries geometry (point, linestring, or polygon as integer coordinates relative to the tile extent), an optional set of key-value \emph{properties} (such as \mlval{class}=\mlval{motorway}), and metadata.
 The dominant wire format is \ac{MVT}, a Protocol Buffer encoding with a \emph{row-oriented} layout in which each feature stores its own property tags, so accessing a single property requires parsing past all others and compression operates on an interleaved byte stream rather than homogeneous columns.
-\citet{tremmelMapLibreTileNext2025b} introduced \ac{MLT}, a columnar alternative that stores each property as an independent column with type-specific encoding, which enables per-column compression and removes the per-feature tag overhead.
+\citet{tremmelMapLibreTileNext2025b} introduced \acf{MLT}, a columnar alternative that stores each property as an independent column with type-specific encoding, which enables per-column compression and removes the per-feature tag overhead.
 
 The visual appearance is governed by a separate \emph{style} document.
 We target the MapLibre style specification, a client-side declarative format whose \ac{JSON} structure is amenable to static analysis.
-A style declares \emph{sources} (WHAT to show), which name where tile data comes from, the source-layers that are avaliable within a source and metadata such as which zoom levels it is available at.
+A style declares \emph{sources} (WHAT to show), the named source-layers that are avaliable within a source and metadata such as which zoom levels it is available at.
 It also contains an ordered list of \emph{layers} (HOW to draw it).
 Each layer references a source and source-layer, fixes a type (\mlval{fill}, \mlval{line}, \mlval{circle}, \mlval{symbol}, and others), and carries paint and layout properties together with a boolean \emph{filter} that selects which features render.
 Filters and properties may be literal constants, zoom-dependent expressions (via \mlop{interpolate} or \mlop{step}), data-driven expressions (via \mlop{match}, \mlop{case}, or \mlop{get}), or combinations.
@@ -50,7 +53,6 @@ The MapLibre validators and the \texttt{gl-style-migrate} tool transform but do 
 Stamen's default-stripping utility covers one pass in isolation.
 The closest academic analogue lies outside the map domain.
 \citet{hagueCSSMinificationConstraint2019} formalize CSS rule merging as a constrained optimization, and rule-based rewriting \citep{piraheshExtensibleRuleBased1992} and equality saturation \citep{tateEqualitySaturationNew2009,willseyEggFastExtensible2021} supply the compiler-side vocabulary.
-Our expression passes apply peephole rewriting, constant folding, and fixpoint iteration over a term-rewriting system \citep{ahoCompilersPrinciplesTechniques2007,baaderTermRewritingAll1999}, while structural passes draw on selectivity estimation \citep{selingerAccessPathSelection1979} and partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
 
 \subsubsection{Benchmarking}
 Prior rendering benchmarks compare \emph{systems} rather than \emph{optimization passes}.

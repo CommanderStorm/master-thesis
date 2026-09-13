@@ -59,7 +59,7 @@ Our data level optimizations are explained in \cref{sub:data_optimizations}.
 
 \section{Tile Encoding and Format Innovation}\label{sec:rw_tile_encoding}
 
-The dominant wire format for vector tiles is \ac{MVT}\footnote{\url{https://github.com/mapbox/vector-tile-spec/tree/master/2.1}, last accessed 2026-04-21}, which uses Protocol Buffers\footnote{\url{https://protobuf.dev/}, last accessed 2026-04-21} to encode features in a row-oriented layout.
+In industry, the dominant open wire format for vector tiles is \ac{MVT}\footnote{\url{https://github.com/mapbox/vector-tile-spec/tree/master/2.1}, last accessed 2026-04-21}, which uses Protocol Buffers\footnote{\url{https://protobuf.dev/}, last accessed 2026-04-21} to encode features in a row-oriented layout.
 \ac{MVT} has been adopted as a conformance class in the \ac{OGC} API-Tiles standard~\cite{masoOGCAPITiles2022}, making it the baseline format for any standards-compliant tile delivery.
 Its row orientation means that accessing a single property column requires scanning the entire feature table, and its protobuf encoding does not exploit the statistical properties of individual columns.
 
@@ -73,7 +73,7 @@ For instance, pruning rare road classes can convert a high-cardinality string co
 
 The encoding techniques used in \ac{MLT} draw on the columnar database compression literature.
 Lemire and Boytsov~\cite{lemireDecodingBillionsIntegers2015} introduced \ac{SIMD}-vectorized integer compression \ac{FastPFOR} achieving billions of integers per second in decompression throughput.
-Boncz et al.~\cite{bonczFSSTFastRandom2020} developed \ac{FSST}, a lightweight string compression scheme using a static symbol table that supports random access without decompressing surrounding data.
+Boncz et al.~\cite{bonczFSSTFastRandom2020} developed \acf{FSST}, a lightweight string compression scheme using a static symbol table that supports random access without decompressing surrounding data.
 Kuschewski et al.~\cite{kuschewskiBtrBlocksEfficientColumnar2023} demonstrated with BtrBlocks that cascading multiple encoding schemes (including \ac{FSST}, bit-packing, \ac{RLE}, and dictionary encoding) with automatic per-block strategy selection achieves 2.2$\times$ faster scans than Parquet.
 The general finding that no single encoding is universally optimal, and that data-driven strategy selection is necessary, motivates the multi-strategy encoding competition we develop in this thesis.
 

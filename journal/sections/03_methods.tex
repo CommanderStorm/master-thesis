@@ -70,6 +70,7 @@ Finally, the data phase processes the fully optimized style so pruning recommend
 
 \begin{figure}[htbp]
     \centering
+    \resizebox{\textwidth}{!}{%
     \begin{tikzpicture}[
         node distance=0.8cm and 1.4cm,
         box/.style={rectangle, draw, rounded corners=2pt, minimum height=0.7cm,
@@ -119,7 +120,7 @@ Finally, the data phase processes the fully optimized style so pruning recommend
         \draw[validation] (corpus) -- node[left, validationlabel] {eval} (opt);
         \draw[validation] (test) -- node[right, validationlabel] {validate} (serial);
         \draw[validation] (test) -- node[right, validationlabel] {validate} (opt);
-    \end{tikzpicture}
+    \end{tikzpicture}}
     \caption{
 System architecture.
     The \emph{codegen pipeline} (top) transforms the upstream \texttt{v8.json} through three stages into generated Rust types (\texttt{SerialSpec}) for typed style manipulation, with the MIR supplying spec metadata to the optimizer.
@@ -134,7 +135,7 @@ The style corpus validates the codegen and evaluates the optimizer.}
 Expression passes act on the raw JSON representation of style expressions.
 We organize the engine as a table of rewrite rules, each gated by a pass flag and scoped to filters, paint and layout properties, or both.
 A post-order visitor walks every expression node, tests all applicable peephole rules, and fires the first matching rule.
-We modeled this on production-compiler peephole optimizers.
+We modeled this on production-compiler peephole optimizers \citep{ahoCompilersPrinciplesTechniques2007}, with fixpoint iteration over the rule table as in a term-rewriting system \citep{baaderTermRewritingAll1999}.
 Individual rules are simple and local, but their composition through fixpoint iteration achieves global simplification.
 Table~\ref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency.
 
@@ -177,7 +178,7 @@ The expression phase applies the full rule set until the style JSON stops changi
 Most rules strictly decrease a lexicographic measure over \ac{AST} node count, maximum nesting depth, and non-literal node count.
 Two rules can temporarily increase the node count, so the measure alone is not a termination proof, but all benchmark styles converge within three iterations.
 The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
-Structural passes consume the style model to perform cross-layer and cross-source reasoning.
+Structural passes consume the style model to perform cross-layer and cross-source reasoning, specializing the style to the data it is served with in the manner of partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
 Table~\ref{tab:structural_passes} lists them.
 
 Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available types.

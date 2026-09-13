@@ -6,7 +6,7 @@ Web maps rendered from vector tiles divide their work across two timelines.
 When a tile arrives, the client decodes it and binds the active style to every feature it holds.
 On each rendered frame, the client re-evaluates the view-dependent parts of that style and issues draw calls to the GPU.
 Network and decode cost bound the first timeline, and the graphics device bounds the second.
-MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document.
+MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document (Figure~\ref{fig:pipeline_overview}).
 While both timelines stay inside budget the map pans and zooms smoothly, and once either exceeds it the interaction stutters.
 
 The penalty grows with reach.
