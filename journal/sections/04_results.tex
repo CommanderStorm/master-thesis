@@ -2,7 +2,7 @@
 
 \section{Results}\label{sec:results}
 
-\subsection{Experimental setup and corpora}\label{sec:results:setup}
+\subsection{Experimental Setup and Corpora}\label{sec:results:setup}
 We evaluate the pipeline across three tiers of breadth.
 A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the \ac{OMT} tileset (zoom levels 0 to 14) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
 The same \num{10} styles are also evaluated at the tile-shaving size level on the same tileset, and a third generalization corpus of \num{12} additional unseen styles drawn from the Maputnik gallery is evaluated with static analysis only.
@@ -10,7 +10,7 @@ The measurement harness is a Puppeteer-driven headless browser that loads MapLib
 Each style and scenario cell is run \num{15} times to account for per-run variance.
 The pipeline itself is measured through a 19-step cumulative ablation in which each pass is added on top of all preceding passes, plus one plain-tile-shaving comparison configuration.
 
-\subsection{Style-level optimization}\label{sec:results:style}
+\subsection{Style-Level Optimization}\label{sec:results:style}
 The eight expression-level passes barely moved end-to-end load time on their own, reducing the per-style median by \qty{1.6}{\percent} (range \qtyrange{-7.3}{+12.3}{\percent} across styles), an effect not consistently distinguishable from per-style measurement noise.
 Their effect on serialized style size was clearer.
 Default stripping was the single largest marginal contributor at \qty{-3.4}{\percent} of raw style size (\qty{-2.5}{\percent} under gzip), followed by stats-driven folding (\qty{-1.5}{\percent}) and expression simplification (\qty{-1.1}{\percent}).
@@ -25,7 +25,7 @@ Compressed size grows slightly in both cases (\qty{+36}{\byte} and \qty{+47}{\by
 The step still pays off at render time, cutting per-frame draw calls and raising FPS on both styles (Liberty \num{642} to \num{664}, Bright \num{621} to \num{632}).
 Symbol-heavy styles benefit less because symbol layers are excluded from merging on collision-soundness grounds.
 
-\subsection{Tile shaving and columnar re-encoding}\label{sec:results:data}
+\subsection{Tile Shaving and Columnar Re-Encoding}\label{sec:results:data}
 Tile shaving dominates the improvements.
 Pooled across the \num{10} styles, shaving alone cuts the median load time from \qty{390}{\milli\second} to \qty{135}{\milli\second} (\qty{-65.5}{\percent}) and roughly doubled median FPS (\num{2.1}$\times$), whereas style-only optimization contributed a modest \qty{-4.0}{\percent} (Figure~\ref{fig:box}).
 Across the \num{10} styles with available tile data, style-driven on-wire reductions on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{28.6}{\percent} (Figure~\ref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
@@ -97,7 +97,7 @@ vs.\ MVT & \num{-28.2}\% & \num{-12.3}\% & \num{-13.1}\% & \num{-13.0}\% & $8.3\
     \label{fig:shaving}
 \end{figure}
 
-\subsection{Combined pipeline: additive or synergistic?}\label{sec:results:combined}
+\subsection{Combined Pipeline: Additive or Synergistic?}\label{sec:results:combined}
 Whether the two levels interact synergistically depends on the metric and the style.
 On data volume they are additive for every style.
 Shaving the optimized style removed essentially the same bytes as shaving the unoptimized one, the optimized advisory adding \qtyrange{0.0}{0.5}{\percent} (median \qty{0.08}{\percent}).
@@ -148,7 +148,7 @@ Bootstrap \qty{95}{\percent} confidence intervals confirmed the full-pipeline lo
     \label{fig:waterfall}
 \end{figure}
 
-\subsection{Cross-style generalization}\label{sec:results:generalization}
+\subsection{Cross-Style Generalization}\label{sec:results:generalization}
 Applied with static passes only to the \num{12} unseen Maputnik styles, the optimizer delivered a median raw style-size reduction of \qty{30.8}{\percent} (range \qtyrange{3.2}{67.7}{\percent}), narrowing to a median of \qty{10.8}{\percent} under gzip (range \qtyrange{3.9}{22.4}{\percent}), with no style regressing (Figure~\ref{fig:cross_style}).
 The top reducers were styles with verbose filter logic or repetitive property structures (LocationIQ Streets at \qty{67.7}{\percent} and MapTiler Toner at \qty{57.5}{\percent}), while already-minified basemaps such as Stadia Outdoors (\qty{3.2}{\percent}) and the AWS pair (\qty{10.6}{\percent}) left little to remove.
 Initial style complexity did not reliably predict achievable reduction (Pearson $r = -0.54$, $n = 12$, $p = 0.07$).
@@ -162,7 +162,7 @@ Because the generalization corpus carries no tile data, stats-driven and data-le
     \label{fig:cross_style}
 \end{figure}
 
-\subsection{Threats to validity}\label{sec:results:threats}
+\subsection{Threats to Validity}\label{sec:results:threats}
 All rendering benchmarks ran on a single hardware and browser configuration with ANGLE/Vulkan, so results may differ on other hardware or graphics backends, and the 15-run median may not capture rare events such as thermal throttling.
 The evaluation is limited to MapLibre GL JS and the \ac{OMT} schema, and the 10 benchmark styles, though diverse, may not cover all authoring patterns.
 Network conditions were simulated through a fixed bandwidth throttle and a caching proxy rather than real content delivery network latency, which also masks real-world cache behavior.

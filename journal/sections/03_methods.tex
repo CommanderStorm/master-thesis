@@ -2,7 +2,7 @@
 
 \section{Methods}\label{sec:methods}
 
-\subsection{Problem statement}\label{sec:methods:problem}
+\subsection{Problem Statement}\label{sec:methods:problem}
 
 We frame the optimizer as a function over (style, tile set) pairs and constrain it by a correctness contract.
 Let $\mathcal{S}$ be the set of syntactically valid MapLibre style \ac{JSON} documents, let $\mathcal{T}$ be the set of tile sets, and let $\mathcal{V}$ be the set of viewing states (six camera degrees of freedom plus the viewport).
@@ -48,7 +48,7 @@ The system under test is MapLibre GL JS, the reference open-source web renderer.
 Lossy geometry transformations, symbol-layer merging, energy measurement, non-\ac{OMT} tile schemas, and online serving are out of scope.
 The optimizer is an offline, one-shot rebuild over a $(\mathcal{S}, \mathcal{T})$ pair whose artifacts can be served by standard geodata infrastructure.
 
-\subsection{A three-level optimization pipeline}\label{sec:methods:pipeline}
+\subsection{A Three-Level Optimization Pipeline}\label{sec:methods:pipeline}
 
 Figure~\ref{fig:system_architecture} sketches the optimizer as a whole.
 At the center sits a pipeline of passes at three levels of abstraction.
@@ -129,7 +129,7 @@ The style corpus validates the codegen and evaluates the optimizer.}
     \label{fig:system_architecture}
 \end{figure}
 
-\subsection{Expression- and structural-level style passes}\label{sec:methods:style}
+\subsection{Expression- and Structural-Level Style Passes}\label{sec:methods:style}
 
 Expression passes act on the raw JSON representation of style expressions.
 We organize the engine as a table of rewrite rules, each gated by a pass flag and scoped to filters, paint and layout properties, or both.
@@ -259,7 +259,7 @@ Phases \stepcirc{1}--\stepcirc{3} are the candidate, match-detection and zoom ch
     \label{fig:layer_merge_example}
 \end{figure}
 
-\subsection{Style-driven tile shaving}\label{sec:methods:shaving}
+\subsection{Style-Driven Tile Shaving}\label{sec:methods:shaving}
 
 The bridge between style-level and data-level optimization is the \emph{tile pruning advisory}, a structured report that captures, for each source-layer and zoom level, exactly what the rendering style needs.
 We compute the advisory from the \emph{optimized} style, after all expression and structural passes, together with tile statistics.
@@ -325,7 +325,7 @@ The optimizer rewrites category strings to integer indices, keeping the optimize
 Because interned tiles encode style-specific integers rather than self-describing strings, interning is an optional stage that can be disabled for multi-consumer deployments.
 \emph{Feature reordering} permutes features within a layer to exploit spatial or categorical locality, with the winning ordering chosen by the encoding competition described next.
 
-\subsection{Adaptive multi-strategy MLT encoding}\label{sec:methods:encoding}
+\subsection{Adaptive Multi-Strategy MLT Encoding}\label{sec:methods:encoding}
 
 The encoder re-encodes the pruned and transformed data into the \ac{MLT} columnar format.
 Rather than committing to a single fixed or learned encoding plan, it competes several strategies against each tile's data distribution and keeps the smallest output.

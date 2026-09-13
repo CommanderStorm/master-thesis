@@ -4,7 +4,7 @@
 
 This section interprets the results of Section~\ref{sec:results} and states their limits.
 
-\subsection{Co-optimization is meaningful but uneven}
+\subsection{Co-Optimization Is Meaningful but Uneven}
 Jointly optimizing style and tiles improves transfer size and rendering substantially, but unevenly.
 Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview scenarios more than street-level panning.
 The reason is structural.
@@ -12,7 +12,7 @@ Tile shaving removes only what a style never references, so its headroom is boun
 There is thus no single optimal tile.
 The optimal encoding is a function of the rendering style, so the same source data yields different ideal tiles for different consumers.
 
-\subsection{The levels compose additively}
+\subsection{The Levels Compose Additively}
 Against our prior expectations, the three families compose additively.
 We expected them to compound, reasoning that style-level dead elimination would narrow the references feeding the tile-shaving advisory.
 The data refutes this.
@@ -20,26 +20,26 @@ Shaving an optimized style removed essentially the same bytes as shaving the uno
 The advisory is governed by which source-layers and columns a style references, not by how its expressions are written, so simplification leaves the shave target untouched, and on data volume and load time the families are simply additive.
 Within a single level the picture is genuinely synergistic, since dead elimination removes the gaps between otherwise-mergeable layers.
 
-\subsection{Which level dominates depends on the bottleneck}
+\subsection{Which Level Dominates Depends on the Bottleneck}
 Because the levels target distinct costs, dominance depends on the bottleneck.
 The data-level passes dominate transfer size and load time, since tiles are fetched throughout interaction whereas the style is parsed once, so on a constrained mobile network they are the levers that matter.
 The structural style passes dominate sustained frame rate, since once tiles are resident on the GPU the per-frame cost is draw-call count and per-feature expression evaluation rather than data size.
 The axes meet only at overview zoom, where shaving entire source-layers reduces the features rendered per frame.
 
-\subsection{Implications for map-serving infrastructure}
+\subsection{Implications for Map-Serving Infrastructure}
 Style-dependent tiles also fragment edge caches.
 Two styles that once shared identical \ac{MVT} tiles now fetch distinct shaved variants, so a CDN must key its cache on (tile, style) pairs.
 Our cache-fragmentation model (Section~\ref{sec:results:combined}) shows the decision to shave turns on a style's share of pooled traffic, not on the number of styles served.
 A dominant style already warms most of the pool, so any positive per-tile saving justifies shaving it, whereas a thin long-tail style cannot keep a private cache warm and reverts to cold-start behavior.
 The recommendation is hybrid, shaving the one or two canonical styles and leaving the long tail on raw \ac{MVT}.
 
-\subsection{Generalization to unseen styles}
+\subsection{Generalization to Unseen Styles}
 The cross-style evaluation argues these gains are not artifacts of our corpus.
 On twelve previously unseen styles under static passes alone, the optimizer produced a meaningful reduction for every style and regressed none, the expression passes firing on virtually every input, as expected of any authored style.
 We found no significant correlation between a style's initial complexity and its achievable reduction at this sample size, so the gains do not depend on a style being unusually verbose.
 We read these figures as a lower bound, since the stats-driven and data-level passes need tile access the generalization corpus lacks.
 
-\subsection{Limitations on interpretation}
+\subsection{Limitations on Interpretation}
 These conclusions are subject to four limitations beyond the measurement threats of Section~\ref{sec:results:threats}.
 First, the per-pass contributions are established on open-source styles only.
 Three styles were excluded from end-to-end rendering by an upstream bug in MapLibre's style-migration tooling regarding mixed legacy and non-legacy expressions, and proprietary styles such as Mapbox Streets and Esri's vector basemaps could not be evaluated because their terms of service forbid it.
