@@ -50,12 +50,12 @@ The optimizer is an offline, one-shot rebuild over a $(\mathcal{S}, \mathcal{T})
 
 \subsection{A Three-Level Optimization Pipeline}\label{sec:methods:pipeline}
 
-Figure~\ref{fig:system_architecture} sketches the optimizer as a whole.
+\Cref{fig:system_architecture} sketches the optimizer as a whole.
 At the center sits a pipeline of passes at three levels of abstraction.
 Around it are three supporting components.
 A code-generation front end produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
 A tile-statistics scanner profiles \ac{MVT} tiles for the statistics-driven and data-level passes.
-A validation harness checks the guarantee of Equation~\ref{eq:visual_equivalence}.
+A validation harness checks the guarantee of \cref{eq:visual_equivalence}.
 
 The three pass levels are the following.
 \emph{Expression passes} operate directly on the JSON representation of style expressions, applying peephole rewrites, constant folding, and algebraic simplifications without deserializing the style into typed structures.
@@ -132,12 +132,12 @@ The style corpus validates the codegen and evaluates the optimizer.}
 
 \subsection{Expression- and Structural-Level Style Passes}\label{sec:methods:style}
 
-Expression passes act on the raw JSON representation of style expressions.
+\paragraph{Expression passes} act on the raw JSON representation of style expressions.
 We organize the engine as a table of rewrite rules, each gated by a pass flag and scoped to filters, paint and layout properties, or both.
 A post-order visitor walks every expression node, tests all applicable peephole rules, and fires the first matching rule.
 We modeled this on production-compiler peephole optimizers \citep{ahoCompilersPrinciplesTechniques2007}, with fixpoint iteration over the rule table as in a term-rewriting system \citep{baaderTermRewritingAll1999}.
 Individual rules are simple and local, but their composition through fixpoint iteration achieves global simplification.
-Table~\ref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency.
+\Cref{tab:expression_passes} summarizes the pass families, each annotated with its data dependency.
 
 \begin{table}
 \tbl{Expression-level optimization passes.}
@@ -161,7 +161,7 @@ Selectivity reordering & sampling & Reorder filter predicates by selectivity \\
 \end{table}
 
 Constant folding evaluates boolean algebra over \mlop{all} and \mlop{any} nodes, comparisons between literals, and dead-branch elimination on \mlop{case} and \mlop{match}.
-Boolean absorption is sound because MapLibre filter operators are pure, so dropping an operand discards no observable side effect, and Equation~\ref{eq:visual_equivalence}'s asymmetry permits dropping an operand that would have raised $\bot$.
+Boolean absorption is sound because MapLibre filter operators are pure, so dropping an operand discards no observable side effect, and \cref{eq:visual_equivalence}'s asymmetry permits dropping an operand that would have raised $\bot$.
 Contradiction detection rewrites mutually exclusive sibling predicates to \mlval{false}, which structural dead elimination later exploits to remove the enclosing layer.
 When tile statistics are available, nine further rules fold expressions that are statically indeterminate but data-determinate, covering property presence, single values, geometry type, numeric ranges, \mlop{match}/\mlop{in} arm pruning, frequency reordering, and ramp-stop pruning outside the observed range.
 Value tracking is governed by a cardinality threshold of 200, so the optimizer records a property's observed value set only when that property has at most 200 distinct values.
@@ -178,10 +178,11 @@ The expression phase applies the full rule set until the style JSON stops changi
 Most rules strictly decrease a lexicographic measure over \ac{AST} node count, maximum nesting depth, and non-literal node count.
 Two rules can temporarily increase the node count, so the measure alone is not a termination proof, but all benchmark styles converge within three iterations.
 The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
-Structural passes consume the style model to perform cross-layer and cross-source reasoning, specializing the style to the data it is served with in the manner of partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
-Table~\ref{tab:structural_passes} lists them.
 
-Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available types.
+\paragraph{Structural passes} consume the style model to perform cross-layer and cross-source reasoning, specializing the style to the data it is served with in the manner of partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
+\Cref{tab:structural_passes} lists them.
+
+Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available style-layer types.
 Metadata refinement extracts implicit zoom bounds from filter predicates and paint ramps and lifts them into explicit \mlprop{minzoom}/\mlprop{maxzoom} metadata, allowing the renderer to skip whole layers at zoom levels where they are invisible.
 Refinement is asymmetric to respect overzoom.
 \mlprop{minzoom} may be raised to the first data-carrying zoom freely, but \mlprop{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \mlprop{maxzoom}, since otherwise the layer's tiles would be overzoomed.
@@ -205,9 +206,9 @@ Source zoom tightening & none & Tighten source zoom bounds to referencing layers
 \label{tab:structural_passes}
 \end{table}
 
-Layer merging (as shown in figure~\ref{fig:layer_merge_example}) combines adjacent layers of the same type whose differing properties are all mergeable, synthesizing a \mlop{case} or \mlop{match} expression over the filter discriminator so fewer layers mean fewer render passes.
+Layer merging (as shown in \cref{fig:layer_merge_example}) combines adjacent layers of the same type whose differing properties are all mergeable, synthesizing a \mlop{case} or \mlop{match} expression over the filter discriminator so fewer layers mean fewer render passes.
 A property is mergeable only when the specification metadata marks it as feature-driven and it is not a zoom ramp.
-Three conditions ensure that the merge preserves the visual equivalence of Equation~\ref{eq:visual_equivalence}.
+Three conditions ensure that the merge preserves the visual equivalence of \cref{eq:visual_equivalence}.
 The merged filter is the disjunction of the original filters and the merged expression selects each original layer's value, so every feature is drawn with the same paint and layout properties as before.
 A synthesized sort key assigns the features of each original layer an ascending integer in declaration order, which preserves the painter order, and candidates that already carry an explicit sort key are not merged.
 Symbol layers are excluded entirely, since merging them would widen the scope of their per-layer collision placement.
@@ -262,64 +263,74 @@ Phases \stepcirc{1}--\stepcirc{3} are the candidate, match-detection and zoom ch
 
 \subsection{Style-Driven Tile Shaving}\label{sec:methods:shaving}
 
-The bridge between style-level and data-level optimization is the \emph{tile pruning advisory}, a structured report that captures, for each source-layer and zoom level, exactly what the rendering style needs.
+The bridge between style-level and data-level optimization is the \emph{tile pruning advisory}, a structured report that captures, for each source-layer and zoom level, exactly what the rendering style needs (\cref{fig:tile_shaving_pipeline}).
 We compute the advisory from the \emph{optimized} style, after all expression and structural passes, together with tile statistics.
 The ordering matters because dead layer elimination, metadata refinement, and layer merging shrink the live-layer set, reducing the referenced properties and geometry types the advisory carries into the data level.
-
-The advisory captures five categories of information per source-layer.
-\emph{Property usage} records each property name appearing in a \mlop{get} or \mlop{has} expression in any live layer, together with the zoom range over which it is referenced.
-\emph{Geometry usage} records the geometry types required at each zoom level, inferred from the live layers targeting the source-layer.
-\emph{Zoom-level coverage} records the zoom levels for which at least one live layer references the source-layer.
-\emph{Categorical-value usage} records property values referenced by equality filters and \mlop{match} expressions, with their applicable zoom ranges.
-\emph{Feature-identifier usage} records which live layer references the features \mlop{id} or \mlop{feature-state}.
-Anything absent from the advisory can be removed.
-
-The pipeline applies the advisory to each \ac{MVT} tile before encoding, as shown in Figure~\ref{fig:tile_shaving_pipeline}.
-It removes source-layers no style layer references, then filters each remaining layer by geometry type and unused categorical values and strips unused properties and feature identifiers.
 
 \begin{figure}[htbp]
     \centering
     \begin{tikzpicture}[
         box/.style={rectangle, draw, rounded corners=2pt, minimum height=0.65cm, font=\small, align=center},
-        style/.style={box, fill=roleStyle!20, minimum width=2.8cm},
-        data/.style={box, fill=roleData!25, minimum width=2.8cm},
-        both/.style={box, fill=roleBoth!20, minimum width=2.8cm},
+        style/.style={box, fill=roleStyle!20, minimum width=2.6cm},
+        data/.style={box, fill=roleData!25, minimum width=2.6cm},
+        both/.style={box, fill=roleBoth!20, minimum width=2.6cm},
+        detail/.style={rectangle, draw, rounded corners=2pt, font=\footnotesize,
+                       align=left, inner sep=5pt, text=black!80},
         arrow/.style={-Stealth, thick},
         lbl/.style={font=\scriptsize\itshape, text=darkgray, align=center},
-        steps/.style={rectangle, rounded corners=2pt, font=\small,
-                      align=left, inner sep=6pt, text=black!80},
     ]
+        % inputs and the advisory they produce
         \node[style] (sopt) {Style optimizations};
+        \node[both, right=1.5cm of sopt, text width=5.0cm, align=left] (adv) {%
+            {\centering\textbf{Tile pruning advisory}\par}\vspace{2pt}
+            {\footnotesize per source-layer and zoom range:\\
+            \stepcirc{1} zoom levels with a live layer\\
+            \stepcirc{2} required geometry types\\
+            \stepcirc{3} values tested by filters or \mlop{match}\\
+            \stepcirc{4} properties and feature \mlop{id}s read}};
+        \draw[arrow] (sopt) -- (adv);
 
-        \node[both, right=2.4cm of sopt] (adv) {Tile pruning advisory};
-        \draw[arrow] (sopt) -- node[above, lbl] {optimized style} (adv);
+        \node[data, right=1.5cm of adv] (stats) {Tile statistics};
+        \draw[arrow] (stats) -- node[above, lbl] {} (adv);
 
-        \node[data, right=2.4cm of adv] (stats) {Tile statistics};
-        \draw[arrow] (stats) -- node[above, lbl] {property/\\geom distribution} (adv);
-
-        \node[data, below=0.55cm of adv] (prune) {Prune \& transform};
+        % per-tile application of the advisory
+        \node[data, below=0.7cm of adv] (prune) {Prune \& transform};
         \node[data] at ($(sopt |- prune)$) (mvt) {\acs{MVT} tile};
         \node[data] at ($(stats |- prune)$) (mlt) {\acs{MLT} tile};
 
         \draw[arrow] (adv) -- (prune);
         \draw[arrow] (mvt) -- (prune);
-        \draw[arrow] (prune) -- node[above, lbl] {re-encode} (mlt);
+        \draw[arrow] (prune) -- (mlt);
 
-        \node[steps, below=0.55cm of prune, text width=11.5cm] (ops) {%
-            \hfil\textbf{Pruning operations:}\hfil\\[2pt]
-            1.\;Remove source-layers no style layer references.\\
-            2.\;In each remaining layer, filter features by geometry type and unused categorical values, then strip unused properties and feature IDs.%
+        \node[detail, below=0.5cm of prune, text width=11.6cm] (ops) {%
+            {\centering\textbf{Prune \& transform}, applied to every \acs{MVT} tile\par}\vspace{2pt}
+            \stepcirc{1} drop source-layers absent from the advisory at this zoom level\\
+            \stepcirc{2} drop features whose geometry type no live layer draws\\
+            \stepcirc{3} drop features whose categorical value no filter or \mlop{match} selects\\
+            \stepcirc{4} strip properties and feature ids the style never reads\\
+            \stepcirc{5} intern categorical strings as integers and reorder features for compressibility%
         };
         \draw[dashed, gray] (prune) -- (ops);
     \end{tikzpicture}
     \caption{
 Style-driven tile shaving pipeline.
-The optimized style and tile statistics jointly produce a pruning advisory.
-Each \acs{MVT} tile is pruned, transformed, and re-encoded to the \acs{MLT} format.}
+The optimized style and tile statistics jointly produce a pruning advisory that records, per source-layer, what the live layers need.
+Each \acs{MVT} tile is pruned in steps \stepcirc{1}--\stepcirc{4}, each consulting the advisory category of the same number, transformed in step \stepcirc{5}, and re-encoded to the \acs{MLT} format.}
     \label{fig:tile_shaving_pipeline}
 \end{figure}
 
-After pruning, two data transformations improve compressibility before encoding.
+The advisory captures four categories of information per source-layer, numbered \mbox{\stepcirc{1}--\stepcirc{4}} in \cref{fig:tile_shaving_pipeline} after the pruning step that consumes each.
+\emph{Zoom-level coverage} records the zoom levels for which at least one live layer references the source-layer.
+\emph{Geometry usage} records the geometry types required at each zoom level, inferred from the live layers targeting the source-layer.
+\emph{Categorical-value usage} records property values referenced by equality filters and \mlop{match} expressions, with their applicable zoom ranges.
+\emph{Property usage} records each property name appearing in a \mlop{get} or \mlop{has} expression in any live layer, together with the zoom range over which it is referenced, and whether any live layer reads the feature \mlop{id} or \mlop{feature-state}, which are served alongside the properties.
+Anything absent from the advisory can be removed.
+
+The pipeline applies the advisory to each \ac{MVT} tile before encoding, in the order of steps \stepcirc{1}--\stepcirc{4}.
+It removes source-layers no style layer references at the tile's zoom level, then filters each remaining layer by geometry type and unused categorical values, and finally strips unused properties and feature identifiers.
+Each step consults exactly one advisory category, so the advisory fully determines what a tile loses.
+
+After pruning, two data transformations (step \stepcirc{5}) improve compressibility before encoding.
 \emph{String property interning} replaces categorical string properties by frequency-ordered integer indices derived from the tile statistics.
 This reduces per-feature storage from a variable-length string to a small variable-length integer, with frequent values receiving small indices that compress well under delta encoding.
 The optimizer rewrites category strings to integer indices, keeping the optimized style consistent with the transformed tiles.
@@ -340,7 +351,7 @@ Morton sorts by the bit-interleaved Z-order index and is fast, while Hilbert is 
 
 The inner competition pairs each logical encoding (plain, delta, run-length, or delta-run-length) with a physical one (variable-length integers or FastPFOR).
 A data profiler prunes candidates in a single pass before any full encoding, and the encoder commits the smallest of the surviving two to four.
-Geometry vertices, roughly 70\% of \ac{MVT} bytes on a planet \ac{OMT} run, use a dedicated path competing componentwise deltas against Morton- and Hilbert-code dictionaries.
+Geometry vertices use a dedicated path competing componentwise deltas against Morton- and Hilbert-code dictionaries.
 
 String columns compete plain bytes, a dictionary, FSST, and FSST over a dictionary.
 For shared dictionaries, our encoder replaces the reference encoder's naming-prefix matching with MinHash similarity clustering \citep{broderResemblanceContainmentDocuments1998}.

@@ -6,7 +6,7 @@ Web maps rendered from vector tiles divide their work across two timelines.
 When a tile arrives, the client decodes it and binds the active style to every feature it holds.
 On each rendered frame, the client re-evaluates the view-dependent parts of that style and issues draw calls to the GPU.
 Network and decode cost bound the first timeline, and the graphics device bounds the second.
-MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document (Figure~\ref{fig:pipeline_overview}).
+MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document (\cref{fig:pipeline_overview}).
 While both timelines stay inside budget the map pans and zooms smoothly, and once either exceeds it the interaction stutters.
 
 \begin{figure}[htbp]
@@ -47,7 +47,7 @@ While both timelines stay inside budget the map pans and zooms smoothly, and onc
             \textbf{Style} (JSON)\\[1pt]
             layer \texttt{motorways}: draw \texttt{roads} features with \mlval{class}=\mlval{motorway} as lines, \mlprop{line-color} \mlval{\#c33}, \mlprop{line-width} growing with zoom};
         \node[paper, right=0.5cm of style.south east, anchor=south west] (paper) {%
-            \textbf{This article} rewrites the style, then prunes and \mbox{re-encodes} the tiles to what it reads \mbox{(Section~\ref{sec:methods})}.};
+            \textbf{This article} rewrites the style, then prunes and \mbox{re-encodes} the tiles to what it reads \mbox{(\cref{sec:methods})}.};
 
         \draw[arrow] (tile.south -| server.north) -- node[right, label] {many per view} (server.north);
         \draw[arrow] (style.south -| bind.north) -- (bind.north);
@@ -100,6 +100,6 @@ A map style is likewise a declarative specification over a tabular feature set, 
     \item An \textbf{answer to the additive-versus-synergistic question}: the two levels compose additively in aggregate, and the per-scenario synergy that does occur is too sparse to lift the total, so each level can be adopted on its own.
 \end{itemize}
 
-Section~\ref{sec:background} sketches the background.
-Section~\ref{sec:methods} formalizes the problem and lays out the three levels.
-Section~\ref{sec:results} presents the measurements, and Section~\ref{sec:discussion} interprets them.
+\Cref{sec:background} sketches the background.
+\Cref{sec:methods} formalizes the problem and lays out the three levels.
+\Cref{sec:results} presents the measurements, and \cref{sec:discussion} interprets them.

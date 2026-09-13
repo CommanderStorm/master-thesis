@@ -2,13 +2,13 @@
 
 \section{Discussion}\label{sec:discussion}
 
-This section interprets the results of Section~\ref{sec:results} and states their limits.
+This section interprets the results of \cref{sec:results} and states their limits.
 
 \subsection{Co-Optimization Is Meaningful but Uneven}
 Jointly optimizing style and tiles improves transfer size and rendering substantially, but unevenly.
 Verbose institutional styles with hundreds of layers benefit far more than compact basemaps, and overview scenarios more than street-level panning.
 The reason is structural.
-Tile shaving removes only what a style never references, so its headroom is bounded by how much of the source schema the style ignores, lean styles such as Toner shaving the most and broad ones such as OSM~Bright the least (Section~\ref{sec:results:combined}).
+Tile shaving removes only what a style never references, so its headroom is bounded by how much of the source schema the style ignores, lean styles such as Toner shaving the most and broad ones such as OSM~Bright the least (\cref{sec:results:combined}).
 There is thus no single optimal tile.
 The optimal encoding is a function of the rendering style, so the same source data yields different ideal tiles for different consumers.
 
@@ -16,7 +16,7 @@ The optimal encoding is a function of the rendering style, so the same source da
 Against our prior expectations, the three families compose additively.
 We expected them to compound, reasoning that style-level dead elimination would narrow the references feeding the tile-shaving advisory.
 The data refutes this.
-Shaving an optimized style removed essentially the same bytes as shaving the unoptimized one, the style passes adding at most half a percent (Section~\ref{sec:results:combined}).
+Shaving an optimized style removed essentially the same bytes as shaving the unoptimized one, the style passes adding at most half a percent (\cref{sec:results:combined}).
 The advisory is governed by which source-layers and columns a style references, not by how its expressions are written, so simplification leaves the shave target untouched, and on data volume and load time the families are simply additive.
 Within a single level the picture is genuinely synergistic, since dead elimination removes the gaps between otherwise-mergeable layers.
 
@@ -29,7 +29,7 @@ The axes meet only at overview zoom, where shaving entire source-layers reduces 
 \subsection{Implications for Map-Serving Infrastructure}
 Style-dependent tiles also fragment edge caches.
 Two styles that once shared identical \ac{MVT} tiles now fetch distinct shaved variants, so a CDN must key its cache on (tile, style) pairs.
-Our cache-fragmentation model (Section~\ref{sec:results:combined}) shows the decision to shave turns on a style's share of pooled traffic, not on the number of styles served.
+Our cache-fragmentation model (\cref{sec:results:combined}) shows the decision to shave turns on a style's share of pooled traffic, not on the number of styles served.
 A dominant style already warms most of the pool, so any positive per-tile saving justifies shaving it, whereas a thin long-tail style cannot keep a private cache warm and reverts to cold-start behavior.
 The recommendation is hybrid, shaving the one or two canonical styles and leaving the long tail on raw \ac{MVT}.
 
@@ -40,12 +40,12 @@ We found no significant correlation between a style's initial complexity and its
 We read these figures as a lower bound, since the stats-driven and data-level passes need tile access the generalization corpus lacks.
 
 \subsection{Limitations on Interpretation}
-These conclusions are subject to four limitations beyond the measurement threats of Section~\ref{sec:results:threats}.
+These conclusions are subject to four limitations beyond the measurement threats of \cref{sec:results:threats}.
 First, the per-pass contributions are established on open-source styles only.
 Three styles were excluded from end-to-end rendering by an upstream bug in MapLibre's style-migration tooling regarding mixed legacy and non-legacy expressions, and proprietary styles such as Mapbox Streets and Esri's vector basemaps could not be evaluated because their terms of service forbid it.
 Second, all tile-level results use the \ac{OMT} schema.
 Schemas with other property distributions may yield different shaving gains.
-Third, geometry simplification was excluded from the optimizer because lossy vertex removal would violate the visual-equivalence criterion of Definition~\ref{def:visual_equivalence}.
+Third, geometry simplification was excluded from the optimizer because lossy vertex removal would violate the visual-equivalence criterion of \cref{def:visual_equivalence}.
 The reported reductions therefore understate what a production pipeline could reach by composing the optimizer with an upstream simplifier.
 Fourth, the jank-count metric worsened across the ablation only at sustained frame rates above \num{2000} \ac{FPS}, where garbage-collection pauses of fixed duration register as proportionally large frame-time outliers.
 Consumer hardware caps frame rates well below this regime, so we do not read the worsening as a rendering regression.

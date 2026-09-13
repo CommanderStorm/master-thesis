@@ -395,7 +395,7 @@ In practice, all styles in the benchmark corpus converge within three iterations
 The rewrite system is not confluent.
 The first matching rule fires (table iteration order defines implicit priority), and selectivity reordering depends on data-dependent statistics.
 Different rule orderings could therefore yield different but visually equivalent output.
-Visual equivalence (the soundness criterion of~(\ref{eq:visual_equivalence})) is preserved regardless, because every individual rule preserves expression semantics.
+Visual equivalence (the soundness criterion of~\cref{eq:visual_equivalence}) is preserved regardless, because every individual rule preserves expression semantics.
 
 
 
@@ -924,22 +924,22 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
 \begin{description}
 	\item[Property usage.] Each property name appearing in a \texttt{[\mlop{"get"},~\ldots]} or \texttt{[\mlop{"has"},~\ldots]} expression in any live style layer, the zoom range over which it is referenced.
 	Properties not referenced at any zoom level are candidates for removal.
-	
+
 	\item[Geometry usage.] Geometry types (Point, LineString, and
 	Polygon) required at each zoom level, inferred from the live style layers
 	targeting the source-layer.
-	
+
 	\item[Zoom-level coverage.] Zoom levels for which at least one live
 	style layer references the source-layer.
-	
+
 	\item[Categorical-value usage.] Property values referenced by
 	equality filters and match expressions, together with their applicable zoom
 	ranges.
-	
+
 	\item[Feature-ID usage.] Whether any live style layer references
 	\texttt{[\mlop{"id"}]} or
 	\texttt{[\mlop{"feature-state"},~\ldots]}.
-	
+
 \end{description}
 
 \noindent The pipeline applies the pruning advisory to each \ac{MVT} tile before encoding (\cref{fig:tile_shaving_pipeline}).
@@ -959,10 +959,10 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
         \node[style] (sopt) {Style optimizations\\{\scriptsize (\cref{sub:expression_optimizations,sub:structural_optimizations})}};
 
         \node[both, right=3cm of sopt] (adv) {Tile pruning advisory};
-        \draw[arrow] (sopt) -- node[above, lbl] {optimized style} (adv);
+        \draw[arrow] (sopt) -- (adv);
 
         \node[data, right=3cm of adv] (stats) {Tile statistics};
-        \draw[arrow] (stats) -- node[above, lbl] {property/\\geom distribution} (adv);
+        \draw[arrow] (stats) -- (adv);
 
         \node[data, below=1.0cm of adv] (prune) {Prune \& transform};
         \node[data] at ($(sopt |- prune)$) (mvt) {\ac{MVT} tile};
@@ -970,7 +970,7 @@ The empirical character of this style-to-data cascade is taken up in \cref{sub:m
 
         \draw[arrow] (adv) -- (prune);
         \draw[arrow] (mvt) -- (prune);
-        \draw[arrow] (prune) -- node[above, lbl] {re-encode} (mlt);
+        \draw[arrow] (prune) -- (mlt);
 
         \node[steps, below=0.5cm of prune] (ops) {%
             \hfil\textbf{Pruning operations (in order):}\hfil\\[2pt]
@@ -1035,7 +1035,7 @@ We report them separately per metric in the ablation evaluation (\cref{ch:experi
 The deployment metrics of \cref{sub:metrics} are characterized per-axis rather than aggregated into a single objective, and the encoder's local size minimization is a contributing quantity to the load-time axis rather than a global cost function.
 
 A no-copy alternatives mechanism lets each candidate write into the encoder's buffers and rolls losing candidates back by resetting cursor positions, so the inner and outer competitions nest without redundant allocation.
-Combined with warm-start caching of \ac{FSST} compressors and vertex-strategy decisions across sort trials, this keeps the cost of the nested competition near-additive rather than multiplicative in the number of trials. \cref{ch:experiments} reports the resulting preprocessing time empirically.
+Combined with warm-start caching of \ac{FSST} compressors and vertex-strategy decisions across sort trials, this keeps the cost of the nested competition near-additive rather than multiplicative in the number of trials. \Cref{ch:experiments} reports the resulting preprocessing time empirically.
 \Cref{fig:arch_enc} summarizes the encoder and decoder data-flow in \texttt{mlt-core}.
 
 \begin{figure}[htbp]
@@ -1261,7 +1261,7 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 				\end{tabular}%
 			};
 			\node[steplabel, above=1pt of tbl] {\circled{1} Column vocabularies};
-			
+
 			\node[stepbox, right=0.8cm of tbl, anchor=west] (hash) {%
 				\begin{tabular}{@{}l c c@{}}
 					\textbf{Column} & \textbf{Exact sketch} & \textbf{Trigram sketch} \\
@@ -1274,7 +1274,7 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 				\end{tabular}%
 			};
 			\node[steplabel, above=1pt of hash] {\circled{2} MinHash signatures (128 permutations)};
-			
+
 			\node[stepbox, anchor=north] (sim) at ($(hash.south)+(0,-0.8cm)$) {%
 				\begin{tabular}{@{}l c c l@{}}
 					\textbf{Column pair} &
@@ -1285,22 +1285,22 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 					\mlval{name:de} vs.\ \mlval{name:fr}
 					& 0.14 & \textbf{0.35}
 					& shared trigrams\\
-					
+
 					\mlval{class} vs.\ \mlval{subclass}
 					& 0.45 & \textbf{0.57}
 					& shared values \\
-					
+
 					\mlval{name:de} vs.\ \mlval{class}
 					& 0.00 & \textbf{0.01}
 					& unrelated \\
-					
+
 					\mlval{maxspeed} vs.\ others
 					& 0.00 & 0.00
 					& no overlap \\
 				\end{tabular}%
 			};
 			\node[steplabel, below=1pt of sim] {\circled{3} Pairwise comparison ($\hat{J} = |\{i : h_i^{(a)} = h_i^{(b)}\}| \,/\, 128$)};
-			
+
 			\node[stepbox, cmp] at ($(tbl |- sim)$)  (res) {%
 				\textbf{Shared dictionary groups:}\\[3pt]
 				\fbox{\strut\mlval{name:de}, \mlval{name:fr}}\\[1pt]
@@ -1311,11 +1311,11 @@ The encoder applies a novel \emph{pruning variant} of \ac{FSST} that drops symbo
 				\quad{\scriptsize no overlap with any string column}%
 			};
 			\node[steplabel, below=1pt of res] {\circled{4} Union-Find clustering};
-			
+
 			\draw[arrow] (tbl) -- node[above, font=\scriptsize\itshape] {hash} (hash);
 			\draw[arrow] (hash) -- (sim);
 			\draw[arrow] (sim) -- node[above, font=\scriptsize\itshape] {$>\tau$} (res);
-			
+
 	\end{tikzpicture}}
 	\caption{
 		MinHash-based shared dictionary clustering (clockwise from top-left).
@@ -1478,7 +1478,7 @@ Our evaluation reports the deployment metrics framed in \cref{sec:problem_statem
     \item[Rendering performance] client-side metrics including load time, frames per second, frame time percentiles (p50, p95, p99), jank count, style parse time, time to first tile, and time to first frame.
     \item[Optimization cost] preprocessing time introduced by each pass, measured as wall-clock time on the optimizer's host machine.
     This is an offline cost amortized over all subsequent tile deliveries.
-    \item[Efficiency] \emph{qualitative} discussion of the energy implications of reduced data transfer and fewer rendering operations. 
+    \item[Efficiency] \emph{qualitative} discussion of the energy implications of reduced data transfer and fewer rendering operations.
     We perform no direct power or energy measurement (\ac{RAPL}, battery delta), because the benchmark harness runs on a desktop workstation rather than a thermally- and battery-constrained mobile device.
     Any quantitative energy claim would require a different hardware platform and we defer it to future work.
 \end{description}
@@ -1511,7 +1511,7 @@ Our primary evaluation methodology is cumulative ablation.
 We add passes one at a time in a fixed order and re-run the full benchmark suite after each addition.
 This reveals both the marginal contribution of each pass and the interactions between passes.
 The ablation comprises 19~cumulative steps (a baseline with no optimizations followed by passes added incrementally in the order listed in \crefrange{tab:expression_passes}{tab:data_passes}) plus one additional configuration that applies plain tile shaving on top of the unoptimized style, included isolating the style$\leftrightarrow$shaving interaction in \cref{sub:mlt_results}.
-\cref{sub:combined_ablation,tab:marginal_contribution} present the step-by-step results.
+\Cref{sub:combined_ablation,tab:marginal_contribution} present the step-by-step results.
 
 We execute each scenario/style combination for 15~runs.
 We report the median and standard deviation of each metric.
