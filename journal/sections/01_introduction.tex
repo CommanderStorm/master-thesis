@@ -9,6 +9,69 @@ Network and decode cost bound the first timeline, and the graphics device bounds
 MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document (Figure~\ref{fig:pipeline_overview}).
 While both timelines stay inside budget the map pans and zooms smoothly, and once either exceeds it the interaction stutters.
 
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        node distance=0.9cm and 0.5cm,
+        box/.style={rectangle, draw, rounded corners=2pt, minimum height=0.9cm,
+                    font=\small, align=center, inner sep=4pt},
+        stage/.style={box, fill=roleGen!20, text width=1.9cm},
+        srv/.style={box, fill=roleData!25, text width=1.9cm},
+        ex/.style={box, align=left, font=\scriptsize, inner sep=5pt, minimum height=2.2cm},
+        tileex/.style={ex, fill=roleData!25, text width=3.7cm},
+        styleex/.style={ex, fill=roleStyle!20, text width=4.5cm},
+        paper/.style={ex, fill=roleOpt!35, densely dashed, text width=3.4cm},
+        arrow/.style={-Stealth, thick},
+        contrib/.style={-Stealth, thick, densely dashed, cvdvermillion},
+        label/.style={font=\scriptsize\itshape, text=darkgray},
+    ]
+        %% bottom row: the client pipeline, left to right; every box is two lines
+        %% so the row shares one bottom edge for the braces below
+        \node[srv]  (server) {Tile\\server};
+        \node[stage, right=1.3cm of server] (decode) {Decode\\tile};
+        \node[stage, right=of decode] (bind)   {Bind style\\to features};
+        \node[stage, right=of bind, text width=2.6cm] (frame) {Evaluate style,\\issue draw calls};
+        \node[stage, right=of frame, text width=1.4cm] (gpu) {GPU\\draws};
+
+        \draw[arrow] (server) -- node[above, label] {network} (decode);
+        \draw[arrow] (decode) -- (bind);
+        \draw[arrow] (bind)   -- (frame);
+        \draw[arrow] (frame)  -- (gpu);
+        \path (frame) edge[arrow, loop above, min distance=6mm] node[above, label] {every frame} (frame);
+
+        %% top row: what flows through the pipeline, with a concrete example each
+        \node[tileex, above=1.5cm of server.north west, anchor=south west] (tile) {%
+            \textbf{Vector tile} $z/x/y$\\[1pt]
+            layer \texttt{roads}: one line feature per road, e.g.\ \mlval{class}=\mlval{motorway}, \mlval{name}=\mlval{A9}};
+        \node[styleex, right=0.5cm of tile.south east, anchor=south west] (style) {%
+            \textbf{Style} (JSON)\\[1pt]
+            layer \texttt{motorways}: draw \texttt{roads} features with \mlval{class}=\mlval{motorway} as lines, \mlprop{line-color} \mlval{\#c33}, \mlprop{line-width} growing with zoom};
+        \node[paper, right=0.5cm of style.south east, anchor=south west] (paper) {%
+            \textbf{This article} rewrites the style, then prunes and \mbox{re-encodes} the tiles to what it reads \mbox{(Section~\ref{sec:methods})}.};
+
+        \draw[arrow] (tile.south -| server.north) -- node[right, label] {many per view} (server.north);
+        \draw[arrow] (style.south -| bind.north) -- (bind.north);
+        \draw[contrib] (paper.west) -- (style.east);
+        \draw[contrib] (paper.north) |- ([yshift=0.35cm]style.north) -| (tile.north);
+
+        %% the two time budgets, both hung from the same baseline
+        \coordinate (bracey) at ([yshift=-4pt]server.south);
+        \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick]
+            (server.west |- bracey) -- (bind.east |- bracey)
+            node[midway, below=7pt, label] {per tile: network- and decode-bound};
+        \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick]
+            (frame.west |- bracey) -- (gpu.east |- bracey)
+            node[midway, below=7pt, label] {per frame: GPU-bound};
+    \end{tikzpicture}
+    \caption{Vector-tile rendering pipeline and the intervention point of this article.
+    The map is cut into \emph{tiles}.
+    Each tile carries features with geometry and properties, grouped in layers.
+    A \emph{style} specifies which features to draw and how.
+    The client decodes every tile in view, binds the style to its features, and re-evaluates zoom- and camera-dependent style per frame before issuing draw calls.
+    This article rewrites the style and prunes the tiles to what the rewritten style reads.}
+    \label{fig:pipeline_overview}
+\end{figure}
+
 The penalty grows with reach.
 A tileset served to millions of sessions pays for every redundant byte many times over.
 Oversized tiles lengthen transfer, layers that never draw waste frame time, and attributes no client reads inflate decode cost.
@@ -21,17 +84,20 @@ Suppose a filter tests a feature property and constant folding against per-tile 
 An encoder aware of this could drop the property's column from every tile, a reduction that neither style rewriting nor blind data pruning reaches on its own.
 Whether such couplings deliver gains beyond the sum of their parts is the question this paper sets out to answer.
 
-We study this style- and data-driven co-optimization and make the following contributions.
+The database community faced the same shape of problem decades ago and settled it with the query optimizer.
+A declarative query names the columns and predicates it needs, and the optimizer pushes projections and predicates down to the storage layer so that only the data a query actually consumes is ever read \citep{selingerAccessPathSelection1979,piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993}.
+Modern engines go a step further and let the pruned workload steer the physical encoding of the data itself \citep{armbrustSparkSQLRelational2015,dingSageDBInstanceOptimizedData2022}.
+A map style is likewise a declarative specification over a tabular feature set, and we investigate this style- and data-driven co-optimization automatically, in the manner of a compiler and a query optimizer, making the following contributions.
 
 \begin{itemize}
     \item A \textbf{formalization of joint style and tile co-optimization} as a transformation $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ held to visual equivalence and strict idempotency.
     Compiler optimization and columnar encoding each cover one half of this space, and we are aware of no prior treatment that couples both under a single soundness criterion.
-    \item A \textbf{three-level optimizer}.
-    Expression-level peephole rewrites run to a fixpoint.
-    Structural passes then rewrite a typed style model through dead layer elimination, metadata refinement, and layer merging.
-    A tile level closes the pipeline with \emph{style-driven tile shaving}, which removes unused properties, values, geometry types, and feature ids, followed by \emph{adaptive multi-strategy encoding} into the \ac{MLT} columnar format.
-    \item An \textbf{implementation} that connects the MapLibre style runtime to the \ac{MLT} tile pipeline end to end.
-    \item An \textbf{evaluation} over multiple style corpora and 18 scenarios with a cumulative ablation, reporting load-time, tile-volume, and frame-rate effects and settling the additive-versus-synergistic question at both aggregate and per-scenario granularity.
+    \item A \textbf{three-level optimizer} and its end-to-end \textbf{implementation} against the MapLibre style runtime and the \ac{MLT} tile pipeline.
+    Expression-level peephole rewrites run to a fixpoint, structural passes rewrite a typed style model through dead layer elimination, metadata refinement, and layer merging, and a tile level closes the pipeline with \emph{style-driven tile shaving}, which removes unused properties, values, geometry types, and feature ids, followed by \emph{adaptive multi-strategy encoding} into the \ac{MLT} columnar format.
+    On \num{12} styles the optimizer had never seen, the style passes alone shrink the style by a median of \qty{30.8}{\percent} with no visual change, and the encoder alone produces tiles \qty{12}{\percent} smaller than gzip-compressed \acp{MVT}.
+    \item An \textbf{evaluation} over multiple style corpora and 18 interactive scenarios with a cumulative ablation.
+    The full pipeline cuts median load time by \qty{71}{\percent} and raises the sustained frame rate to a median of \num{2.5}$\times$, with discarding tile content the style never reads accounting for most of the gain.
+    \item An \textbf{answer to the additive-versus-synergistic question}: the two levels compose additively in aggregate, and the per-scenario synergy that does occur is too sparse to lift the total, so each level can be adopted on its own.
 \end{itemize}
 
 Section~\ref{sec:background} sketches the background.
