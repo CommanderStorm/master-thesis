@@ -186,16 +186,16 @@ def plot_encoder_comparison_per_zoom(df: pd.DataFrame) -> None:
 def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
     print("Generating shaving_effectiveness_per_zoom…")
 
+    # Plain and gzip only, in a single short row: zoom 14 dominates every
+    # panel anyway, and brotli/zstd look the same as gzip at this scale.
     fig = make_subplots(
-        rows=2, cols=2,
-        subplot_titles=["Plain (uncompressed)", "Gzip", "Brotli", "Zstd"],
-        shared_xaxes=True,
+        rows=1, cols=2,
+        subplot_titles=["Plain (uncompressed)", "Gzip"],
         shared_yaxes=True,
-        vertical_spacing=0.12,
-        horizontal_spacing=0.08,
+        horizontal_spacing=0.04,
     )
 
-    positions = {"plain": (1, 1), "gzip": (1, 2), "brotli": (2, 1), "zstd": (2, 2)}
+    positions = {"plain": (1, 1), "gzip": (1, 2)}
     show_legend_for: set[str] = set()
     series = ["MVT", "MVT-shaved", "MLT-Rust", "MLT-Rust-shaved"]
     # No reference MLT here, so short labels stay unambiguous and fit one row.
@@ -225,23 +225,23 @@ def plot_shaving_effectiveness_per_zoom(df: pd.DataFrame) -> None:
             ), row=row, col=col)
 
     fig.update_layout(
-        **journal_layout(margin=dict(l=70, r=20, t=30, b=95)),
+        **journal_layout(margin=dict(l=70, r=20, t=30, b=90)),
         barmode="group",
         legend=dict(
             orientation="h",
             xanchor="center",
             x=0.5,
             yanchor="top",
-            y=-0.18,
+            y=-0.42,
             bgcolor="rgba(0,0,0,0)",
         ),
     )
-    fig.update_xaxes(title_text="Zoom level", dtick=2, row=2)
+    # Pad the range so the grouped bars at zoom 14 are not clipped.
+    fig.update_xaxes(title_text="Zoom level", title_standoff=4, dtick=2, range=[-0.7, 14.7])
     fig.update_yaxes(row=1, col=1, title_text="Total size (bytes)")
-    fig.update_yaxes(row=2, col=1, title_text="Total size (bytes)")
     fig.update_annotations(font_size=15)
 
-    export_figure(fig, "shaving_effectiveness_per_zoom", height=470)
+    export_figure(fig, "shaving_effectiveness_per_zoom", height=235)
 
 
 def plot_compression_ratio_per_zoom(df: pd.DataFrame) -> None:
