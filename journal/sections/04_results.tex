@@ -67,7 +67,8 @@ Adding sort-strategy competition, per-stream profiling, and shared-dictionary cl
 Our encoder falls below \ac{MVT}+gzip even uncompressed and stays \qty{12.3}{\percent} smaller once both are gzipped, holding its edge even against zstd-22, the strongest general-purpose compressor tested.
 Our native Rust decoder is \numrange{4.6}{8.3}$\times$ faster than \ac{MVT}+gzip across zoom levels 4, 7, and 13, but this advantage does not reach the browser load-time numbers, which use the existing JavaScript MLT decoder rather than the Rust path.
 Decomposing the on-wire savings by zoom level (\cref{fig:shaving}) separates the two effects.
-The gap between each format and its shaved counterpart is the payload removed by the pruning advisory, which dominates at the dense mid-zoom levels, while the residual gap between shaved \ac{MVT} and shaved \ac{MLT} is the additional contribution of columnar encoding.
+The gap between each format and its shaved counterpart is removed via the pruning advisory.
+This dominates at the dense mid-zoom levels. The remaining gap between shaved \ac{MVT}/\ac{MLT} is format dependent.
 
 \begin{table}
 \tbl{Encoded size and full-decode latency for the Germany \acs{OMT} tileset (\qty{256.5}{\kilo tiles}).

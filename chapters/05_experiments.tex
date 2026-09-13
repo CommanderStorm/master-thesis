@@ -142,7 +142,7 @@ Gzip absorbs the difference.
 Several pairwise dependencies between structural passes shape what we measure in the cumulative ablation in \cref{sub:structural_results}.
 Expression passes must run first so that metadata refinement sees zoom predicates in their canonical form.
 Dead elimination must precede layer merging because a dead layer between two otherwise-mergeable live layers blocks the merge.
-Similarly, metadata refinement must precede cleanup so the residual \mlval{true} filters and zero-opacity layers it produces can be removed.
+Similarly, metadata refinement must come before cleanup so the remaining \mlval{true} filters and zero-opacity layers it produces can be removed.
 We give the full ordering rationale in \cref{sub:pipeline}.
 The practical consequence here is that the marginal contribution of each later pass in the ablation will reflect work that an earlier pass enabled, not just the pass itself.
 

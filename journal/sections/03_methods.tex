@@ -32,7 +32,7 @@ Every rule is thus semantics-preserving, so on an identical draw stream the dete
 This is deliberately weaker than bit-identity as structural changes such as re-batched draw calls and re-encoded tile coordinates change edge antialiasing and floating-point rasterization without altering what is drawn.
 We sample $v$ on a discrete grid of zooms and viewports and accept a rendering as equivalent when it matches the reference under MapLibre's own render-test oracle.
 At most a fraction \num{0.00025} of the \num{262144} pixels exceed a per-pixel YIQ perceptual distance of \num{0.1285}, with antialiased-only pixels excluded.
-Both bounds are the renderer's published render-test defaults rather than parameters we tuned, so the residual disagreement is a few dozen sub-perceptual pixels, not a semantic divergence.
+Both bounds are the renderer's published render-test defaults rather than parameters we tuned, so the remaining disagreement is a few dozen sub-perceptual pixels, not a semantic divergence.
 The second is
 \begin{definition}[Strict idempotency]\label{def:idempotency}
 The optimizer $\mathcal{O}$ is strictly idempotent when
