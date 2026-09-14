@@ -2,17 +2,17 @@
 
 \section{Results}\label{sec:results}
 After describing the experimental setup (\cref{sec:results:setup}), we report results in the order of the pipeline.
-The style-driven passes alone (\cref{sec:results:style}), tile shaving and adaptive \ac{MLT} encoding (\cref{sec:results:data}), and finally the joint pipeline and whether its levels are additive or synergistic (\cref{sec:results:combined}), before assessing generalization to unseen styles (\cref{sec:results:generalization}) and threats to validity (\cref{sec:results:threats}).
+The style-driven passes alone (\cref{sec:results:style}), tile shaving and adaptive \ac{MLT} encoding (\cref{sec:results:data}), and finally the joint pipeline and whether its style-level and data-level passes are additive or synergistic (\cref{sec:results:combined}), before assessing generalization to unseen styles (\cref{sec:results:generalization}).
 
 \subsection{Experimental Setup and Corpora}\label{sec:results:setup}
 We evaluate the pipeline across three tiers of breadth.
-A benchmarking corpus of 10 MapLibre styles is rendered end-to-end against the \ac{OMT} tileset (zoom levels 0 to 14) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
+A benchmarking corpus of \num{10} publicly available MapLibre styles for the \ac{OMT} schema, four from OpenFreeMap (Liberty, Bright, Positron, Fiord) and six from the \ac{OMT} community (Dark~Matter, OSM~Bright, Klokan-Basic, Toner, OSM~Liberty, Stadia~Outdoors), spanning compact basemaps of under \num{50} layers to styles with over \num{100}, is rendered end-to-end against the Germany \ac{OMT} tileset (zoom levels 0 to 14) under \num{18} scenarios, each a pairing of a geographic location with a camera animation, selected so that every location appears at least once and dense and sparse, Latin and non-Latin cases are all represented.
 The same \num{10} styles are also evaluated at the tile-shaving size level on the same tileset, and a third generalization corpus of \num{12} additional unseen styles drawn from the Maputnik gallery is evaluated with static analysis only.
 The measurement harness is a Puppeteer-driven headless browser that loads MapLibre GL JS, replays each animation, and collects load-, first tile and per-frame-times through the browser \texttt{Performance} API under Vulkan based rendering.
 Each style and scenario cell is run \num{15} times to account for per-run variance.
 The pipeline itself is measured through a 19-step cumulative ablation in which each pass is added on top of all preceding passes, plus one plain-tile-shaving comparison configuration.
 
-\subsection{Style-Level Optimization}\label{sec:results:style}
+\subsection{Expression- and Structural-Level Style Passes}\label{sec:results:style}
 The eight expression-level passes barely moved end-to-end load time on their own, reducing the per-style median by \qty{1.6}{\percent} (range \qtyrange{-7.3}{+12.3}{\percent} across styles), an effect not consistently distinguishable from per-style measurement noise.
 Their effect on serialized style size was clearer.
 Default stripping was the single largest marginal contributor at \qty{-3.4}{\percent} of raw style size (\qty{-2.5}{\percent} under gzip), followed by stats-driven folding (\qty{-1.5}{\percent}) and expression simplification (\qty{-1.1}{\percent}).
@@ -27,15 +27,15 @@ Compressed size grows slightly in both cases (\qty{+36}{\byte} and \qty{+47}{\by
 The step still pays off at render time, cutting per-frame draw calls and raising FPS on both styles (Liberty \num{642} to \num{664}, Bright \num{621} to \num{632}).
 Symbol-heavy styles benefit less because symbol layers are excluded from merging on collision-soundness grounds.
 
-\subsection{Tile Shaving and Columnar Re-Encoding}\label{sec:results:data}
+\subsection{Style-Driven Tile Shaving and Adaptive \acs{MLT} Encoding}\label{sec:results:data}
 Tile shaving dominates the improvements.
 Pooled across the \num{10} styles, shaving alone cuts the median load time from \qty{390}{\milli\second} to \qty{135}{\milli\second} (\qty{-65.5}{\percent}) and roughly doubled median FPS (\num{2.1}$\times$), whereas style-only optimization contributed a modest \qty{-4.0}{\percent} (\cref{fig:box}).
-Across the \num{10} styles with available tile data, style-driven on-wire reductions on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{28.6}{\percent} (\cref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
+Across the \num{10} styles, the transfer-size reduction from style-driven shaving on the Germany tileset ranged from \qty{19.8}{\percent} (Bright) to \qty{46.3}{\percent} (Toner) with a median of \qty{28.6}{\percent} (\cref{fig:tile_shave_per_style}), the spread reflecting how many source-layers and property columns each style references.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\linewidth]{tile_shave_per_style.pdf}
-    \caption{On-wire data reduction from style-driven \acs{MVT} shaving across the \num{10} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.
+    \caption{Transfer-size reduction from style-driven \acs{MVT} shaving across the \num{10} styles with fully available tile data, applied to the same \qty{3.07}{\giga\byte} Germany tileset.
     Styles that reference fewer source-layers and property columns achieve larger reductions.}
     \label{fig:tile_shave_per_style}
 \end{figure}
@@ -66,7 +66,7 @@ Once both are gzipped, the reference \ac{MLT} encoder is larger than \ac{MVT}, b
 Adding sort-strategy competition, per-stream profiling, and shared-dictionary clustering reverses this.
 Our encoder falls below \ac{MVT}+gzip even uncompressed and stays \qty{12.3}{\percent} smaller once both are gzipped, holding its edge even against zstd-22, the strongest general-purpose compressor tested.
 Our native Rust decoder is \numrange{4.6}{8.3}$\times$ faster than \ac{MVT}+gzip across zoom levels 4, 7, and 13, but this advantage does not reach the browser load-time numbers, which use the existing JavaScript MLT decoder rather than the Rust path.
-Decomposing the on-wire savings by zoom level (\cref{fig:shaving}) separates the two effects.
+Decomposing the transfer-size savings by zoom level (\cref{fig:shaving}) separates the two effects.
 The gap between each format and its shaved counterpart is removed via the pruning advisory.
 This dominates at the dense mid-zoom levels. The remaining gap between shaved \ac{MVT}/\ac{MLT} is format dependent.
 
@@ -101,25 +101,26 @@ vs.\ MVT & \num{-28.2}\% & \num{-12.3}\% & \num{-13.1}\% & \num{-13.0}\% & $8.3\
 \end{figure}
 
 \subsection{Combined Pipeline: Additive or Synergistic?}\label{sec:results:combined}
-Whether the two levels interact synergistically depends on the metric and the style.
+Whether the style-level passes (expression and structural) and the data-level passes (shaving and encoding) interact synergistically depends on the metric and the style.
 On data volume they are additive for every style.
-Shaving the optimized style removed essentially the same bytes as shaving the unoptimized one, the optimized advisory adding \qtyrange{0.0}{0.5}{\percent} (median \qty{0.08}{\percent}).
+Shaving driven by the optimized style removed essentially the same bytes as shaving driven by the unoptimized style: deriving the pruning advisory from the optimized rather than the original style raised the tile-data reduction by only \qtyrange{0.0}{0.5}{\percent} of the baseline volume (median \qty{0.08}{\percent}).
 The advisory depends only on which source-layers and property columns a style references, which simplification leaves intact.
 
-On load time the levels are additive in aggregate.
+On load time the two groups are additive in aggregate.
 Pooled across the \num{10} styles, the combined reduction (\qty{66.4}{\percent}) matches the sum of the style-only (\qty{4.0}{\percent}) and shaving-only (\qty{65.5}{\percent}) reductions to within a \qty{-3.1}{\percent} interaction term.
 Per scenario, small super-additive interactions are common.
 Combined load time beat the sum of the parts in \num{103} of \num{180} style-scenario pairs (\qty{57}{\percent}).
-They concentrate in a few styles (Bright \num{15} of \num{18} pairs at a median of \qty{+7.1}{\percent}, OSM~Bright and OSM~Liberty \num{15} of \num{18}, Stadia~Outdoors \num{14}, Liberty \num{13}) and are largely absent in others (Fiord \num{4} of \num{18}, Positron \num{5}, Dark~Matter \num{6}, Klokan-Basic \num{8}, Toner \num{8}), independently of how much each style shaves.
-Toner shaves the most yet stays additive, while OSM~Bright shaves the least yet synergizes the most.
+They split the corpus in half: five styles synergize in \numrange{13}{15} of their \num{18} scenarios (Bright at a median of \qty{+7.1}{\percent}), while the other five do so in only \numrange{4}{8}, independently of how much each style shaves.
+Toner, which shaves the most, stays additive, while OSM~Bright, which shaves the least, synergizes the most.
 The interactions are small (median \qty{+0.64}{\percent} across all pairs) and offset one another, so they do not lift the aggregate.
 Because style optimization leaves tile volume unchanged, this residual synergy is a second-order rendering and decode timing effect, not a data-volume effect.
 Style-level passes therefore act as enablers that simplify the advisory, and for some styles modestly improve render timing, rather than as co-equal synergistic partners.
 
-The 19-step ablation confirms this (\cref{fig:box,fig:waterfall}).
+The ablation confirms this (\cref{fig:box,fig:waterfall}).
 Load-time variance compresses only when tile shaving fires, the FPS spread widens past the same step, and almost all of the style-size win lands by metadata stripping.
 The load-time budget breakdown (\cref{fig:time_breakdown}) shows the same split.
-Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}, but at under \qty{2}{\milli\second} it is negligible against a load budget of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately.
+Style-parse time falls with each expression pass, from roughly \qty{1.8}{\milli\second} to \qty{0.2}{\milli\second}.
+At under \qty{2}{\milli\second} it is negligible against the loading time of several hundred milliseconds, so we fold it into the first-frame leg rather than plot it separately.
 The first-tile and remaining-load legs move only once tile shaving fires.
 Composed end-to-end across the \num{10} styles, the full pipeline cut load time by \qtyrange{63}{74}{\percent} (median \qty{71}{\percent}) and raised FPS to \numrange{2.0}{3.0}$\times$ (median \num{2.5}$\times$).
 Browser heap fell \qty{35.5}{\percent}, from \qty{84.2}{\mega\byte} to \qty{54.3}{\mega\byte}, almost entirely from the smaller in-memory tile payload after shaving (\cref{fig:memory_ablation}).
@@ -164,11 +165,3 @@ Because the generalization corpus carries no tile data, stats-driven and data-le
     Raw reductions range from \qty{3.2}{\percent} to \qty{67.7}{\percent}, with no style regressing.}
     \label{fig:cross_style}
 \end{figure}
-
-\subsection{Threats to Validity}\label{sec:results:threats}
-All rendering benchmarks ran on a single hardware and browser configuration with ANGLE/Vulkan, so results may differ on other hardware or graphics backends, and the 15-run median may not capture rare events such as thermal throttling.
-The evaluation is limited to MapLibre GL JS and the \ac{OMT} schema, and the 10 benchmark styles, though diverse, may not cover all authoring patterns.
-Network conditions were simulated through a fixed bandwidth throttle and a caching proxy rather than real content delivery network latency, which also masks real-world cache behavior.
-The cumulative ablation design means each pass's reported marginal contribution depends on the order of preceding passes, and tail metrics (p99 frame time, jank count) carry higher variance than central-tendency metrics.
-Because the \num{18} scenarios share hardware, tile data, and styles, they are not fully independent, so we read the reported $p$-values as descriptive evidence of large effect sizes rather than strict inferential tests, and apply no multiple-comparisons correction across the full ablation grid.
-Visual-equivalence checks across the corpus, all scenarios, and zoom levels 0 to 14 confirmed every pass stays within the per-test pixel-difference tolerance of \cref{sec:methods:problem}.

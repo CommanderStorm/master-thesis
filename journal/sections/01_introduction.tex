@@ -5,9 +5,10 @@
 Web maps rendered from vector tiles divide their work across two timelines.
 When a tile arrives, the client decodes it and binds the active style to every feature it holds.
 On each rendered frame, the client re-evaluates the view-dependent parts of that style and issues draw calls to the GPU.
-Network and decode cost bound the first timeline, and the graphics device bounds the second.
+Network and decode cost limit the first timeline, and the graphics device limits the second.
 MapLibre GL~JS and Mapbox GL~JS both follow this model, streaming tiled geometry into the browser and driving a WebGL or WebGPU pipeline from a declarative style document (\cref{fig:pipeline_overview}).
-While both timelines stay inside budget the map pans and zooms smoothly, and once either exceeds it the interaction stutters.
+If both of these stay inside the shared frame-time budget, the map pans and zooms smoothly.
+Once either exceeds it, the interaction stutters.
 
 \begin{figure}[htbp]
     \centering
@@ -72,14 +73,13 @@ While both timelines stay inside budget the map pans and zooms smoothly, and onc
     \label{fig:pipeline_overview}
 \end{figure}
 
-The penalty grows with reach.
 A tileset served to millions of sessions pays for every redundant byte many times over.
 Oversized tiles lengthen transfer, layers that never draw waste frame time, and attributes no client reads inflate decode cost.
-On phones the same waste surfaces as heat and battery drain, and over the intermittent links found on trains and aircraft it surfaces as visible stalls.
+On phones the same waste surfaces as heat and battery drain, and over the intermittent links found on trains and aircraft it surfaces as visibly empty maps.
 
 Map production keeps styling and tiling apart.
 Cartographers tune a style for appearance against a tileset that was encoded for general use, and no stage inspects the two together.
-That separation leaves an opening.
+That separation can be exploited.
 Suppose a filter tests a feature property and constant folding against per-tile statistics collapses that filter into a form that no longer names the property.
 An encoder aware of this could drop the property's column from every tile, a reduction that neither style rewriting nor blind data pruning reaches on its own.
 Whether such couplings deliver gains beyond the sum of their parts is the question this paper sets out to answer.
@@ -87,7 +87,7 @@ Whether such couplings deliver gains beyond the sum of their parts is the questi
 The database community faced the same shape of problem decades ago and settled it with the query optimizer.
 A declarative query names the columns and predicates it needs, and the optimizer pushes projections and predicates down to the storage layer so that only the data a query actually consumes is ever read \citep{selingerAccessPathSelection1979,piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993}.
 Modern engines go a step further and let the pruned workload steer the physical encoding of the data itself \citep{armbrustSparkSQLRelational2015,dingSageDBInstanceOptimizedData2022}.
-A map style is likewise a declarative specification over a tabular feature set, and we investigate this style- and data-driven co-optimization automatically, in the manner of a compiler and a query optimizer, making the following contributions.
+A map style is likewise a declarative specification over a tabular feature set, and we investigate this style- and data-driven co-optimization automatically, in the manner of a compiler and a query optimizer, making the following contributions:
 
 \begin{itemize}
     \item A \textbf{formalization of joint style and tile co-optimization} as a transformation $\mathcal{O}: \mathcal{S} \times \mathcal{T} \to \mathcal{S} \times \mathcal{T}$ held to visual equivalence and strict idempotency.
@@ -97,7 +97,7 @@ A map style is likewise a declarative specification over a tabular feature set, 
     On \num{12} styles the optimizer had never seen, the style passes alone shrink the style by a median of \qty{30.8}{\percent} with no visual change, and the encoder alone produces tiles \qty{12}{\percent} smaller than gzip-compressed \acp{MVT}.
     \item An \textbf{evaluation} over multiple style corpora and 18 interactive scenarios with a cumulative ablation.
     The full pipeline cuts median load time by \qty{71}{\percent} and raises the sustained frame rate to a median of \num{2.5}$\times$, with discarding tile content the style never reads accounting for most of the gain.
-    \item An \textbf{answer to the additive-versus-synergistic question}: the two levels compose additively in aggregate, and the per-scenario synergy that does occur is too sparse to lift the total, so each level can be adopted on its own.
+    \item The \textbf{style-level} and \textbf{data-level} passes compose \textbf{additively}. The per-scenario synergy that does occur is too weak to lift the total, so each can be adopted on its own.
 \end{itemize}
 
 \Cref{sec:background} sketches the background.

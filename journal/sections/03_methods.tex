@@ -4,7 +4,7 @@
 
 \subsection{Problem Statement}\label{sec:methods:problem}
 
-We frame the optimizer as a function over (style, tile set) pairs and constrain it by a correctness contract.
+The optimizer as a function over (style, tile set) pairs and constrained it by correctness.
 Let $\mathcal{S}$ be the set of syntactically valid MapLibre style \ac{JSON} documents, let $\mathcal{T}$ be the set of tile sets, and let $\mathcal{V}$ be the set of viewing states (six camera degrees of freedom plus the viewport).
 MapLibre's deterministic renderer is a function
 \begin{equation}\label{eq:render_function}
@@ -17,9 +17,8 @@ It pays a one-off preprocessing cost to improve the deployment metrics (load tim
 The deployment cost is not formalized as a single closed-form function.
 It depends on hardware, camera scenario, and tile cache state, and several of our passes trade a small load-time regression for a larger frames-per-second gain.
 We therefore characterize each pass in an ablation study whose per-axis breakdown lets an operator compose the pass set suiting the deployment priorities.
-
-The optimizer must satisfy two constraints.
-The first is
+\newpage
+The optimizer must satisfy two constraints. The first is
 \begin{definition}[Visual equivalence]\label{def:visual_equivalence}
 Writing $\equiv$ for pixel-identity on $\mathcal{I}$, the optimized pair $(S', T')$ is visually equivalent to $(S, T)$ when
 \begin{equation}\label{eq:visual_equivalence}
@@ -48,10 +47,10 @@ The system under test is MapLibre GL JS, the reference open-source web renderer.
 Lossy geometry transformations, symbol-layer merging, energy measurement, non-\ac{OMT} tile schemas, and online serving are out of scope.
 The optimizer is an offline, one-shot rebuild over a $(\mathcal{S}, \mathcal{T})$ pair whose artifacts can be served by standard geodata infrastructure.
 
-\subsection{A Three-Level Optimization Pipeline}\label{sec:methods:pipeline}
+\subsection{The Optimization Pipeline}\label{sec:methods:pipeline}
 
 \Cref{fig:system_architecture} sketches the optimizer as a whole.
-At the center sits a pipeline of passes at three levels of abstraction.
+At the center sit optimisation passes at three levels of abstraction.
 Around it are three supporting components.
 A code-generation front end produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
 A tile-statistics scanner profiles \ac{MVT} tiles for the statistics-driven and data-level passes.
@@ -62,6 +61,7 @@ The three pass levels are the following.
 They run to a fixpoint with a hard cap of eight iterations.
 \emph{Structural passes} deserialize the style into the typed specification produced by the code-generation front end and apply transformations that require cross-layer or cross-source reasoning, such as dead-layer elimination, metadata refinement, and layer merging.
 \emph{Data passes} transform the served tile payload via a style-driven pruning advisory and the conversion from \ac{MVT} to \ac{MLT}.
+Because the expression and structural passes both rewrite only the style, we refer to them jointly as the \emph{style-level passes}, in contrast to the \emph{data-level passes}, and the additive-versus-synergistic question of \cref{sec:intro} asks how these two groups interact.
 
 This ordering addresses the phase-ordering problem \citep{clickCombiningAnalysesCombining1995}.
 Expression passes run first, allowing subsequent structural passes to operate on simplified expressions.
@@ -132,7 +132,7 @@ The style corpus validates the codegen and evaluates the optimizer.}
 
 \subsection{Expression- and Structural-Level Style Passes}\label{sec:methods:style}
 
-\paragraph{Expression passes} act on the raw JSON representation of style expressions.
+\textit{Expression passes} act on the raw JSON representation of style expressions.
 We organize the engine as a table of rewrite rules, each gated by a pass flag and scoped to filters, paint and layout properties, or both.
 A post-order visitor walks every expression node, tests all applicable peephole rules, and fires the first matching rule.
 We modeled this on production-compiler peephole optimizers \citep{ahoCompilersPrinciplesTechniques2007}, with fixpoint iteration over the rule table as in a term-rewriting system \citep{baaderTermRewritingAll1999}.
@@ -177,15 +177,17 @@ The correlation between style predicates rarely inverts that ordering.
 The expression phase applies the full rule set until the style JSON stops changing, with a hard cap of eight iterations.
 Most rules strictly decrease a lexicographic measure over \ac{AST} node count, maximum nesting depth, and non-literal node count.
 Two rules can temporarily increase the node count, so the measure alone is not a termination proof, but all benchmark styles converge within three iterations.
-The monotone majority drives the measure toward zero and the non-monotone rules fire at most once per expression.
+The monotonly decreasing rules drive the measure toward zero and the non-monotone rules fire at most once per expression.
 
-\paragraph{Structural passes} consume the style model to perform cross-layer and cross-source reasoning, specializing the style to the data it is served with in the manner of partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
+\textit{Structural passes} consume the style model to perform cross-layer and cross-source reasoning, specializing the style to the data it is served with in the manner of partial evaluation \citep{jonesPartialEvaluationAutomatic1993}.
 \Cref{tab:structural_passes} lists them.
 
-Dead layer elimination treats a layer as dead when its filter is literally \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available style-layer types.
-Metadata refinement extracts implicit zoom bounds from filter predicates and paint ramps and lifts them into explicit \mlprop{minzoom}/\mlprop{maxzoom} metadata, allowing the renderer to skip whole layers at zoom levels where they are invisible.
+Dead layer elimination treats a layer as dead when its filter is the literal \mlval{false}, when its source layer carries zero features, or when its geometry type does not match the available style-layer types.
+Metadata refinement extracts implicit zoom bounds from filter predicates and paint ramps and lifts them into explicit \mlprop{minzoom}/\mlprop{maxzoom} metadata.
+This allows the renderer to skip whole layers at zoom levels where they are invisible.
 Refinement is asymmetric to respect overzoom.
-\mlprop{minzoom} may be raised to the first data-carrying zoom freely, but \mlprop{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \mlprop{maxzoom}, since otherwise the layer's tiles would be overzoomed.
+\mlprop{minzoom} may be raised to the first data-carrying zoom freely, but \mlprop{maxzoom} is tightened only when the last data-carrying zoom is strictly below the source's \mlprop{maxzoom}.
+This allows the layer's tiles to be overzoomed.
 
 \begin{table}
 \tbl{Structural optimization passes operating on the style representation.}
@@ -255,15 +257,14 @@ A final source-zoom-tightening pass narrows each source's zoom bounds to the ran
         \draw[arrow] (l1.south) -- (l1.south |- ph.north);
         \draw[arrow] (ph) -- (out);
     \end{tikzpicture}
-    \caption{Layer merging example.
-Two adjacent line layers differing only in filter literal and color are merged into one whose differing paint property and synthesized sort key become \mlop{match} expressions keyed on \mlval{"class"}.
-Phases \stepcirc{1}--\stepcirc{3} are the candidate, match-detection and zoom checks.}
+    \caption{Example how two adjacent line layers being differing only in filter and color are merged into one. Phases \stepcirc{1}--\stepcirc{3} are the candidate, match-detection and zoom checks.}
     \label{fig:layer_merge_example}
 \end{figure}
 
 \subsection{Style-Driven Tile Shaving}\label{sec:methods:shaving}
 
-The bridge between style-level and data-level optimization is the \emph{tile pruning advisory}, a structured report that captures, for each source-layer and zoom level, exactly what the rendering style needs (\cref{fig:tile_shaving_pipeline}).
+The bridge between style-level and data-level optimization is the \emph{tile pruning advisory}.
+It is a structured report that captures, for each source-layer and zoom level, exactly what the rendering style needs (\cref{fig:tile_shaving_pipeline}).
 We compute the advisory from the \emph{optimized} style, after all expression and structural passes, together with tile statistics.
 The ordering matters because dead layer elimination, metadata refinement, and layer merging shrink the live-layer set, reducing the referenced properties and geometry types the advisory carries into the data level.
 

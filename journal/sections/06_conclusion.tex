@@ -8,7 +8,7 @@ Expression rules simplify the style, a structural level reorganizes the layer gr
 
 On the Germany \ac{OMT} tileset, \ac{MLT} encoding alone makes tiles \qty{12}{\percent} smaller than gzip-compressed \ac{MVT}, and style-driven shaving removes a median of \qty{29}{\percent} of bytes per style.
 Together, the pipeline improves load times by a median of \qty{71}{\percent}, with no soundness regressions across the 10-style evaluation corpus and the 12-style generalization corpus.
-The gains of the three levels are roughly additive, so each can be adopted independently of the others.
+The gains of the style-level passes (expression and structural) and the data-level passes are additive, so each group can be adopted independently of the other.
 
 Future work falls into three directions.
 The first is moving the pipeline out of its offline batch stage.

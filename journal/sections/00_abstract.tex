@@ -6,8 +6,10 @@ Cartographic styling and tile production are normally handled by separate tools,
 This article treats styling and tile encoding as a single optimization problem for MapLibre rendering pipelines.
 We build an optimizer that rewrites style expressions to a fixpoint, restructures the typed style document, and then derives from the optimized style a pruning advisory that removes unused attributes, geometry types, and feature values before re-encoding each tile in the columnar \ac{MLT} format.
 Measured over a corpus of production and institutional styles under interactive navigation scenarios, discarding tile content the style never consumes accounts for most of the benefit, lowering median load time by 71\% and raising sustained frame rate to a median of \num{2.5}$\times$.
-The columnar encoder alone shrinks tile volume by 28\% against the uncompressed reference and 12\% against gzip-compressed Mapbox Vector Tiles, and style rewriting shrinks unseen styles by a median of 30.8\% with visually equivalent output.
-Quantifying how the two levels interact, we find their combined effect is additive rather than synergistic, with per-scenario synergy present but too sparse to raise the aggregate.
+The columnar encoder alone shrinks tile volume by 28\% against the uncompressed reference and 12\% against gzip-compressed Mapbox Vector Tiles.
+Style rewriting shrinks unseen styles by a median of 30.8\% with visually equivalent output.
+Quantifying how the style-level and data-level passes interact, we find their combined effect is additive rather than synergistic.
+Per-scenario synergy is present but too weak to raise the aggregate.
 \end{abstract}
 
 \begin{keywords}
