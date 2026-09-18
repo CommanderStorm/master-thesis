@@ -52,14 +52,14 @@ The optimizer is an offline, one-shot rebuild over a $(\mathcal{S}, \mathcal{T})
 \Cref{fig:system_architecture} sketches the optimizer as a whole.
 At the center sit optimisation passes at three levels of abstraction.
 Around it are three supporting components.
-A code-generation front end produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
+A code-generation frontend produces concrete types from the upstream MapLibre style specification (\texttt{v8.json}), shifting specification drift from manual synchronization to a regenerator invocation and giving every pass typed access to defaults, value types, and expression capabilities.
 A tile-statistics scanner profiles \ac{MVT} tiles for the statistics-driven and data-level passes.
-A validation harness checks the guarantee of \cref{eq:visual_equivalence}.
+A validation harness checks the visual equivalence (\cref{eq:visual_equivalence}).
 
 The three pass levels are the following.
 \emph{Expression passes} operate directly on the JSON representation of style expressions, applying peephole rewrites, constant folding, and algebraic simplifications without deserializing the style into typed structures.
 They run to a fixpoint with a hard cap of eight iterations.
-\emph{Structural passes} deserialize the style into the typed specification produced by the code-generation front end and apply transformations that require cross-layer or cross-source reasoning, such as dead-layer elimination, metadata refinement, and layer merging.
+\emph{Structural passes} deserialize the style into the typed specification produced by the code-generation frontend and apply transformations that require cross-layer or cross-source reasoning, such as dead-layer elimination, metadata refinement, and layer merging.
 \emph{Data passes} transform the served tile payload via a style-driven pruning advisory and the conversion from \ac{MVT} to \ac{MLT}.
 Because the expression and structural passes both rewrite only the style, we refer to them jointly as the \emph{style-level passes}, in contrast to the \emph{data-level passes}, and the additive-versus-synergistic question of \cref{sec:intro} asks how these two groups interact.
 
@@ -285,10 +285,10 @@ The ordering matters because dead layer elimination, metadata refinement, and la
         \node[both, right=1.5cm of sopt, text width=5.0cm, align=left] (adv) {%
             {\centering\textbf{Tile pruning advisory}\par}\vspace{2pt}
             {\footnotesize per source-layer and zoom range:\\
-            \stepcirc{1} zoom levels with a live layer\\
-            \stepcirc{2} required geometry types\\
-            \stepcirc{3} values tested by filters or \mlop{match}\\
-            \stepcirc{4} properties and feature \mlop{id}s read}};
+            \stepcirc{a} zoom levels with a live layer\\
+            \stepcirc{b} required geometry types\\
+            \stepcirc{c} values tested by filters or \mlop{match}\\
+            \stepcirc{d} properties and feature \mlop{id}s read}};
         \draw[arrow] (sopt) -- (adv);
 
         \node[data, right=1.5cm of adv] (stats) {Tile statistics};
@@ -320,7 +320,7 @@ Each \acs{MVT} tile is pruned in steps \stepcirc{1}--\stepcirc{4}, each consulti
     \label{fig:tile_shaving_pipeline}
 \end{figure}
 
-The advisory captures four categories of information per source-layer, numbered \mbox{\stepcirc{1}--\stepcirc{4}} in \cref{fig:tile_shaving_pipeline} after the pruning step that consumes each.
+The advisory captures four categories of information per source-layer, labelled \mbox{\stepcirc{a}--\stepcirc{d}} in \cref{fig:tile_shaving_pipeline} after the pruning step that consumes each.
 \emph{Zoom-level coverage} records the zoom levels for which at least one live layer references the source-layer.
 \emph{Geometry usage} records the geometry types required at each zoom level, inferred from the live layers targeting the source-layer.
 \emph{Categorical-value usage} records property values referenced by equality filters and \mlop{match} expressions, with their applicable zoom ranges.
@@ -328,7 +328,7 @@ The advisory captures four categories of information per source-layer, numbered 
 Anything absent from the advisory can be removed.
 
 The pipeline applies the advisory to each \ac{MVT} tile before encoding, in the order of steps \stepcirc{1}--\stepcirc{4}.
-It removes source-layers no style layer references at the tile's zoom level, then filters each remaining layer by geometry type and unused categorical values, and finally strips unused properties and feature identifiers.
+It removes source-layer's no style-layer references at the tile's zoom level, then filters each remaining layer by geometry type and unused categorical values, and finally strips unused properties and feature identifiers.
 Each step consults exactly one advisory category, so the advisory fully determines what a tile loses.
 
 After pruning, two data transformations (step \stepcirc{5}) improve compressibility before encoding.

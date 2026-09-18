@@ -85,7 +85,7 @@ An encoder aware of this could drop the property's column from every tile, a red
 Whether such couplings deliver gains beyond the sum of their parts is the question this paper sets out to answer.
 
 The database community faced the same shape of problem decades ago and settled it with the query optimizer.
-A declarative query names the columns and predicates it needs, and the optimizer pushes projections and predicates down to the storage layer so that only the data a query actually consumes is ever read \citep{selingerAccessPathSelection1979,piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993}.
+A declarative query names the columns and predicates it needs, and the optimizer pushes projections and predicates down to the storage layer so that only the actually consuming data query is ever read \citep{selingerAccessPathSelection1979,piraheshExtensibleRuleBased1992,graefeQueryEvaluationTechniques1993}.
 Modern engines go a step further and let the pruned workload steer the physical encoding of the data itself \citep{armbrustSparkSQLRelational2015,dingSageDBInstanceOptimizedData2022}.
 A map style is likewise a declarative specification over a tabular feature set, and we investigate this style- and data-driven co-optimization automatically, in the manner of a compiler and a query optimizer, making the following contributions:
 
